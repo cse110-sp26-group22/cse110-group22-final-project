@@ -1,5 +1,7 @@
 # Prototyping Team Meeting 
 
+5/6/2026 @ 8PM over Google Meet
+
 Members Attended: Angel, Brenda, Anirudh, Ben, Kaung  
 Members Absent: Lucien  
 
