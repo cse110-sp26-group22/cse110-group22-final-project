@@ -1,7 +1,7 @@
 # Prototyping Team Meeting 
 
-Members Attended:    
-Members Absent:    
+Members Attended: Angel, Brenda, Anirudh, Ben, Kaung  
+Members Absent: Lucien  
 
 ## Goals:
 1. Establish core criteria for the prototype
