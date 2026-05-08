@@ -1,0 +1,92 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #0d0f14;
+}
+
+/* 🔥 THIS IS THE OVERLAY CONTAINER */
+#game-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 50vw;   /* left half */
+  height: 50vh;  /* top half */
+
+  background: #151922;
+  color: white;
+
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  border-right: 1px solid #2a2f3a;
+  border-bottom: 1px solid #2a2f3a;
+}
+
+/* Header */
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Question box */
+#question-box {
+  background: #1c2230;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* Options */
+#options button {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  background: #222a3a;
+  border: 1px solid #2f3a52;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#options button:hover {
+  background: #2c3550;
+}
+
+/* Input area */
+#input-area {
+  display: flex;
+  gap: 8px;
+}
+
+#typing-input {
+  flex: 1;
+  padding: 8px;
+  background: #1c2230;
+  border: 1px solid #2f3a52;
+  color: white;
+  border-radius: 6px;
+}
+
+#submit-btn {
+  padding: 8px 12px;
+  background: #3a6df0;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Stats */
+#stats {
+  font-size: 14px;
+  opacity: 0.9;
+}
