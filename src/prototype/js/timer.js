@@ -82,3 +82,17 @@ export function TimerReset() {
 export function GetAllTimerRecords() {
     return time_used_each_question;
 }
+
+export function ClearAllTimerRecords() {
+    time_used_each_question.length = 0;
+}
+export function GetCurrentTimerSettings() {
+    return {
+        start_time: timer_settings.start_time,
+        timer_type: timer_settings.timer_type,
+        time_limit: timer_settings.time_limit,
+        ticks_per_second: timer_settings.ticks_per_second,
+        total_time_used: timer_settings.total_time_used,
+        timer_ended: timer_settings.timer_ended
+    };
+}
