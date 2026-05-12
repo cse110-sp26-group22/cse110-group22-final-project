@@ -49,11 +49,6 @@ function normalizeWhitespace(str) {
     return str.trim().replace(/\s+/g, " ");
 }
 
-
-function normalizeWhitespace(str) {
-    return str.trim().replace(/\s+/g, " ");
-}
-
 function checkSyntaxMatch(user_answer, correct_answer) {
     return normalizeWhitespace(user_answer) === normalizeWhitespace(correct_answer);
 }
