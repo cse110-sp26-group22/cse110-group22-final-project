@@ -65,7 +65,7 @@ The multiplier is based on speed, accuracy, and correctness, with a bonus for st
 
 
 If score is consistently high and streak is maintained, increases chances of positive events like the following:
-- Plant becomes golden plant and produces more 
+- Plant becomes golden plant and produces more money
 - Super Growth (planted seed instantly grows)   
 
 If score decreases, increases the chance of a negative event:
