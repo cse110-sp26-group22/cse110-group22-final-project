@@ -70,7 +70,7 @@ If score is consistently high and streak is maintained, increases chances of pos
 
 If score decreases, increases the chance of a negative event:
 - Plant becomes sick (decreases 1 level and -X money)
-- Plant gets eaten (plant goes away and -2)
+- Plant gets eaten (plant goes away and -2X money)
 
 **Goal:** Make a happy and healthy farm to maximize revenue.
 
