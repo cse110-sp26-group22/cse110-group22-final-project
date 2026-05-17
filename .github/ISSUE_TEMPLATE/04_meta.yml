@@ -1,0 +1,12 @@
+name: Meta Issue
+description: Issues related to repo organization or the team in general
+labels: ["meta"]
+
+body:
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Describe the issue or task in detail
+    validations:
+      required: true
