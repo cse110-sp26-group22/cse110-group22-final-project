@@ -1,0 +1,40 @@
+name: Bug Report
+description: Report a bug for a subteam to take
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        #### Please include the following:
+        1. Summary of the bug
+        2. Steps to reproduce
+        3. Expected behavior
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Fill in the above information 
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this bug?
+      options:
+        - high
+        - medium
+        - low
+      default: 2
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: subteam
+    attributes:
+      label: Subteam Assignment
+      options:
+        - label: ui-team
+        - label: backend-team
+        - label: none
