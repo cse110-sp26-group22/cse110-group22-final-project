@@ -1,61 +1,64 @@
-import * as timer from '../src/prototype/js/timer.js';
+import { Timer, TimerType } from "../src/prototype/js/timer.js";
+
+let timer;
 
 beforeEach(() => {
-    timer.TimerReset();
-    timer.ClearAllTimerRecords();
+    timer = new Timer();
+    timer.reset();
+    timer.clearAllRecords();
 });
 
-test("TimerInit sets the timer settings correctly", () => {
-    timer.TimerInit(timer.timer_type.countdown, 10, 100);
+test("init sets the timer settings correctly", () => {
+    timer.init(TimerType.countdown, 10, 100);
 
-    const settings = timer.GetCurrentTimerSettings();
+    const settings = timer.getCurrentSettings();
 
-    expect(settings.timer_type).toBe(timer.timer_type.countdown);
+    expect(settings.timer_type).toBe(TimerType.countdown);
     expect(settings.ticks_per_second).toBe(10);
     expect(settings.time_limit).toBe(100);
     expect(settings.total_time_used).toBe(0);
     expect(settings.timer_ended).toBe(false);
 });
 
-test("TimerStart automatically ends countdown timer", () => {
-    timer.TimerInit(timer.timer_type.countdown, 10, 5);
+test("start automatically ends countdown timer", () => {
+    timer.init(TimerType.countdown, 10, 5);
 
     return new Promise((resolve) => {
-        timer.TimerStart((result) => {
-            expect(result.timer_type).toBe(timer.timer_type.countdown);
+        timer.start((result) => {
+            expect(result.timer_type).toBe(TimerType.countdown);
             expect(result.ticks_per_second).toBe(10);
             expect(result.time_limit).toBe(5);
             expect(result.total_time_used).toBeGreaterThanOrEqual(5);
 
-            const records = timer.GetAllTimerRecords();
+            const records = timer.getAllRecords();
             expect(records.length).toBe(1);
-            expect(records[0].timer_type).toBe(timer.timer_type.countdown);
+            expect(records[0].timer_type).toBe(TimerType.countdown);
 
             resolve();
         });
     });
 });
 
-test("TimerStop stops countdown timer before it ends", () => {
-    timer.TimerInit(timer.timer_type.countdown, 10, 50);
+test("stop stops countdown timer before it ends", () => {
+    timer.init(TimerType.countdown, 10, 50);
 
     let endCallbackCalled = false;
 
-    timer.TimerStart(() => {
+    timer.start(() => {
         endCallbackCalled = true;
     });
 
     return new Promise((resolve) => {
         setTimeout(() => {
-            timer.TimerStop((result) => {
-                expect(result.timer_type).toBe(timer.timer_type.countdown);
+            timer.stop((result) => {
+                expect(result.timer_type).toBe(TimerType.countdown);
                 expect(result.ticks_per_second).toBe(10);
                 expect(result.time_limit).toBe(50);
                 expect(result.total_time_used).toBeGreaterThan(0);
                 expect(result.total_time_used).toBeLessThan(50);
                 expect(endCallbackCalled).toBe(false);
 
-                const records = timer.GetAllTimerRecords();
+                const records = timer.getAllRecords();
                 expect(records.length).toBe(1);
 
                 resolve();
@@ -64,21 +67,21 @@ test("TimerStop stops countdown timer before it ends", () => {
     });
 });
 
-test("TimerStart and TimerStop work correctly for stopwatch timer", () => {
-    timer.TimerInit(timer.timer_type.stopwatch, 10);
+test("start and stop work correctly for stopwatch timer", () => {
+    timer.init(TimerType.stopwatch, 10);
 
-    timer.TimerStart();
+    timer.start();
 
     return new Promise((resolve) => {
         setTimeout(() => {
-            timer.TimerStop((result) => {
-                expect(result.timer_type).toBe(timer.timer_type.stopwatch);
+            timer.stop((result) => {
+                expect(result.timer_type).toBe(TimerType.stopwatch);
                 expect(result.ticks_per_second).toBe(10);
                 expect(result.total_time_used).toBeGreaterThan(0);
 
-                const records = timer.GetAllTimerRecords();
+                const records = timer.getAllRecords();
                 expect(records.length).toBe(1);
-                expect(records[0].timer_type).toBe(timer.timer_type.stopwatch);
+                expect(records[0].timer_type).toBe(TimerType.stopwatch);
 
                 resolve();
             });
@@ -86,45 +89,45 @@ test("TimerStart and TimerStop work correctly for stopwatch timer", () => {
     });
 });
 
-test("TimerStop should not record twice if called multiple times", () => {
-    timer.TimerInit(timer.timer_type.stopwatch, 10);
+test("stop should not record twice if called multiple times", () => {
+    timer.init(TimerType.stopwatch, 10);
 
-    timer.TimerStart();
+    timer.start();
 
-    timer.TimerStop();
-    timer.TimerStop();
+    timer.stop();
+    timer.stop();
 
-    const records = timer.GetAllTimerRecords();
+    const records = timer.getAllRecords();
 
     expect(records.length).toBe(1);
 });
 
-test("TimerReset resets current timer but does not clear records", () => {
-    timer.TimerInit(timer.timer_type.stopwatch, 10);
+test("reset resets current timer but does not clear records", () => {
+    timer.init(TimerType.stopwatch, 10);
 
-    timer.TimerStart();
-    timer.TimerStop();
+    timer.start();
+    timer.stop();
 
-    expect(timer.GetAllTimerRecords().length).toBe(1);
+    expect(timer.getAllRecords().length).toBe(1);
 
-    timer.TimerReset();
+    timer.reset();
 
-    const settings = timer.GetCurrentTimerSettings();
+    const settings = timer.getCurrentSettings();
 
     expect(settings.total_time_used).toBe(0);
     expect(settings.timer_ended).toBe(false);
-    expect(timer.GetAllTimerRecords().length).toBe(1);
+    expect(timer.getAllRecords().length).toBe(1);
 });
 
-test("ClearAllTimerRecords clears all timer records", () => {
-    timer.TimerInit(timer.timer_type.stopwatch, 10);
+test("clearAllRecords clears all timer records", () => {
+    timer.init(TimerType.stopwatch, 10);
 
-    timer.TimerStart();
-    timer.TimerStop();
+    timer.start();
+    timer.stop();
 
-    expect(timer.GetAllTimerRecords().length).toBe(1);
+    expect(timer.getAllRecords().length).toBe(1);
 
-    timer.ClearAllTimerRecords();
+    timer.clearAllRecords();
 
-    expect(timer.GetAllTimerRecords().length).toBe(0);
+    expect(timer.getAllRecords().length).toBe(0);
 });
