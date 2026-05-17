@@ -1,0 +1,21 @@
+name: Feature Request
+description: Suggest a new feature for the project
+labels: ["feature request"]
+
+body:
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Describe the feature you are requesting
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: subteam
+    attributes:
+      label: Subteam Assignment
+      options:
+        - label: ui-team
+        - label: backend-team
+        - label: none

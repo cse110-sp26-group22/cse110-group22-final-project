@@ -1,0 +1,30 @@
+name: Planning Task
+description: Record a task related to project planning
+labels: ["planning"]
+
+body:
+  - type: input
+    id: due_date
+    attributes:
+      label: Due Date
+      description: When is this task due? 
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What needs to be done for this task?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: subteam
+    attributes:
+      label: Assigned Subteam
+      options:
+        - label: question-bank-team
+        - label: ui-team
+        - label: backend-team
+        - label: None
