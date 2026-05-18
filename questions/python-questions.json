@@ -1,0 +1,6 @@
+{
+    "question": "string",
+    "answer": "string",
+    "difficulty": "integer",
+    "baseScore": "integer"
+}
