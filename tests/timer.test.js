@@ -131,3 +131,47 @@ test("clearAllRecords clears all timer records", () => {
 
     expect(timer.getAllRecords().length).toBe(0);
 });
+
+//Yannis add'l:
+test("constructor initializes with correct default values", () => {
+    const t = new Timer();
+    const settings = t.getCurrentSettings();
+    expect(settings.timer_type).toBe(TimerType.countdown);
+    expect(settings.ticks_per_second).toBe(10);
+    expect(settings.time_limit).toBe(300);
+    expect(settings.total_time_used).toBe(0);
+    expect(settings.timer_ended).toBe(false);
+    expect(t.getAllRecords()).toHaveLength(0);
+});
+
+test("getCurrentSettings returns a copy, not the internal object", () => {
+    const settings = timer.getCurrentSettings();
+    settings.total_time_used = 9999;
+    expect(timer.getCurrentSettings().total_time_used).toBe(0);
+});
+
+test("updateTickPerSecond updates when timer is not running", () => {
+    timer.init(TimerType.stopwatch, 10, 0);
+    timer.updateTickPerSecond(20);
+    expect(timer.getCurrentSettings().ticks_per_second).toBe(20);
+});
+
+test("updateTickPerSecond does not update when timer is running", () => {
+    timer.init(TimerType.stopwatch, 10, 0);
+    timer.start();
+    timer.updateTickPerSecond(99);
+    expect(timer.getCurrentSettings().ticks_per_second).toBe(10);
+    timer.stop();
+});
+
+test("multiple stop calls across separate runs accumulate records", () => {
+    timer.init(TimerType.stopwatch, 10, 0);
+    timer.start();
+    timer.stop();
+
+    timer.init(TimerType.stopwatch, 10, 0);
+    timer.start();
+    timer.stop();
+
+    expect(timer.getAllRecords()).toHaveLength(2);
+});
