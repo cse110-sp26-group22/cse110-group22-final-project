@@ -1,0 +1,48 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #06110d;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 100vh;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+#game-ui {
+  width: 700px;
+  max-width: 90vw;
+
+  min-height: 50vh;
+
+  background: #102018;
+  color: #ecfff4;
+
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  border: 1px solid #2ecc71;
+  border-radius: 12px;
+}
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#progress {
+  font-weight: bold;
+  color: #8ff0b3;
+}
+
+
