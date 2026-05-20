@@ -2,7 +2,6 @@ import { assertHTMLElement } from "../utils.js";
 import CodeInputField from "./game/CodeInputField.js";
 import PromptDisplay from "./game/PromptDisplay.js";
 import StatsDisplay from "./game/StatsDisplay.js";
-import PlantsGroup from "./game/PlantDisplayGroup.js";
 import PlantDisplayGroup from "./game/PlantDisplayGroup.js";
 
 /**
