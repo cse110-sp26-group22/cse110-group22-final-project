@@ -19,7 +19,11 @@ export default class PlantDisplayGroup {
     /**
      * Adds a new PlantDisplay to this PlantDisplayGroup.
      */
-    addPlant(){
+    addPlantLevel(){
+        if(this.plantDisplays.length > 0){
+            const lastPlantDisplay = this.plantDisplays[this.plantDisplays.length - 1];
+            if(lastPlantDisplay.attemptGrow()) return;
+        }
         const plantDisplayMount = document.createElement('div');
         plantDisplayMount.classList.add('plant-display');
         const plantDisplay = new PlantDisplay(plantDisplayMount);

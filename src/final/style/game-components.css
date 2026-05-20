@@ -39,11 +39,11 @@
   justify-content: center;
   align-items: center;
   width: 60%;
-  height: 30%;
+  height: 50%;
 
-  bottom: 50%;
+  bottom: 30%;
   left: 50%;
-  transform: translate(-50%, 50%);
+  transform: translate(-50%, 0%);
 
   z-index: 0;
 }
@@ -51,7 +51,7 @@
 
 /*#region PlantDisplay styles */
 .plant-display {
-  max-width: 20%;
+  max-width: 33%;
   max-height: 90%;
 }
 
@@ -61,7 +61,12 @@
 }
 /*#endregion */
 
-/* print("Hello, World!") */
+/*#region QuestionCounter styles */
+.question-counter {
+  font-weight: bold;
+  color: white;
+}
+/*#endregion */
 
 /*#region StatsDisplay styles */
 .stats-display {

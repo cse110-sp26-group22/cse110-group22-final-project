@@ -1,3 +1,4 @@
+import { assertHTMLElement } from "../../utils.js";
 
 /**
  * The component responsible for displaying the user's current score and accuracy.
@@ -17,8 +18,21 @@ export default class StatsDisplay {
      */
     constructor(element){
         this.element = element;
-        this.scoreElement = this.element.querySelector('.stats-display-score');
-        this.accuracyElement = this.element.querySelector('.stats-display-accuracy');
-        this.wpmElement = this.element.querySelector('.stats-display-wpm');
+        this.scoreElement = assertHTMLElement(this.element.querySelector('.stats-display-score'));
+        this.accuracyElement = assertHTMLElement(this.element.querySelector('.stats-display-accuracy'));
+        this.wpmElement = assertHTMLElement(this.element.querySelector('.stats-display-wpm'));
+        this.updateStats(0, -1, -1);
+    }
+
+    /**
+     * Updates the statistics displayed.
+     * @param {number} score 
+     * @param {number} accuracy 
+     * @param {number} wpm 
+     */
+    updateStats(score, accuracy, wpm) {
+        this.scoreElement.textContent = String(score);
+        this.accuracyElement.textContent = "N/A"; //String(accuracy) + '%';
+        this.wpmElement.textContent = "N/A"; //String(wpm);
     }
 }

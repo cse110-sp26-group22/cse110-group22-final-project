@@ -1,4 +1,7 @@
 import { assertHTMLElement, assertHTMLInputElement } from '../../utils.js';
+
+//TODO: reorganize this component
+
 /**
  * The component responsible for taking in the user's code input.
  * 
@@ -27,15 +30,20 @@ export default class CodeInputField {
         this.codeInput.addEventListener('input', () => this.handleInput());
         this.renderGhostText();
     }
+    
+
+    get text() {
+        return this.codeInput.value;
+    }
 
     /**
-     * Sets what the ghost text should be. 
-     * This is the text that appears as a hint for the user, but disappears as they type.
-     * @param {String} text 
+     * Sets the answer for the current question. 
+     * This will clear the input field and set the ghost text to the answer.
+     * @param {String} answer 
      */
-    setGhostText(text) {
-        this.ghostTextString = text;
-        console.log('Setting ghost text to: ' + text);
+    set answer(answer){
+        this.codeInput.value = "";
+        this.ghostTextString = answer;
         this.renderGhostText();
     }
 
@@ -59,11 +67,19 @@ export default class CodeInputField {
     }
 
     /**
+     * Sets up a callback to be called when the input changes.
+     * @param {(input: string) => void} callback 
+     * @returns 
+     */
+    onInput(callback) {
+        this.codeInput.addEventListener('input', () => callback(this.codeInput.value));
+    }
+
+    /**
      * Event handler for when the user presses the Enter key.
      * @param {(text: string) => void} callback - The function to call when the user presses Enter. The current input value will be passed as an argument to this function.
      */
     onEnter(callback) {
-        if(!callback) return;
         this.codeInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') callback(this.codeInput.value);
         });

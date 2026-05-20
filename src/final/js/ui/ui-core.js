@@ -1,28 +1,56 @@
-import GameUI from './components/GameUI.js';
-import { assertHTMLElement } from './utils.js';
-
 /**
  * The main entry point for the UI.
  */
 
+import GameUI from './components/GameUI.js';
+import * as backend from './backend-emulation/game.js';
+import { assertHTMLElement } from './utils.js';
+
 /** @type {GameUI} */
 let gameUI;
 
-/**
- * Initializes the UI.
- */
-function main() {
+let currentLevel = 1;
+
+// Initialize the backend game state
+backend.initGame();
+
+function updateGameUI() {
+    const gameState = backend.getState();
+    gameUI.updateStats(gameState.score, -1, -1);
+}
+
+async function updateBackend(){
+    if(gameUI.checkAnswer()){
+        let gameState = backend.nextQuestion();
+        console.log(gameState.currentQuestionIndex);
+        let currentQuestion = gameState.questions[gameState.currentQuestionIndex];
+        if(gameState.currentQuestionIndex % 3 === 0){
+            gameUI.addPlantLevel();
+        }
+        if(!currentQuestion){
+            console.log("Level complete! Starting next level...");
+            currentLevel++;
+            gameState = await backend.startLevel(currentLevel, 'python');
+            currentQuestion = gameState.questions[gameState.currentQuestionIndex];
+        } 
+        console.log(currentQuestion);
+        gameUI.sendQuestion(currentQuestion.prompt, currentQuestion.answer);
+        gameUI.handleQuestionFinish();
+    }
+}
+
+async function main() {
     const gameDisplayElement = assertHTMLElement(document.querySelector('#game-ui'));
     gameUI = new GameUI(gameDisplayElement);
-    
-    const [question, answer] = backendEmulator();
-    gameUI.sendQuestion(question, answer);
-}
 
-function backendEmulator(){
-    //return a tuple of (question, answer)
-    return ["Print \"Hello, World!\" in Python", "print(\"Hello, World!\")"];
+    const gameState = await backend.startLevel(currentLevel, 'python');
+    const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
+    gameUI.sendQuestion(currentQuestion.prompt, currentQuestion.answer);
+    gameUI.onInput((input) => {
+        backend.onInput(input);
+        updateBackend();
+        updateGameUI();
+    });
 }
-
 
 document.addEventListener('DOMContentLoaded', main);

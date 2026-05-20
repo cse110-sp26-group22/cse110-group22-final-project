@@ -22,7 +22,7 @@ export default class PromptDisplay {
      * Sets the text of the prompt display.
      * @param {String} text - The text to display.
      */
-    setText(text) {
+    set text(text) {
         this.promptTextElement.textContent = text;
     }
 }

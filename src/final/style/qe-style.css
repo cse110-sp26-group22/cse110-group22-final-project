@@ -25,15 +25,4 @@ body {
 }
 
 
-#header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#progress {
-  font-weight: bold;
-  color: white;
-}
-
 

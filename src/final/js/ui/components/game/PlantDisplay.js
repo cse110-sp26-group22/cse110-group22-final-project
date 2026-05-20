@@ -6,7 +6,7 @@
  */
 export default class PlantDisplay  {
     /** @const {(string)[]}*/
-    static PLANT_IMAGES = ['plant-small.png', 'plant-medium.png', 'plant-large.png'];
+    static PLANT_IMAGES = ['plant-small-AI.png', 'plant-medium-AI.png', 'plant-large-AI.png'];
     /**
      * Binds this PlantDisplay to the given element.
      * @param {HTMLElement} element 
@@ -17,6 +17,18 @@ export default class PlantDisplay  {
         this.plantImageElement = document.createElement('img');
 
         this.build();
+    }
+    /**
+     * Tries to grow the plant to the next level. If the plant is already at max growth, does nothing.
+     * @returns Whether the plant was able to grow or not.
+     */
+    attemptGrow(){
+        if(this.growthLevel < PlantDisplay.PLANT_IMAGES.length - 1){
+            this.growthLevel++;
+            this.plantImageElement.src = `../assets/images/plant/${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`;
+            return true;
+        }
+        return false;
     }
     build(){
         this.plantImageElement.src = `../assets/images/plant/${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`;
