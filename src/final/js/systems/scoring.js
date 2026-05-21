@@ -5,7 +5,7 @@
 //none of the functions in this file should be able to directly mutate the game state
 //instead they should return values that can be used to update the game state in game.js
 
-export function calculateTypingAccuracy(incorrectChars, totalChars) {
+export function calculateAccuracyMultiplier(incorrectChars, totalChars) {
     if (totalChars === 0) return 1;
 
   const accuracy = (totalChars - incorrectChars) / totalChars;
@@ -14,7 +14,7 @@ export function calculateTypingAccuracy(incorrectChars, totalChars) {
   return Math.max(0.5, accuracy); // 50% minimum
 }
 
-export function calculateTimeBonus(timeElapsed, timeLimit, level) {
+export function calculateTimeMultiplier(timeElapsed, timeLimit) {
     if (timeLimit === 0) return 1;
 
     const ratio = timeElapsed / timeLimit;
@@ -31,7 +31,7 @@ export function calculateTimeBonus(timeElapsed, timeLimit, level) {
 //    return Math.min(1 + streak * 0.05, 2.0);
 // }
 
-export function calculateTotalScore(baseScore, incorrectChars, totalChars, timeElapsed, timeLimit, streak = 0) {
+export function calculateTotalScore(baseScore, incorrectChars, totalChars, timeElapsed, timeLimit) {
     const accuracyMultiplier = calculateAccuracyMultiplier(
         incorrectChars,
         totalChars
@@ -47,8 +47,8 @@ export function calculateTotalScore(baseScore, incorrectChars, totalChars, timeE
     const finalScore =
         baseScore *
         accuracyMultiplier *
-        timeMultiplier *
-        streakMultiplier;
+        timeMultiplier;
+        //streakMultiplier;
 
     return Math.round(Math.max(0, finalScore));
 }
