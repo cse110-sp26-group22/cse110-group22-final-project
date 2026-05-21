@@ -1,0 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #06110d;
+
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  flex-direction: column;
+  gap: 1rem;
+
+  min-height: 100vh;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.site-title {
+  text-align: center;
+  color: white;
+  margin-left: 0.75rem;
+}
+
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#progress {
+  font-weight: bold;
+  color: white;
+}
+
+
