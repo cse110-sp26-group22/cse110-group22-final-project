@@ -1,0 +1,16 @@
+
+/*#region RulesBox styles */
+.rules-box {
+  background: #0b1812;
+  border-left: 4px solid #2ecc71;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.rules-box > h3 {
+  margin-bottom: 6px;
+  color: #8ff0b3;
+}
+/*#endregion */
