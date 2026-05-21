@@ -33,7 +33,9 @@
  * Passed into startTimer() when a level begins. Never called directly by ui.js.
  * @param {number} time - The current time remaining in seconds from timer.js
  */
+/*
 function onTick(time) {
   // TODO: update state.elapsed_time
   // TODO: call ui callback to update timer display
 }
+  */
