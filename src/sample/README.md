@@ -153,6 +153,7 @@ We can walk through our code to get a sense of how our components manage data.
     1. The `eggCounter` receives an event on the increment button, which calls `callback(this.count + 1)`, thus passing state up the component tree.
     2. `App`'s callback was `handleUpdateCount(newCount)`. This then runs `addEgg` to add an egg to the display.
     3. In `addEgg`, the function creates a new `span` element, and binds an `Egg` component to it. This `Egg` is stored in a list for future access.
+    4. Then, `eggCounter.count` is updated, allowing reactivity to synchronize the rest of the state.
 3. When the user presses the `-` button:
     1. A similar process as the `+` button occurs, the only exception being that `App` calls `removeEgg` instead.
     2. In `removeEgg`, the function pops the last `Egg` from the stored list and unmounts it. 
