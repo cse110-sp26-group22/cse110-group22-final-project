@@ -12,7 +12,7 @@ If you have any questions/feedback/suggestions, feel free to bring them up in th
 
 Broadly, components are a way to define the interactivity of our app in an encapsulated manner, while generally adhering to the semantics of HTML/CSS/JS. That is, HTML adds structure, CSS adds styles to HTML, and JS adds interactivity to HTML+CSS.
 
-To achieve this goal, all components will have a root HTML template that they bind to. This template serves as the 'contract' for this component; it must be present in the HTML when the component is instantiated for it to function correctly. 
+To achieve this goal, all components will have a base HTML template that they bind to. This template serves as the 'contract' for this component; it must be present in the HTML when the component is instantiated for it to function correctly. 
 
 All components will lie in the `/components` directory, and will be named in PascalCase. Let's take a look at `/components/App.js` for an example of our first component.
 
@@ -87,9 +87,7 @@ document.addEventListener('DOMContentLoaded', main);
 ``` 
 
 Components will usually interact with the DOM by changing attributes, properties, or text. However, some components may need to modify the DOM by creating and deleting DOM elements.  
-
-We will maintain the convention that the component creating a DOM element is the one responsible for deleting it when it is done being used. 
-
+- We will maintain the convention that the component creating a DOM element is the one responsible for deleting it when it is done being used. 
 
 ### Component Trees
 
@@ -100,14 +98,14 @@ this.eggCounter = new EggCounter(assertHTMLElement(this.element.querySelector('.
 this.eggCounter.onUpdateCount((newCount) => this.handleUpdateCount(newCount));
 ```
 
-This pattern of having components contain other subcomponents creates a component tree. Here is the component tree for our sample project.
+This pattern of having components contain other subcomponents creates a component tree. Here is the component tree for our sample project:
 ![component tree](./assets/image.png)
 
 There are a few conventions to keep in mind when working with component trees.
 1. Component tree structure should match HTML structure.
     1. This is useful for encapsulation, but it also maintains code semanticity when root elements call `querySelector`.
 2. State shared between a set of components should either (1) be global state or (2) be 'lifted' up to the least common ancestor of that set.
-3. Information flow is regulated.
+3. Information flow is regulated, as follows:
     1. Information going from parent $\to$  child should be passed through properties or child function calls (e.g. `child.doStuff()`)
     2. Information going from child $\to$ parent should be passed through callbacks (e.g. parent calls `child.onClick(callback)`)
 
