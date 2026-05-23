@@ -57,11 +57,11 @@ export function initializeGame(uiCallbacks) {
 
 //-----------Game lifecycle functions-----------//
 //Purpose: start a new valid level, initialize runtime metadata, render gameplay screen, start timer
-export function startLevel(category) {
+export function startLevel(levelNumber, category) {
   if(runtime.active) {
     stopTimer();
   }
-  state = await loadLevel(category);
+  state = await loadLevel(levelNumber, category);
   runtime.active = true;
   runtime.questionStartTime = Date.now();
 
