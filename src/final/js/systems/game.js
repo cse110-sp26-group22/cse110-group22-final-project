@@ -39,6 +39,7 @@ import { run } from "jest";
 // - process the creation and storage of a new player profile
 // - implement pause/resume functionaliy
 // - understand how to handle the loading of a saved game state in ui.js
+// - handle the end of a level (currently it just ends the game but it should present an option to move to the next level if there is one)
 
 let gamestate = null;
 let runtime = {
@@ -90,6 +91,7 @@ export function handleRoundComplete() {
   const nextQuestion = state.selector.getNextQuestion();
   if(!nextQuestion) {
     endGame();
+    //presently it ends game but it should probably present an option to advance to next level if there is one
     return;
   }
   gamestate.currentInput = "";
@@ -126,7 +128,22 @@ function onTick(timeRemaining) {
 
 function handleExpire() {
   if(!runtime.active) return;
-  endGame();
+  const nextQuestion = gamestate.selector.getNextQuestion();
+  if(!nextQuestion) {
+    endGame();
+    //end game but maybe give option to move to next level
+    return;
+  }
+
+  gamestate.currentInput = "";
+  gamestate.incorrectChars = 0;
+  gamestate.currentQuestion = nextQuestion;
+  runtime.questionStartTime = Date.now();
+  callbacks.updatePage("question", {
+    word: gamestate.currentQuestion.answer,
+    score: gamestate.score
+    //same issue as before: timer update or other metadata needed?
+  });
 }
 
 //-----------Player input processing-----------//
