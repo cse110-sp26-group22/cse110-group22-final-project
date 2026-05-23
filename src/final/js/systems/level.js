@@ -53,6 +53,7 @@ export async function loadLevel(levelNumber, category) {
 
     selector,            //used to advance question in game.js
     currentQuestion: firstQuestion,
+    incorrectChars: 0,   //reset on question complete
 
     currentInput: "",
     timeRemaining: config.timeLimit,
