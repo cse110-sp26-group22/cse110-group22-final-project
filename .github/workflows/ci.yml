@@ -7,13 +7,11 @@ on:
       - dev
       - research
       - feature/**
-      - docs/**
-      - fix/**
-      - test/**
 
   pull_request:
     branches:
       - main
+      - dev
 
 jobs:
   test:
