@@ -12,24 +12,23 @@ import { assertHTMLElement } from "../utils.js";
  * </div>
  */
 export default class MainMenu {
-    /** @type {((language: string) => void) | null} */
-    #startCallback = null;
+    /** @type {(language: string) => void} */
+    #startCallback = () => {};
+    /** @type {HTMLSelectElement} */
+    #languageSelect;
+    /** @type {HTMLElement} */
+    #startButton;
 
     /**
      * Binds this MainMenu to the given element.
      * @param {HTMLElement} element
      */
     constructor(element) {
-        /** @type {HTMLElement} */
         this.element = element;
-        /** @private @type {HTMLSelectElement} */
-        this.languageSelect = assertHTMLElement(this.element.querySelector('.main-menu-language-select'));
-        /** @private @type {HTMLElement} */
-        this.startButton = assertHTMLElement(this.element.querySelector('.main-menu-start'));
+        this.#languageSelect = assertHTMLElement(this.element.querySelector('.main-menu-language-select'));
+        this.#startButton = assertHTMLElement(this.element.querySelector('.main-menu-start'));
 
-        this.startButton.addEventListener('click', () => {
-            if (this.#startCallback) this.#startCallback(this.languageSelect.value);
-        });
+        this.#startButton.addEventListener('click', () => this.#startCallback(this.#languageSelect.value));
     }
 
     /**
