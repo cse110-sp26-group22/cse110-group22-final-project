@@ -57,4 +57,12 @@ export default class GameUI {
             console.log("Incorrect! The correct answer was: " + this.currentAnswer);
         }
     }
+
+    show() {
+        this.element.classList.remove('hidden');
+    }
+
+    hide() {
+        this.element.classList.add('hidden');
+    }
 }
