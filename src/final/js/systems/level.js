@@ -44,6 +44,7 @@ const LEVELS = [
 export async function loadLevel(levelNumber, category) {
   const config = LEVELS[levelNumber - 1];
 
+  fetch(`../data/${category}.json`);
   const response = await fetch(`../js/data/${category}.json`);
   const allQuestions = await response.json();
 
