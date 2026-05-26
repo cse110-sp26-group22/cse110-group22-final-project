@@ -49,7 +49,7 @@
 import { loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
 import { calculateBaseScore, calculateTotalScore } from "./scoring.js";
-import { saveProfile, clearState } from "./storage.js";
+import { saveProfile } from "./storage.js";
 import { defaultGameState, defaultProfile } from "../models/models.js";
 import { growNextPlant } from "./plants.js";
 
@@ -175,7 +175,7 @@ export function goToLevelSelect() {
 export function goToMainMenu() {
   stopTimer();
   state = defaultGameState();
-  callbacks.loadScreen("mainmenu", { ...state });
+  emitUpdate("MAIN_MENU");
 }
 // I presently doubt we even have a main menu button
 
@@ -264,7 +264,7 @@ function handleQuestionComplete() {
 function _onTick(timeRemaining) {
   if (!isActive || isPaused) return;
   state.timer = timeRemaining;
-  callbacks.updateScreen("tick", { ...state });
+  emitUpdate("TICK", { timeRemaining });
 }
 
 /**
