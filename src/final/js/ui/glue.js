@@ -1,0 +1,74 @@
+import {
+    registerCallbacks, startLevel, pauseGame, resumeGame, 
+    goToMainMenu, goToLevelSelect, onInput
+} from "../systems/game.js"
+
+import { store } from "./store.js";
+import { mainMenu, gameUI, resultsScreen } from "./ui.js";
+
+let currentLevel = 1;
+let language = 'python';
+
+/**
+ * @param {string} screenName 
+ * @param {*} data 
+ */
+function handleLoadScreen(screenName, data) {
+    if (screenName === 'game') {
+        mainMenu.hide();
+        resultsScreen.hide();
+        gameUI.show();
+        gameUI.sendQuestion(data.questions[data.current_question_index], data.answers[data.current_question_index]);
+    }
+    if (screenName === 'pause') {
+        gameUI.show();
+        gameUI.pauseMenu.show();
+        resultsScreen.hide();
+        mainMenu.hide();
+    }
+    if (screenName === 'endscreen') {
+        gameUI.hide();
+        resultsScreen.show(data.stats);
+        mainMenu.hide();
+    }
+    if (screenName === 'mainmenu' || screenName === 'levelselect') {
+        gameUI.hide();
+        resultsScreen.hide();
+        mainMenu.show();
+    }
+}
+
+/**
+ * @param {string} response 
+ * @param {*} data 
+ */
+function handleUpdateScreen(response, data) {
+    if (response === 'tick') {
+        store.update('timer', data.timer);
+    }
+    if (response === 'correct-char') {
+        gameUI.combo.increment();
+    }
+    if (response === 'incorrect') {
+        gameUI.combo.reset();
+    }
+    if (response === 'next-question') {
+        gameUI.sendQuestion(data.questions[data.current_question_index], data.answers[data.current_question_index]);
+    }
+}
+
+export function initializeBackend() {
+    registerCallbacks(handleLoadScreen, handleUpdateScreen);
+    startLevel(currentLevel, language);
+}
+
+/**
+ * Relays user input from the UI to the backend.
+ * @param {string} key 
+ */
+export function handleKeyPress(key){
+    console.log(`Key pressed: ${key}`);
+    onInput(key); //backend naming is different from our convention
+}
+
+export { pauseGame, resumeGame, goToLevelSelect, goToMainMenu };
