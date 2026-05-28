@@ -1,4 +1,4 @@
-import CodeInputField from '../../../../src/final/js/ui/components/game/input/CodeInputField.js';
+import CodeInputField from '../../../../../src/final/js/ui/components/game/input/CodeInputField.js';
 
 describe('CodeInputField', () => {
     /** @type {CodeInputField} */
