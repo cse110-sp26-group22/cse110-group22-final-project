@@ -20,11 +20,9 @@
  */
 
 const LEVELS = [
-  { levelNumber: 1, timeLimit: 60, questionCount: 10, difficulty: "very easy" },
-  { levelNumber: 2, timeLimit: 60, questionCount: 10, difficulty: "easy"      },
-  { levelNumber: 3, timeLimit: 60, questionCount: 10, difficulty: "medium"    },
-  { levelNumber: 4, timeLimit: 60, questionCount: 10, difficulty: "hard"      },
-  { levelNumber: 5, timeLimit: 60, questionCount: 10, difficulty: "very hard" },
+  { levelNumber: 1, timeLimit: 4500, questionCount: 9, difficulty: "easy" },
+  { levelNumber: 2, timeLimit: 4500, questionCount: 9, difficulty: "medium"      },
+  { levelNumber: 3, timeLimit: 4500, questionCount: 9, difficulty: "hard"    },
 ];
 
 /**
@@ -44,8 +42,14 @@ const LEVELS = [
 export async function loadLevel(levelNumber, category) {
   const config = LEVELS[levelNumber - 1];
 
-  fetch(`../data/${category}.json`);
   const response = await fetch(`../js/data/${category}.json`);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load questions for ${category}`
+    );
+  }
+
   const allQuestions = await response.json();
 
   // Filter by difficulty, shuffle, cap at questionCount
@@ -64,14 +68,17 @@ export async function loadLevel(levelNumber, category) {
     answers,                            // shuffled answer strings; index matches questions[]
     total_questions: shuffled.length,   // may be < questionCount if the pool is small
     time_limit:      config.timeLimit,  // total seconds allowed, set by LEVELS config
-    timer:           config.timeLimit,  // seconds remaining; starts full, counts down each tick
-
+    level:           config.levelNumber, // add level to gamestate for advancement purposes
+    
     // ── Always start at zero / empty ─────────────────────────────────────
     plants:                 [0, 0, 0],  // 3 plants, each starting at growth stage 0
     current_question_index: 0,   // pointer into questions[] and answers[]
     current_input:          "",  // what the player has typed so far
     incorrect_chars:        0,   // wrong keystrokes this question; reset each question
     base_score:             0,   // points earned this session
+    questionStartTime: null,     // timestamp when the current question was loaded; used to calculate elapsed time
+    endTime: null,               // timestamp when the timer should expire; set when the question starts
+    remainingOnPause: null,      // seconds remaining when the game is paused; used to restore timer on resume
   };
 }
 
