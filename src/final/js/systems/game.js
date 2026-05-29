@@ -319,7 +319,7 @@ function startQuestionTimer() {
 
   state.end_time =
       state.question_start_time +
-      state.time_limit * 1000;
+      state.time_limit;
 
   startTimer(
       state.end_time,
