@@ -348,5 +348,6 @@ export function savePlayerData(){
   player.score += state.score; //perhaps display this at the end of every level as well
   player.questions_answered = state.current_question_index;
   player.level = state.level;
+  player.current_question_index = state.current_question_index;
   saveProfile(player);
 }

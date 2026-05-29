@@ -16,7 +16,7 @@
  * @typedef {Object} Profile
  * @property {string} username - The player's chosen username
  * @property {number} level - The player's current level
- * @property {number} num_questions_answered - Total questions answered by the player
+ * @property {number} current_question_index - The index of the current question
  * @property {string} language - The player's preferred programming language
  * @property {number} score - The player's total accumulated score
  * @property {boolean} isInitialized - Flag indicating if the profile has been set up
@@ -26,7 +26,7 @@ export function defaultProfile() {
     username: "Guest",
     score: 0,
     level: 1,
-    num_questions_answered: 0,
+    current_question_index: 0,
     language: "Python",
     isInitialized: false
   };
