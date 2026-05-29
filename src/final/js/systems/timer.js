@@ -17,7 +17,7 @@ let timeoutId = null;
  */
 export function startTimer(end_time, onExpire) {
   stopTimer();
-  timeRemaining = end_time - Date.now();
+  const timeRemaining = end_time - Date.now();
   
   if (timeRemaining <= 0) {
     onExpire();

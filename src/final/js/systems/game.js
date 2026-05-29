@@ -133,8 +133,12 @@ export function endGame() {
   isPaused = false;
   stopTimer();
 
-  // Accumulate session results into the persistent player profile, persist profile
-  savePlayerData();
+  // Accumulate session results into the persistent player profile
+  player.score += calculateTotalScore(state.base_score, { ...state });
+  player.num_questions_answered += state.current_question_index;
+
+  // Persist profile, clear in-progress session state
+  saveProfile(player);
   clearState();
 
   callbacks.loadScreen("endscreen", { total_score: player.score, ...state });
