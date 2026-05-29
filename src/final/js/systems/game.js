@@ -135,7 +135,9 @@ export function endGame() {
   stopTimer();
 
   // Accumulate session results into the persistent player profile
-  player.score += calculateTotalScore(state.base_score, { ...state });
+  const remainingTime = Math.max(0, state.end_time - Date.now());
+  const elapsedTime = state.time_limit - remainingTime;
+  player.score += calculateTotalScore(state.base_score, { ...state }, elapsedTime);
   player.num_questions_answered += state.current_question_index;
 
   // Persist profile, clear in-progress session state
@@ -276,8 +278,6 @@ function handleQuestionComplete(complete) {
   else{
     state.base_score = 0;
   }
-
-  const elapsedTime = Date.now() - state.question_start_time;
 
   if(state.current_question_index % 3 === 0) {
     state.plants = growNextPlant(state);

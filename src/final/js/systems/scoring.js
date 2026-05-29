@@ -36,7 +36,7 @@ export function calculateTimeMultiplier(elapsedMs, timeLimit) {
 //    return Math.min(1 + streak * 0.05, 2.0);
 // }
 
-export function calculateTotalScore(baseScore, state, elapsedMs) {
+export function calculateTotalScore(baseScore, state, elapsedMs = 0) {
     const { incorrect_chars, answers, current_input, current_question_index, time_limit} = state;
 
     const totalChars = answers
