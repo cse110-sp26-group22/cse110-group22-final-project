@@ -66,8 +66,8 @@ export default class Combo {
      * Repeatedly decrements the rendered combo count by 1 every 0.01 seconds until it reaches 0.
      * @private
      */
-    async rollDown(){
-        if(this.#rollDownPromise) return; //prevent multiple simultaneous roll downs
+    rollDown(){
+        if(this.#rollDownPromise) return this.#rollDownPromise; //prevent multiple simultaneous roll downs
         this.#rollDownPromise = new Promise((resolve) => {
             const intervalId = setInterval(() => {
                 if(this.renderedComboCount > this.#comboCount){
@@ -79,13 +79,15 @@ export default class Combo {
                 }
             }, 20);
         });
+        return this.#rollDownPromise;
     }
 
     /**
      * Resets the combo count to 0 and updates the display.
+     * @return {Promise<void>} A promise that resolves when the roll down animation is complete.
      */
     reset(){
         this.#comboCount = 0;
-        this.rollDown();
+        return this.rollDown();
     }
 }
