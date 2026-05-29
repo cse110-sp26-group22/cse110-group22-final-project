@@ -141,6 +141,32 @@ Again, we will maintain conventions for reactivity:
 2. Reactivity only affects a component's subtree
     1. To prevent loops, reactivity should never trigger callbacks to parent components. The code structure should be reworked to have the least common ancestor (or a global object) handle such cases.
 
+### Callbacks
+
+Often, components need to pass events up to their parent component. 
+This can be done by exposing a callback register function, which the parent component passes a callback into.
+
+The naming convention here is that components should name their function with the prefix `on` (for example, `onClick`). When registering a callback, the callback should ideally be semantically labeled (e.g. `onClick(incrementScore)`), but if there does not exist a nice semantic label, use the prefix `handle` with the event instead (e.g. `onClick(handleClick)`).
+
+When implementing these register functions, the convention is to always 'defer' the callback to the subcomponent/element unless you need to have access to this callback. In many cases, your logic can be rewritten in the form of deferring a wrapper callback to the subcomponent, which is usually preferable.
+
+An example of this pattern is seen in `EggCounter`, as follows:
+```js
+/**
+ * Registers a callback to be invoked when the egg count changes.
+ * @param {(newCount: number) => void} callback
+ */
+onUpdateCount(callback) {
+    this.incrementButton.addEventListener('click', () => callback(this.count + 1));
+    this.decrementButton.addEventListener('click', () => callback(this.count - 1));
+}
+```
+
+`EggCounter` does not store the given callback; rather, it simply passes it on to the underlying element for it to handle. At the same time, we are able to handle our own logic by passing in `this.count + 1` or `this.count - 1` into the callback depending on the particular event.
+
+> [!NOTE]
+> While we keep the rule that reactivity cannot call callbacks, it's alright for callbacks to trigger reactive events.
+
 ### Sample Information Flow
 
 We can walk through our code to get a sense of how our components manage data.
@@ -218,3 +244,4 @@ Mark variables/functions with the correct JSDocs visibility (e.g. `@private`)
 Use JS modules with import/export syntax
 - Classes should use `export default` 
 - Functions should only use `export`
+

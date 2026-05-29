@@ -1,130 +1,103 @@
-import * as timer from '../src/prototype/js/timer.js';
+import { startTimer, stopTimer, isRunning } from "../src/final/js/systems/timer.js";
 
 beforeEach(() => {
-    timer.TimerReset();
-    timer.ClearAllTimerRecords();
+  jest.useFakeTimers();
+  stopTimer(); // ensure clean state before each test
 });
 
-test("TimerInit sets the timer settings correctly", () => {
-    timer.TimerInit(timer.timer_type.countdown, 10, 100);
-
-    const settings = timer.GetCurrentTimerSettings();
-
-    expect(settings.timer_type).toBe(timer.timer_type.countdown);
-    expect(settings.ticks_per_second).toBe(10);
-    expect(settings.time_limit).toBe(100);
-    expect(settings.total_time_used).toBe(0);
-    expect(settings.timer_ended).toBe(false);
+afterEach(() => {
+  stopTimer();
+  jest.useRealTimers();
 });
 
-test("TimerStart automatically ends countdown timer", () => {
-    timer.TimerInit(timer.timer_type.countdown, 10, 5);
+// ── isRunning ─────────────────────────────────────────────────────────────────
 
-    return new Promise((resolve) => {
-        timer.TimerStart((result) => {
-            expect(result.timer_type).toBe(timer.timer_type.countdown);
-            expect(result.ticks_per_second).toBe(10);
-            expect(result.time_limit).toBe(5);
-            expect(result.total_time_used).toBeGreaterThanOrEqual(5);
+describe("isRunning", () => {
+  test("returns false before any timer is started", () => {
+    expect(isRunning()).toBe(false);
+  });
 
-            const records = timer.GetAllTimerRecords();
-            expect(records.length).toBe(1);
-            expect(records[0].timer_type).toBe(timer.timer_type.countdown);
+  test("returns true after startTimer is called", () => {
+    startTimer({ timer: 5 }, () => {}, () => {});
+    expect(isRunning()).toBe(true);
+  });
 
-            resolve();
-        });
-    });
+  test("returns false after stopTimer is called", () => {
+    startTimer({ timer: 5 }, () => {}, () => {});
+    stopTimer();
+    expect(isRunning()).toBe(false);
+  });
 });
 
-test("TimerStop stops countdown timer before it ends", () => {
-    timer.TimerInit(timer.timer_type.countdown, 10, 50);
+// ── stopTimer ─────────────────────────────────────────────────────────────────
 
-    let endCallbackCalled = false;
+describe("stopTimer", () => {
+  test("is safe to call when timer is not running", () => {
+    expect(() => stopTimer()).not.toThrow();
+  });
 
-    timer.TimerStart(() => {
-        endCallbackCalled = true;
-    });
-
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            timer.TimerStop((result) => {
-                expect(result.timer_type).toBe(timer.timer_type.countdown);
-                expect(result.ticks_per_second).toBe(10);
-                expect(result.time_limit).toBe(50);
-                expect(result.total_time_used).toBeGreaterThan(0);
-                expect(result.total_time_used).toBeLessThan(50);
-                expect(endCallbackCalled).toBe(false);
-
-                const records = timer.GetAllTimerRecords();
-                expect(records.length).toBe(1);
-
-                resolve();
-            });
-        }, 200);
-    });
+  test("stops onTick from firing after stopTimer", () => {
+    const onTick = jest.fn();
+    startTimer({ timer: 5 }, onTick, () => {});
+    jest.advanceTimersByTime(2000);
+    stopTimer();
+    jest.advanceTimersByTime(3000); // should not fire any more ticks
+    expect(onTick).toHaveBeenCalledTimes(2);
+  });
 });
 
-test("TimerStart and TimerStop work correctly for stopwatch timer", () => {
-    timer.TimerInit(timer.timer_type.stopwatch, 10);
+// ── startTimer ────────────────────────────────────────────────────────────────
 
-    timer.TimerStart();
+describe("startTimer", () => {
+  test("calls onTick once per second", () => {
+    const onTick = jest.fn();
+    startTimer({ timer: 3 }, onTick, () => {});
+    jest.advanceTimersByTime(3000);
+    expect(onTick).toHaveBeenCalledTimes(3);
+  });
 
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            timer.TimerStop((result) => {
-                expect(result.timer_type).toBe(timer.timer_type.stopwatch);
-                expect(result.ticks_per_second).toBe(10);
-                expect(result.total_time_used).toBeGreaterThan(0);
+  test("passes decreasing time remaining to onTick", () => {
+    const ticks = [];
+    startTimer({ timer: 3 }, (t) => ticks.push(t), () => {});
+    jest.advanceTimersByTime(3000);
+    expect(ticks).toEqual([2, 1, 0]);
+  });
 
-                const records = timer.GetAllTimerRecords();
-                expect(records.length).toBe(1);
-                expect(records[0].timer_type).toBe(timer.timer_type.stopwatch);
+  test("calls onExpire when timer reaches 0", () => {
+    const onExpire = jest.fn();
+    startTimer({ timer: 2 }, () => {}, onExpire);
+    jest.advanceTimersByTime(2000);
+    expect(onExpire).toHaveBeenCalledTimes(1);
+  });
 
-                resolve();
-            });
-        }, 200);
-    });
-});
+  test("stops ticking after expiry (onExpire calls stopTimer)", () => {
+    const onTick = jest.fn();
+    startTimer({ timer: 2 }, onTick, () => {});
+    jest.advanceTimersByTime(5000); // extra time after expiry
+    expect(onTick).toHaveBeenCalledTimes(2); // only the 2 real ticks
+  });
 
-test("TimerStop should not record twice if called multiple times", () => {
-    timer.TimerInit(timer.timer_type.stopwatch, 10);
+  test("restarting stops the previous timer", () => {
+    const onTick = jest.fn();
+    startTimer({ timer: 10 }, onTick, () => {});
+    jest.advanceTimersByTime(2000); // 2 ticks from first timer
+    startTimer({ timer: 5 }, onTick, () => {});
+    jest.advanceTimersByTime(2000); // 2 ticks from second timer
+    // total = 4 ticks; first timer was stopped so no double-firing
+    expect(onTick).toHaveBeenCalledTimes(4);
+  });
 
-    timer.TimerStart();
+  test("reads starting time from state.timer", () => {
+    const ticks = [];
+    startTimer({ timer: 2 }, (t) => ticks.push(t), () => {});
+    jest.advanceTimersByTime(1000);
+    expect(ticks[0]).toBe(1); // started from 2, first tick is 1
+  });
 
-    timer.TimerStop();
-    timer.TimerStop();
-
-    const records = timer.GetAllTimerRecords();
-
-    expect(records.length).toBe(1);
-});
-
-test("TimerReset resets current timer but does not clear records", () => {
-    timer.TimerInit(timer.timer_type.stopwatch, 10);
-
-    timer.TimerStart();
-    timer.TimerStop();
-
-    expect(timer.GetAllTimerRecords().length).toBe(1);
-
-    timer.TimerReset();
-
-    const settings = timer.GetCurrentTimerSettings();
-
-    expect(settings.total_time_used).toBe(0);
-    expect(settings.timer_ended).toBe(false);
-    expect(timer.GetAllTimerRecords().length).toBe(1);
-});
-
-test("ClearAllTimerRecords clears all timer records", () => {
-    timer.TimerInit(timer.timer_type.stopwatch, 10);
-
-    timer.TimerStart();
-    timer.TimerStop();
-
-    expect(timer.GetAllTimerRecords().length).toBe(1);
-
-    timer.ClearAllTimerRecords();
-
-    expect(timer.GetAllTimerRecords().length).toBe(0);
+  test("onExpire is not called before time runs out", () => {
+    const onExpire = jest.fn();
+    startTimer({ timer: 5 }, () => {}, onExpire);
+    jest.advanceTimersByTime(4000);
+    expect(onExpire).not.toHaveBeenCalled();
+  });
 });
