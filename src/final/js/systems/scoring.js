@@ -19,10 +19,10 @@ export function calculateAccuracyMultiplier(incorrectChars, totalChars) {
   return Math.max(0.5, accuracy); // 50% minimum
 }
 
-export function calculateTimeMultiplier(timeElapsed, timeLimit) {
+export function calculateTimeMultiplier(elapsedMs, timeLimit) {
     if (timeLimit === 0) return 1;
 
-    const ratio = timeElapsed / timeLimit;
+    const ratio = elapsedMs / timeLimit;
 
     // faster = higher reward
     const multiplier = 1 + (1 - ratio);
@@ -36,8 +36,8 @@ export function calculateTimeMultiplier(timeElapsed, timeLimit) {
 //    return Math.min(1 + streak * 0.05, 2.0);
 // }
 
-export function calculateTotalScore(baseScore, state) {
-    const { incorrect_chars, answers, current_input, current_question_index, timer, time_limit } = state;
+export function calculateTotalScore(baseScore, state, elapsedMs = 0) {
+    const { incorrect_chars, answers, current_input, current_question_index, time_limit} = state;
 
     const totalChars = answers
         .slice(0, current_question_index)
@@ -50,8 +50,8 @@ export function calculateTotalScore(baseScore, state) {
     );
 
     const timeMultiplier = calculateTimeMultiplier(
-        time_limit - timer,
-        time_limit
+        elapsedMs,
+        time_limit * 1000
     );
 
     //const streakMultiplier = calculateStreakMultiplier(streak);
