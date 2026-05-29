@@ -45,8 +45,9 @@ export function defaultProfile() {
  * @property {string}    current_input          - Player's in-progress input for the active question
  * @property {number}    incorrect_chars        - Wrong keystrokes for the current question (reset each question)
  * @property {number}    time_limit             - Total milliseconds allowed for the question
- * @property {number}    end_time:              - Ending time for this question
- * @property {number}    remaining_on_pause:    - Remaining ms for timer at pause.
+ * @property {number}    question_start_time    - Timestamp when the current question started.
+ * @property {number}    end_time               - Timestamp when the current question timer ends.
+ * @property {number}    remaining_on_pause     - Remaining ms for timer at pause.
  * @property {number}    base_score             - Points accumulated this session
  * @property {boolean}   isActive               - Is game started
  * @property {boolean}   isPaused               - Is game paused
@@ -63,8 +64,9 @@ export function defaultGameState() {
     current_input:          "",
     incorrect_chars:        0,
     time_limit:             600000,
+    question_start_time:    0,
     end_time:               0,
-    remaining_on_pause:     60,
+    remaining_on_pause:     0,
     base_score:             0,
     isActive:              false,
     isPaused:              false

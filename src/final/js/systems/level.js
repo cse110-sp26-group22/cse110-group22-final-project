@@ -76,9 +76,9 @@ export async function loadLevel(levelNumber, category) {
     current_input:          "",  // what the player has typed so far
     incorrect_chars:        0,   // wrong keystrokes this question; reset each question
     base_score:             0,   // points earned this session
-    questionStartTime: null,     // timestamp when the current question was loaded; used to calculate elapsed time
-    endTime: null,               // timestamp when the timer should expire; set when the question starts
-    remainingOnPause: null,      // seconds remaining when the game is paused; used to restore timer on resume
+    question_start_time: 0,      // timestamp when the current question was loaded; used to calculate elapsed time
+    end_time: 0,                 // timestamp when the timer should expire; set when the question starts
+    remaining_on_pause: 0,       // ms remaining when the game is paused; used to restore timer on resume
   };
 }
 
