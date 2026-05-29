@@ -59,7 +59,6 @@ let isPaused = false;
 
 /**
  * Session state — reset each level via Object.assign(state, levelData).
- * Does not hold player data.
  * @type {ReturnType<typeof defaultGameState>}
  */
 let state = defaultGameState();
@@ -134,15 +133,23 @@ export function endGame() {
   isPaused = false;
   stopTimer();
 
-  // Accumulate session results into the persistent player profile
-  player.score += calculateTotalScore(state.base_score, { ...state });
-  player.num_questions_answered += state.current_question_index;
-
-  // Persist profile, clear in-progress session state
-  saveProfile(player);
+  // Accumulate session results into the persistent player profile, persist profile
+  savePlayerData();
   clearState();
 
-  callbacks.loadScreen("endscreen", { ...state });
+  callbacks.loadScreen("endscreen", { total_score: player.score, ...state });
+}
+
+export function goToNextLevel() {
+  isActive = true;
+  isPaused = false;
+  stopTimer();
+
+  savePlayerData();
+  state = defaultGameState();
+
+  callbacks.loadScreen("level_end", { total_score: player.score, ...state });
+  // ui will call startLevel(state.level + 1, player.language) if the user clicks "Next Level"
 }
 
 /**
@@ -181,7 +188,7 @@ export function resumeGame() {
  * Stops the timer and discards in-progress state without saving.
  * Called when the player presses the level select button.
  */
-export function goToLevelSelect() {
+export function goToLevelSelect() { //UI does not presently have a level selection feature, nor is this used anywhere right now
   isActive = false;
   isPaused = false;
   stopTimer();
@@ -200,14 +207,6 @@ export function goToMainMenu() {
   stopTimer();
   state = defaultGameState();
   callbacks.loadScreen("mainmenu", { ...state });
-}
-
-export function goToResultsScreen(){
-  isActive = false;
-  isPaused = false;
-  stopTimer();
-  state = defaultGameState();
-  callbacks.loadScreen("resultscreen", { ...state });
 }
 
 // ── Game Input handling ────────────────────────────────────────────────────────────
@@ -262,22 +261,25 @@ export function onInput(key) {
 
   // completion check
   if (state.current_input === answer) {
-    handleQuestionComplete(true);
+    handleQuestionComplete();
   }
 }
 
 /**
  * Handles the end of a question
  */
-function handleQuestionComplete(complete) {
-  if (complete) {
-    state.base_score = calculateBaseScore(state);
+function handleQuestionComplete() {
+  //init time
+   const elapsedTime = Date.now() - state.question_start_time;
+
+  //calculate score and add to total score
+  if(elapsedTime <= state.time_limit) { //can probably be simplified by changes to scoring.js
+    const baseScore = state.base_scores[state.current_question_index] || 0;
+    state.score += calculateTotalScore(state, Date.now() - state.question_start_time);
   }
   else{
-    state.base_score = 0;
+    state.score += 0;
   }
-
-  const elapsedTime = Date.now() - state.question_start_time;
 
   if(state.current_question_index % 3 === 0) {
     state.plants = growNextPlant(state);
@@ -294,7 +296,7 @@ function handleQuestionComplete(complete) {
       endGame();
     }
     else {     
-      goToResultsScreen();
+      goToNextLevel();
     }
     return;
   }
@@ -319,7 +321,7 @@ function startQuestionTimer() {
 
   state.end_time =
       state.question_start_time +
-      state.time_limit * 1000;
+      state.time_limit;
 
   startTimer(
       state.end_time,
@@ -331,5 +333,16 @@ function startQuestionTimer() {
  * Fired by timer.js when the countdown reaches 0.
  */
 function _onExpire() {
-  handleQuestionComplete(false); 
+  handleQuestionComplete(); 
+}
+
+/** 
+ * Save relevant session data in the player profile
+*/
+
+export function savePlayerData(){
+  player.score += state.score; //perhaps display this at the end of every level as well
+  player.questions_answered = state.current_question_index;
+  player.level = state.level;
+  saveProfile(player);
 }

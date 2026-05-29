@@ -20,9 +20,9 @@
  */
 
 const LEVELS = [
-  { levelNumber: 1, timeLimit: 4500, questionCount: 9, difficulty: "easy" },
-  { levelNumber: 2, timeLimit: 4500, questionCount: 9, difficulty: "medium"      },
-  { levelNumber: 3, timeLimit: 4500, questionCount: 9, difficulty: "hard"    },
+  { levelNumber: 1, timeLimit: 3000, questionCount: 9, difficulty: 1 },
+  { levelNumber: 2, timeLimit: 3000, questionCount: 9, difficulty: 2 },
+  { levelNumber: 3, timeLimit: 3000, questionCount: 9, difficulty: 3 },
 ];
 
 /**
@@ -54,18 +54,20 @@ export async function loadLevel(levelNumber, category) {
 
   // Filter by difficulty, shuffle, cap at questionCount
   const shuffled = allQuestions
-    .filter(q => q.difficulty === config.difficulty)
+    .filter(q => q.Difficulty === config.difficulty)
     .sort(() => Math.random() - 0.5)
     .slice(0, config.questionCount);
 
   // Split into parallel arrays — same index = same question
-  const questions = shuffled.map(q => q.prompt);
-  const answers   = shuffled.map(q => q.answer);
+  const questions = shuffled.map(q => q.Question);
+  const answers   = shuffled.map(q => q.answers);
+  const base_scores = shuffled.map(q => q.baseScore);
 
   return {
     // ── Calculated from fetched data ──────────────────────────────────────
     questions,                          // shuffled prompt strings; index matches answers[]
     answers,                            // shuffled answer strings; index matches questions[]
+    base_scores,                        // base score for each question, parallel to questions[] and answers[]
     total_questions: shuffled.length,   // may be < questionCount if the pool is small
     time_limit:      config.timeLimit,  // total seconds allowed, set by LEVELS config
     level:           config.levelNumber, // add level to gamestate for advancement purposes
@@ -75,7 +77,7 @@ export async function loadLevel(levelNumber, category) {
     current_question_index: 0,   // pointer into questions[] and answers[]
     current_input:          "",  // what the player has typed so far
     incorrect_chars:        0,   // wrong keystrokes this question; reset each question
-    base_score:             0,   // points earned this session
+    score:                  0,   // points earned this level; separate from profile.score which is total across all levels
     questionStartTime: null,     // timestamp when the current question was loaded; used to calculate elapsed time
     endTime: null,               // timestamp when the timer should expire; set when the question starts
     remainingOnPause: null,      // seconds remaining when the game is paused; used to restore timer on resume

@@ -28,6 +28,7 @@ export function defaultProfile() {
     level: 1,
     num_questions_answered: 0,
     language: "Python",
+    isInitialized: false
   };
 }
 
@@ -54,6 +55,7 @@ export function defaultGameState() {
     plants:                 [0, 0, 0],
     questions:              [],
     answers:                [],
+    base_scores:            [],
     level:                  1,
     current_question_index: 0,
     current_input:          "",
@@ -61,7 +63,7 @@ export function defaultGameState() {
     time_limit:             60,
     end_time:               0,
     remaining_on_pause:     60,
-    base_score:             0,
+    score:                  0,
     isActive:              false,
     isPaused:              false
   };

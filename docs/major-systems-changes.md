@@ -4,6 +4,18 @@
 
 After a large nuclear rewrite to our codebase, there were several logic gaps and cohesion gaps with frontend to be filled. The following document illustrates what was changed and what was preserved in this process.
 
+# New Variables
+
+The new variables `isActive` and `isPaused` were added as flags used to saftey check functions
+
+## Previous Design
+
+Previously, functions were able to be called under any conditions in the game state, which can lead to issues if a function is mistakenly called while a session is supposed to be inactive.
+
+## New Design
+
+These flags check for if there is currently an active session and if the session is paused in order to safely execute functions only when they are able to be called.
+
 # Communication Architecture
 
 ## Preserved Design
@@ -432,6 +444,18 @@ if(state.current_question_index % 3 === 0)
 Plant growth should depend on progression, not total length.
 
 ---
+
+# Scoring Fix
+
+## Previous Logic
+
+Previously, time and accuracy score multipliers would only applied once to the score at the end of the game.
+This was incorrect as only the last question would be scaled and added to the current player's score, which is
+not what our MVP aimed for. We aimed for a responsive scoring system that showed players live rewards for high accuracy and speed
+
+## Current Logic
+
+Scoring has now been updated to reflect the critera of the MVP, now calculating and appending total score in `handleQuestionComplete()` in order to reflect accurate scores after every question. 
 
 # Remaining Future Improvements
 
