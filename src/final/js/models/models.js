@@ -16,7 +16,7 @@
  * @typedef {Object} Profile
  * @property {string} username - The player's chosen username
  * @property {number} level - The player's current level
- * @property {number} num_questions_answered - Total questions answered by the player
+ * @property {number} current_question_index - The index of the current question
  * @property {string} language - The player's preferred programming language
  * @property {number} score - The player's total accumulated score
  * @property {boolean} isInitialized - Flag indicating if the profile has been set up
@@ -26,8 +26,9 @@ export function defaultProfile() {
     username: "Guest",
     score: 0,
     level: 1,
-    num_questions_answered: 0,
+    current_question_index: 0,
     language: "Python",
+    isInitialized: false
   };
 }
 
@@ -59,6 +60,7 @@ export function defaultGameState() {
     plants:                 [0, 0, 0],
     questions:              [],
     answers:                [],
+    base_scores:            [],
     level:                  1,
     current_question_index: 0,
     current_input:          "",
@@ -66,8 +68,8 @@ export function defaultGameState() {
     time_limit:             600000,
     question_start_time:    0,
     end_time:               0,
-    remaining_on_pause:     0,
-    base_score:             0,
+    remaining_on_pause:     60,
+    score:                  0,
     isActive:              false,
     isPaused:              false
   };

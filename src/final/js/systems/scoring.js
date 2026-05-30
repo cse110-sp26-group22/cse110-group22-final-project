@@ -36,13 +36,19 @@ export function calculateTimeMultiplier(elapsedMs, timeLimit) {
 //    return Math.min(1 + streak * 0.05, 2.0);
 // }
 
-export function calculateTotalScore(baseScore, state, elapsedMs = 0) {
-    const { incorrect_chars, answers, current_input, current_question_index, time_limit} = state;
+export function calculateTotalScore(state, elapsedMs = 0) {
+    const {
+        base_scores = [],
+        incorrect_chars = 0,
+        answers = [],
+        current_input = "",
+        current_question_index = 0,
+        time_limit = 0
+    } = state;
 
-    const totalChars = answers
-        .slice(0, current_question_index)
-        .reduce((sum, a) => sum + a.length, 0)
-        + current_input.length;
+    const answer = answers[current_question_index] || "";
+    const questionBaseScore = base_scores[current_question_index] || 0;
+    const totalChars = Math.max(answer.length, current_input.length);
 
     const accuracyMultiplier = calculateAccuracyMultiplier(
         incorrect_chars,
@@ -51,13 +57,13 @@ export function calculateTotalScore(baseScore, state, elapsedMs = 0) {
 
     const timeMultiplier = calculateTimeMultiplier(
         elapsedMs,
-        time_limit * 1000
+        time_limit
     );
 
     //const streakMultiplier = calculateStreakMultiplier(streak);
 
     const finalScore =
-        baseScore *
+        questionBaseScore *
         accuracyMultiplier *
         timeMultiplier;
         //streakMultiplier;
