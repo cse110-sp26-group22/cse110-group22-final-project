@@ -48,7 +48,7 @@
 
 import { loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
-import { calculateBaseScore, calculateTotalScore } from "./scoring.js";
+import { calculateTotalScore } from "./scoring.js";
 import { saveProfile, clearState } from "./storage.js";
 import { defaultGameState, defaultProfile } from "../models/models.js";
 import { growNextPlant } from "./plants.js";
@@ -281,7 +281,6 @@ function handleQuestionComplete() {
 
   //calculate score and add to total score
   if(elapsedTime <= state.time_limit) { //can probably be simplified by changes to scoring.js
-    const baseScore = state.base_scores[state.current_question_index];
     state.score += calculateTotalScore(state, elapsedTime);
   }
   else{
