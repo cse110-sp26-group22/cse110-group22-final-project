@@ -457,6 +457,247 @@ not what our MVP aimed for. We aimed for a responsive scoring system that showed
 
 Scoring has now been updated to reflect the critera of the MVP, now calculating and appending total score in `handleQuestionComplete()` in order to reflect accurate scores after every question. 
 
+# `level.js` JSON Alignment Refactor
+
+## Context
+
+Following the backend rewrite, several inconsistencies existed between the level initialization logic and the question JSON schema. In particular, variable naming and score handling did not accurately reflect the structure and intent of the question data.
+
+## Changes
+
+### JSON Field Alignment
+
+`level.js` was updated to properly align with the question JSON files.
+
+This included:
+
+* updating variable names to match the JSON schema
+* clarifying the purpose of `base_score`
+* removing ambiguity between level configuration data and runtime scoring data
+
+### Base Score Tracking
+
+Added:
+
+```js
+base_scores
+```
+
+to state.
+
+This array stores the per-question `base_score` values defined in the question JSON files.
+
+### Benefits
+
+* Better agreement between backend state and question definitions
+* Clear separation between question metadata and runtime score calculations
+* Improved support for future analytics and score breakdown features
+
+---
+
+# Player State Persistence Refactor
+
+## Previous Design
+
+Player persistence occurred only inside:
+
+```js
+endGame()
+```
+
+Only a limited subset of state was preserved:
+
+```js
+score
+current_question_index
+```
+
+This created ambiguity around what data should persist and when persistence should occur.
+
+---
+
+## New Design
+
+Added:
+
+```js
+savePlayerState()
+```
+
+### Responsibilities
+
+Persist the current:
+
+```js
+score
+current_level
+current_question_index
+```
+
+to the player profile.
+
+### Benefits
+
+* Centralized persistence logic
+* Eliminates duplicated save behavior
+* Allows state to be saved at any point in gameplay
+
+Examples include:
+
+* after a question
+* after a level
+* during pause/resume
+* during future autosave implementations
+
+This improves both current maintainability and future extensibility.
+
+---
+
+# Part 2: Game Flow Refactor
+
+## `endGame()` Clarification
+
+### Previous Design
+
+`endGame()` handled two unrelated responsibilities:
+
+* ending the entire game
+* transitioning between levels
+
+This created ambiguity because the frontend requires different screens and callbacks for these situations.
+
+### New Design
+
+The scope of `endGame()` has been narrowed.
+
+`endGame()` is now responsible only for:
+
+```text
+Terminating the current game session
+```
+
+This makes the function behavior explicit and easier for the UI layer to reason about.
+
+---
+
+## Added `goToNextLevel()`
+
+Created:
+
+```js
+goToNextLevel()
+```
+
+### Responsibilities
+
+* persist current player progress
+* advance level state
+* initialize the next level
+* invoke the correct frontend transition callbacks
+
+### Benefits
+
+* Separates level progression from game termination
+* Improves frontend/backend cohesion
+* Reduces conditional logic surrounding screen transitions
+* Better reflects actual gameplay behavior
+
+---
+
+## Removed `goToLevelSelect()`
+
+### Context
+
+Based on current discussions with Team 2, the application is no longer moving toward a dedicated level-selection screen.
+
+Instead, progression flows through a level-results screen before advancing to the next level.
+
+### Changes
+
+Removed:
+
+```js
+goToLevelSelect()
+```
+
+Level transitions are now handled by:
+
+```js
+goToNextLevel()
+```
+
+which more accurately represents the current product direction.
+
+---
+
+# Scoring Architecture Refactor
+
+## Previous Design
+
+Previously, score accumulation worked as follows:
+
+For each correctly completed question:
+
+```js
+score += baseScore
+```
+
+At the end of the game, score multipliers were applied once:
+
+```js
+calculateTotalScore(...)
+```
+
+### Problem
+
+The backend did not preserve per-question timing and accuracy information between questions.
+
+As a result, the final multiplier calculation only reflected the timing and accuracy data from the most recently completed question.
+
+This meant that:
+
+* earlier performance was ignored
+* final scores were inaccurate
+* live score feedback did not match actual player performance
+
+---
+
+## New Design
+
+`base_score` now strictly represents the value defined by the question JSON files.
+
+Rather than treating base score as the primary source of truth for total score, score multipliers are now calculated immediately when a question is completed.
+
+### New Flow
+
+Inside:
+
+```js
+handleQuestionComplete()
+```
+
+the backend now:
+
+1. retrieves the question's `base_score`
+2. calculates applicable accuracy and speed multipliers
+3. computes the fully adjusted score
+4. immediately appends that value to:
+
+```js
+state.score
+```
+
+### Benefits
+
+* Accurate per-question score calculation
+* Correct application of timing and accuracy multipliers
+* Live score updates throughout gameplay
+* Eliminates dependence on end-of-game score reconstruction
+* Aligns implementation with MVP scoring requirements
+
+The backend score now always reflects the player's true cumulative score at any point during gameplay.
+
+
 # Remaining Future Improvements
 
 Potential future improvements:
