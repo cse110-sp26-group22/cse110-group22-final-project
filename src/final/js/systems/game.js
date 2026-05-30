@@ -134,10 +134,6 @@ export function endGame() {
   state.isPaused = false;
   stopTimer();
 
-  // Accumulate session results into the persistent player profile
-  player.score += calculateTotalScore(state.base_score, { ...state });
-  player.num_questions_answered += state.current_question_index;
-
   // Persist profile, clear in-progress session state
   saveProfile(player);
   clearState();
@@ -349,5 +345,6 @@ export function savePlayerData(){
   player.score = state.score; 
   player.level = state.level;
   player.current_question_index = state.current_question_index;
+  player.plants = state.plants;
   saveProfile(player);
 }
