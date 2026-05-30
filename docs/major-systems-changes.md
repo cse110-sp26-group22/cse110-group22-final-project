@@ -445,6 +445,10 @@ Plant growth should depend on progression, not total length.
 
 ---
 
+# Part 2: Major Refactor of Scoring System
+
+---
+
 # Scoring Fix
 
 ## Previous Logic
@@ -553,7 +557,7 @@ This improves both current maintainability and future extensibility.
 
 ---
 
-# Part 2: Game Flow Refactor
+# Game Flow Refactor
 
 ## `endGame()` Clarification
 
