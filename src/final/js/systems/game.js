@@ -174,6 +174,8 @@ export function pauseGame() {
  * Resumes the countdown timer and loads the game screen.
  */
 export function resumeGame() {
+  if (!state.isPaused) return;
+  
   state.isPaused = false;
   state.isActive = true;
 

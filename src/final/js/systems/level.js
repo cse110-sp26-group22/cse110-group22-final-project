@@ -77,7 +77,7 @@ export async function loadLevel(levelNumber, category) {
     current_question_index: 0,   // pointer into questions[] and answers[]
     current_input:          "",  // what the player has typed so far
     incorrect_chars:        0,   // wrong keystrokes this question; reset each question
-    score:                  0,   // points earned this level; separate from profile.score which is total across all levels
+    score:                  0,   // points earned this level
     questionStartTime: null,     // timestamp when the current question was loaded; used to calculate elapsed time
     endTime: null,               // timestamp when the timer should expire; set when the question starts
     remainingOnPause: null,      // seconds remaining when the game is paused; used to restore timer on resume
