@@ -54,9 +54,6 @@ import { defaultGameState, defaultProfile } from "../models/models.js";
 import { growNextPlant } from "./plants.js";
 
 
-// safety flags to prevent input processing when the game is not active or paused
-let isActive = false;
-let isPaused = false;
 
 // ── Module-level state ────────────────────────────────────────────────────────
 
@@ -114,9 +111,10 @@ export function registerCallbacks(loadScreen, updateScreen) {
  * @param {string} category    - Question category slug, e.g. "python"
  */
 export async function startLevel(levelNumber, category) {
-  isActive = true;
-  isPaused = false;
+ 
   state = await loadLevel(levelNumber, category);
+  state.isActive = true;
+  state.isPaused = false;
   // Start the countdown timer
   startQuestionTimer();
 
@@ -132,8 +130,8 @@ export async function startLevel(levelNumber, category) {
  * Called internally (all questions done, or timer expired) or by ui.js (quit).
  */
 export function endGame() {
-  isActive = false;
-  isPaused = false;
+  state.isActive = false;
+  state.isPaused = false;
   stopTimer();
 
   // Accumulate session results into the persistent player profile
@@ -148,8 +146,8 @@ export function endGame() {
 }
 
 export function goToNextLevel() {
-  isActive = true;
-  isPaused = false;
+  state.isActive = true;
+  state.isPaused = false;
   stopTimer();
 
   savePlayerData();
@@ -163,8 +161,8 @@ export function goToNextLevel() {
  * Pauses the active countdown timer and loads the pause screen.
  */
 export function pauseGame() {
-  isPaused = true;
-  isActive = true;
+  state.isPaused = true;
+  state.isActive = true;
 
   state.remaining_on_pause = state.end_time - Date.now();
 
@@ -176,9 +174,8 @@ export function pauseGame() {
  * Resumes the countdown timer and loads the game screen.
  */
 export function resumeGame() {
-  
-  isPaused = false;
-  isActive = true;
+  state.isPaused = false;
+  state.isActive = true;
 
   if(state.remaining_on_pause <= 0) {
     _onExpire();
@@ -197,8 +194,8 @@ export function resumeGame() {
  * Called when the player presses the level select button.
  */
 export function goToLevelSelect() { //UI does not presently have a level selection feature, nor is this used anywhere right now
-  isActive = false;
-  isPaused = false;
+  state.isActive = false;
+  state.isPaused = false;
   stopTimer();
   state = defaultGameState();
   callbacks.loadScreen("levelselect", { ...state });
@@ -210,8 +207,8 @@ export function goToLevelSelect() { //UI does not presently have a level selecti
  * Called when the player presses the main menu button.
  */
 export function goToMainMenu() {
-  isActive = false;
-  isPaused = false;
+  state.isActive = false;
+  state.isPaused = false;
   stopTimer();
   state = defaultGameState();
   callbacks.loadScreen("mainmenu", { ...state });
@@ -235,7 +232,7 @@ export function goToMainMenu() {
  * @param {string} key - Single character typed by the player (e.key)
  */
 export function onInput(key) {
-  if (!isActive || isPaused) return;
+  if (!state.isActive || state.isPaused) return;
 
   const answer = state.answers[state.current_question_index];
   if (!answer) return;
@@ -282,7 +279,6 @@ function handleQuestionComplete() {
 
   //calculate score and add to total score
   if(elapsedTime <= state.time_limit) { //can probably be simplified by changes to scoring.js
-    const baseScore = state.base_scores[state.current_question_index];
     state.score += calculateTotalScore(state, elapsedTime);
   }
   else{
