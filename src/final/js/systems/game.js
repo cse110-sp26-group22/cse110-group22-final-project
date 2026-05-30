@@ -48,7 +48,7 @@
 
 import { loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
-import { calculateBaseScore, calculateTotalScore } from "./scoring.js";
+import { calculateTotalScore } from "./scoring.js";
 import { saveProfile, clearState } from "./storage.js";
 import { defaultGameState, defaultProfile } from "../models/models.js";
 import { growNextPlant } from "./plants.js";
@@ -176,6 +176,7 @@ export function pauseGame() {
  * Resumes the countdown timer and loads the game screen.
  */
 export function resumeGame() {
+  
   isPaused = false;
   isActive = true;
 
