@@ -53,8 +53,11 @@ import { saveProfile, clearState } from "./storage.js";
 import { defaultGameState, defaultProfile } from "../models/models.js";
 import { growNextPlant } from "./plants.js";
 
+
+// safety flags to prevent input processing when the game is not active or paused
 let isActive = false;
 let isPaused = false;
+
 // ── Module-level state ────────────────────────────────────────────────────────
 
 /**
@@ -141,7 +144,7 @@ export function endGame() {
   saveProfile(player);
   clearState();
 
-  callbacks.loadScreen("endscreen", { total_score: player.score, ...state });
+  callbacks.loadScreen("endscreen", {...state });
 }
 
 export function goToNextLevel() {
@@ -152,7 +155,7 @@ export function goToNextLevel() {
   savePlayerData();
   state = defaultGameState();
 
-  callbacks.loadScreen("level_end", { total_score: player.score, ...state });
+  callbacks.loadScreen("level_end", {...state });
   // ui will call startLevel(state.level + 1, player.language) if the user clicks "Next Level"
 }
 
@@ -278,8 +281,8 @@ function handleQuestionComplete() {
 
   //calculate score and add to total score
   if(elapsedTime <= state.time_limit) { //can probably be simplified by changes to scoring.js
-    const baseScore = state.base_scores[state.current_question_index] || 0;
-    state.score += calculateTotalScore(state, Date.now() - state.question_start_time);
+    const baseScore = state.base_scores[state.current_question_index];
+    state.score += calculateTotalScore(state, elapsedTime);
   }
   else{
     state.score += 0;
@@ -343,10 +346,8 @@ function _onExpire() {
 /** 
  * Save relevant session data in the player profile
 */
-
 export function savePlayerData(){
-  player.score += state.score; //perhaps display this at the end of every level as well
-  player.questions_answered = state.current_question_index;
+  player.score = state.score; 
   player.level = state.level;
   player.current_question_index = state.current_question_index;
   saveProfile(player);
