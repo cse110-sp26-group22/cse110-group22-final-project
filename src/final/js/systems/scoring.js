@@ -5,6 +5,11 @@
 //none of the functions in this file should be able to directly mutate the game state
 //instead they should return values that can be used to update the game state in game.js
 
+export function calculateBaseScore(state) {
+    const { base_score } = state;
+    return 50 + base_score;
+}
+
 export function calculateAccuracyMultiplier(incorrectChars, totalChars) {
     if (totalChars === 0) return 1;
 
@@ -14,10 +19,10 @@ export function calculateAccuracyMultiplier(incorrectChars, totalChars) {
   return Math.max(0.5, accuracy); // 50% minimum
 }
 
-export function calculateTimeMultiplier(timeElapsed, timeLimit) {
+export function calculateTimeMultiplier(elapsedMs, timeLimit) {
     if (timeLimit === 0) return 1;
 
-    const ratio = timeElapsed / timeLimit;
+    const ratio = elapsedMs / timeLimit;
 
     // faster = higher reward
     const multiplier = 1 + (1 - ratio);
@@ -31,21 +36,34 @@ export function calculateTimeMultiplier(timeElapsed, timeLimit) {
 //    return Math.min(1 + streak * 0.05, 2.0);
 // }
 
-export function calculateTotalScore(baseScore, incorrectChars, totalChars, timeElapsed, timeLimit) {
+export function calculateTotalScore(state, elapsedMs = 0) {
+    const {
+        base_scores = [],
+        incorrect_chars = 0,
+        answers = [],
+        current_input = "",
+        current_question_index = 0,
+        time_limit = 0
+    } = state;
+
+    const answer = answers[current_question_index] || "";
+    const questionBaseScore = base_scores[current_question_index] || 0;
+    const totalChars = Math.max(answer.length, current_input.length);
+
     const accuracyMultiplier = calculateAccuracyMultiplier(
-        incorrectChars,
+        incorrect_chars,
         totalChars
     );
 
     const timeMultiplier = calculateTimeMultiplier(
-        timeElapsed,
-        timeLimit
+        elapsedMs,
+        time_limit
     );
 
     //const streakMultiplier = calculateStreakMultiplier(streak);
 
     const finalScore =
-        baseScore *
+        questionBaseScore *
         accuracyMultiplier *
         timeMultiplier;
         //streakMultiplier;

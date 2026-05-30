@@ -8,39 +8,39 @@
  * Imported by:
  * - game.js: calls startTimer() when a level begins, stopTimer() on pause or game end
  */
-
-let intervalId = null;
-let timeRemaining = 0;
-
+let timeoutId = null;
 /**
- * Starts the countdown timer from the given initial time.
- * Calls onTick each second with the updated time remaining.
- * Calls onExpire when time reaches 0.
- * @param {number} initialTime - Starting time in seconds
+ * Starts a timer that expires at a specific timestamp
+ * @param {object} state - A copy of game state; reads state.timer as starting seconds
  * @param {function(number): void} onTick - Called every second with the updated time
  * @param {function(): void} onExpire - Called when the timer reaches 0
  */
-export function startTimer(initialTime, onTick, onExpire) {
+export function startTimer(end_time, onExpire) {
   stopTimer();
-  timeRemaining = initialTime;
-  intervalId = setInterval(() => {
-    timeRemaining--;
-    onTick(timeRemaining);
-    if (timeRemaining <= 0) {
-      stopTimer();
-      onExpire();
-    }
-  }, 1000);
+  const timeRemaining = end_time - Date.now();
+  
+  if (timeRemaining <= 0) {
+    onExpire();
+    return;
+  }
+
+  timeoutId = setTimeout(() => {
+    timeoutId = null;
+    onExpire();
+  }, timeRemaining);
 }
+
+
+
 
 /**
  * Stops the countdown timer without triggering onExpire.
  * Safe to call even if the timer is not running.
  */
 export function stopTimer() {
-  if (intervalId !== null) {
-    clearInterval(intervalId);
-    intervalId = null;
+  if (timeoutId !== null) {
+    clearTimeout(timeoutId);
+    timeoutId = null;
   }
 }
 
@@ -49,5 +49,5 @@ export function stopTimer() {
  * @returns {boolean}
  */
 export function isRunning() {
-  return intervalId !== null;
+  return timeoutId !== null;
 }
