@@ -6,7 +6,7 @@
  */
 export default class PlantDisplay  {
     /** @const {(string)[]}*/
-    static PLANT_IMAGES = ['plant-small.png', 'plant-medium.png', 'plant-large.png'];
+    static PLANT_IMAGES = ['plant1-stage1.png', 'plant1-stage2.png', 'plant1-stage3.png'];
     /**
      * Binds this PlantDisplay to the given element.
      * @param {HTMLElement} element 
