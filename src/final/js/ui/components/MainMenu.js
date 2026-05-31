@@ -12,8 +12,6 @@ import { assertHTMLElement, assertHTMLSelectElement } from "../utils.js";
  * </div>
  */
 export default class MainMenu {
-    /** @type {(language: string) => void} */
-    #startCallback = () => {};
     /** @type {HTMLSelectElement} */
     #languageSelect;
     /** @type {HTMLElement} */
@@ -27,8 +25,6 @@ export default class MainMenu {
         this.element = element;
         this.#languageSelect = assertHTMLSelectElement(this.element.querySelector('.main-menu-language-select'));
         this.#startButton = assertHTMLElement(this.element.querySelector('.main-menu-start'));
-
-        this.#startButton.addEventListener('click', () => this.#startCallback(this.#languageSelect.value));
     }
 
     /**
@@ -36,7 +32,7 @@ export default class MainMenu {
      * @param {(language: string) => void} callback - Called with the selected language value.
      */
     onStart(callback) {
-        this.#startCallback = callback;
+        this.#startButton.addEventListener('click', () => callback(this.#languageSelect.value));
     }
 
     show() {

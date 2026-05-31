@@ -21,11 +21,6 @@ import { assertHTMLElement } from "../utils.js";
  * </div>
  */
 export default class ResultsScreen {
-    /** @type {() => void} */
-    #retryCallback = () => {};
-    /** @type {() => void} */
-    #mainMenuCallback = () => {};
-
     /**
      * @param {HTMLElement} element
      */
@@ -38,11 +33,8 @@ export default class ResultsScreen {
         this.questionsEl = assertHTMLElement(element.querySelector('.results-questions'));
         this.languageEl = assertHTMLElement(element.querySelector('.results-language'));
 
-        const retryBtn = assertHTMLElement(element.querySelector('.results-retry'));
-        const mainMenuBtn = assertHTMLElement(element.querySelector('.results-main-menu'));
-
-        retryBtn.addEventListener('click', () => this.#retryCallback());
-        mainMenuBtn.addEventListener('click', () => this.#mainMenuCallback());
+        this.retryBtn = assertHTMLElement(element.querySelector('.results-retry'));
+        this.mainMenuBtn = assertHTMLElement(element.querySelector('.results-main-menu'));
     }
 
     /**
@@ -64,11 +56,11 @@ export default class ResultsScreen {
 
     /** @param {() => void} callback */
     onRetry(callback) {
-        this.#retryCallback = callback;
+        this.retryBtn.addEventListener('click', callback);
     }
 
     /** @param {() => void} callback */
     onMainMenu(callback) {
-        this.#mainMenuCallback = callback;
+        this.mainMenuBtn.addEventListener('click', callback);
     }
 }
