@@ -8,7 +8,7 @@
 export default class Timer {
     
     /** @type {number} The remaining amount of time, in seconds */
-    #remainingTime = 0;
+    #remainingTime;
 
     /**
      * Binds this Timer to the given element.
@@ -16,6 +16,7 @@ export default class Timer {
      */
     constructor(element){
         this.element = element;
+        this.remainingTime = 0;
     }
 
     /**
@@ -25,7 +26,7 @@ export default class Timer {
     set remainingTime(newTime) {
         this.#remainingTime = newTime;
         const minutes = Math.floor(this.#remainingTime / 60);
-        const seconds = this.#remainingTime % 60;
+        const seconds = Math.floor(this.#remainingTime % 60);
         this.element.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 

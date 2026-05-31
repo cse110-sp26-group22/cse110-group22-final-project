@@ -48,16 +48,17 @@
 
 import { loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
-import { calculateBaseScore, calculateTotalScore } from "./scoring.js";
+import { calculateTotalScore } from "./scoring.js";
 import { saveProfile, clearState } from "./storage.js";
 import { defaultGameState, defaultProfile } from "../models/models.js";
 import { growNextPlant } from "./plants.js";
+
+
 
 // ── Module-level state ────────────────────────────────────────────────────────
 
 /**
  * Session state — reset each level via Object.assign(state, levelData).
- * Does not hold player data.
  * @type {ReturnType<typeof defaultGameState>}
  */
 let state = defaultGameState();
@@ -110,10 +111,12 @@ export function registerCallbacks(loadScreen, updateScreen) {
  * @param {string} category    - Question category slug, e.g. "python"
  */
 export async function startLevel(levelNumber, category) {
+ 
   state = await loadLevel(levelNumber, category);
-
+  state.isActive = true;
+  state.isPaused = false;
   // Start the countdown timer
-  startTimer({ ...state }, _onTick, _onExpire);
+  startQuestionTimer();
 
   // Signal ui-core to transition to the game screen
   callbacks.loadScreen("game", { ...state });
@@ -127,23 +130,38 @@ export async function startLevel(levelNumber, category) {
  * Called internally (all questions done, or timer expired) or by ui.js (quit).
  */
 export function endGame() {
+  state.isActive = false;
+  state.isPaused = false;
   stopTimer();
-
-  // Accumulate session results into the persistent player profile
-  player.score += calculateTotalScore(state.base_score, { ...state });
-  player.num_questions_answered += state.current_question_index;
 
   // Persist profile, clear in-progress session state
   saveProfile(player);
   clearState();
 
-  callbacks.loadScreen("endscreen", { ...state });
+  callbacks.loadScreen("endscreen", {...state });
+}
+
+export function goToNextLevel() {
+  state.isActive = true;
+  state.isPaused = false;
+  stopTimer();
+
+  savePlayerData();
+  state = defaultGameState();
+
+  callbacks.loadScreen("level_end", {...state });
+  // ui will call startLevel(state.level + 1, player.language) if the user clicks "Next Level"
 }
 
 /**
  * Pauses the active countdown timer and loads the pause screen.
  */
 export function pauseGame() {
+  state.isPaused = true;
+  state.isActive = true;
+
+  state.remaining_on_pause = state.end_time - Date.now();
+
   stopTimer();
   callbacks.loadScreen("pause", { ...state });
 }
@@ -152,10 +170,20 @@ export function pauseGame() {
  * Resumes the countdown timer and loads the game screen.
  */
 export function resumeGame() {
-  if (state.timer > 0) {
-    startTimer({ ...state }, _onTick, _onExpire);
-    callbacks.loadScreen("game", { ...state });
+  if (!state.isPaused) return;
+  
+  state.isPaused = false;
+  state.isActive = true;
+
+  if(state.remaining_on_pause <= 0) {
+    _onExpire();
+    return;
   }
+  
+  state.end_time = Date.now() + state.remaining_on_pause;
+
+  startTimer(state.end_time, _onExpire);
+  callbacks.loadScreen("game", { ...state });
 }
 
 /**
@@ -163,7 +191,9 @@ export function resumeGame() {
  * Stops the timer and discards in-progress state without saving.
  * Called when the player presses the level select button.
  */
-export function goToLevelSelect() {
+export function goToLevelSelect() { //UI does not presently have a level selection feature, nor is this used anywhere right now
+  state.isActive = false;
+  state.isPaused = false;
   stopTimer();
   state = defaultGameState();
   callbacks.loadScreen("levelselect", { ...state });
@@ -175,6 +205,8 @@ export function goToLevelSelect() {
  * Called when the player presses the main menu button.
  */
 export function goToMainMenu() {
+  state.isActive = false;
+  state.isPaused = false;
   stopTimer();
   state = defaultGameState();
   callbacks.loadScreen("mainmenu", { ...state });
@@ -198,62 +230,121 @@ export function goToMainMenu() {
  * @param {string} key - Single character typed by the player (e.key)
  */
 export function onInput(key) {
+  if (!state.isActive || state.isPaused) return;
+
   const answer = state.answers[state.current_question_index];
-  if (answer === undefined) return; // no active question
+  if (!answer) return;
 
-  const nextPos = state.current_input.length;
+  const i = state.current_input.length;
 
-  // ── Wrong character ──────────────────────────────────────────────────────
-  if (key !== answer[nextPos]) {
-    state.incorrect_chars++;
-    callbacks.updateScreen("incorrect", { ...state });
-    return;
-  }
+  // ignore invalid keys like Shift, etc.
+  if (!key || key.length !== 1) return;
 
-  // ── Correct character ────────────────────────────────────────────────────
-  state.current_input += key;
+  const expectedChar = answer[i];
 
-  if (state.current_input.length < answer.length) {
-    callbacks.updateScreen("correct-char", { ...state });
-    return;
-  }
+  //correctness is evaluated per keystroke
+  if (key === expectedChar) {
+    state.current_input += key;
 
-  // ── Answer complete ──────────────────────────────────────────────────────
-  state.base_score = calculateBaseScore({ ...state });
-
-  // Grow a plant after correct answer
-  state.plants = growNextPlant({ ...state });
-
-  // Reset per-question trackers
-  state.current_input   = "";
-  state.incorrect_chars = 0;
-
-  // Advance index and check if level is complete
-  state.current_question_index++;
-
-  if (state.current_question_index < state.questions.length) {
-    callbacks.updateScreen("next-question", { ...state });
+    callbacks.updateScreen("correct-char", {
+      index: i,
+      char: key,
+      ...state,
+    });
   } else {
-    endGame();
+    state.incorrect_chars++;
+
+    callbacks.updateScreen("incorrect", {
+      index: i,
+      typed: key,
+      expected: expectedChar,
+      ...state,
+    });
+  }
+
+  // completion check
+  if (state.current_input === answer) {
+    handleQuestionComplete();
   }
 }
 
+/**
+ * Handles the end of a question
+ */
+function handleQuestionComplete() {
+  //init time
+   const elapsedTime = Date.now() - state.question_start_time;
+
+  //calculate score and add to total score
+  if(elapsedTime <= state.time_limit) { //can probably be simplified by changes to scoring.js
+    state.score += calculateTotalScore(state, elapsedTime);
+  }
+  else{
+    state.score += 0;
+  }
+
+  if(state.current_question_index % 3 === 0) {
+    state.plants = growNextPlant(state);
+    callbacks.updateScreen("plant-growth", { ...state });
+  }
+
+  state.current_input = "";
+  state.incorrect_chars = 0;
+
+  state.current_question_index++;
+
+  if (state.current_question_index >= state.questions.length) {
+    if (state.level >= 3) {
+      endGame();
+    }
+    else {     
+      goToNextLevel();
+    }
+    return;
+  }
+
+  startQuestionTimer();
+
+  callbacks.updateScreen("next-question", { ...state });
+}
+
+
 // ── Timer callbacks (internal) ────────────────────────────────────────────────
 
+
 /**
- * Fired every second by timer.js.
- * Updates state.timer and notifies ui-core to refresh the timer display.
- *
- * @param {number} timeRemaining - Seconds left on the clock
+ * Starts a timer that expires at a specific timestamp
+ * Called internally when a new question starts
  */
-function _onTick(timeRemaining) {
-  state.timer = timeRemaining;
-  callbacks.updateScreen("tick", { ...state });
+function startQuestionTimer() {
+  stopTimer();
+
+  state.question_start_time = Date.now();
+
+  state.end_time =
+      state.question_start_time +
+      state.time_limit;
+
+  startTimer(
+      state.end_time,
+      _onExpire
+  );
 }
 
 /**
  * Fired by timer.js when the countdown reaches 0.
  */
 function _onExpire() {
-  endGame();
+  handleQuestionComplete(); 
+}
+
+/** 
+ * Save relevant session data in the player profile
+*/
+export function savePlayerData(){
+  player.score = state.score; 
+  player.level = state.level;
+  player.current_question_index = state.current_question_index;
+  player.plants = state.plants;
+  saveProfile(player);
 }

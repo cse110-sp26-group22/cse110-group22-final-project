@@ -20,10 +20,6 @@ export default class Combo {
     constructor(element){
         this.element = element;
         this.countElement = assertHTMLElement(element.querySelector('span'));
-        this.element.addEventListener('animationend', (e) => {
-            if(e.animationName !== 'combo-flash-highlight') return;
-            if(!this.#rollDownPromise) this.renderedComboCount = this.#comboCount;
-        });
     }
 
     /**
@@ -50,7 +46,7 @@ export default class Combo {
      * @private
      */
     flash(){
-        this.element.setAttribute('data-flash-text', this.#renderedComboCount + 'x');
+        this.element.setAttribute('data-flash-text', (this.#renderedComboCount + 1).toString() + 'x');
         this.element.classList.remove('flashed');
         this.element.offsetWidth; //force reflow to restart animation if already flashed
         this.element.classList.add('flashed');
@@ -62,6 +58,7 @@ export default class Combo {
     increment(){
         if(!this.#rollDownPromise) this.renderedComboCount = this.#comboCount;
         this.#comboCount++;
+        setTimeout(() => this.renderedComboCount = this.#comboCount, 20);
         this.flash();
     }
 
@@ -69,8 +66,8 @@ export default class Combo {
      * Repeatedly decrements the rendered combo count by 1 every 0.01 seconds until it reaches 0.
      * @private
      */
-    async rollDown(){
-        if(this.#rollDownPromise) return; //prevent multiple simultaneous roll downs
+    rollDown(){
+        if(this.#rollDownPromise) return this.#rollDownPromise; //prevent multiple simultaneous roll downs
         this.#rollDownPromise = new Promise((resolve) => {
             const intervalId = setInterval(() => {
                 if(this.renderedComboCount > this.#comboCount){
@@ -82,13 +79,15 @@ export default class Combo {
                 }
             }, 20);
         });
+        return this.#rollDownPromise;
     }
 
     /**
      * Resets the combo count to 0 and updates the display.
+     * @return {Promise<void>} A promise that resolves when the roll down animation is complete.
      */
     reset(){
         this.#comboCount = 0;
-        this.rollDown();
+        return this.rollDown();
     }
 }
