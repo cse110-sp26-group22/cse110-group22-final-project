@@ -31,7 +31,7 @@ beforeEach(() => {
 
 describe("saveProfile / loadProfile", () => {
   test("saves and reloads a profile", () => {
-    const profile = { username: "Alice", score: 200, level: 3, num_questions_answered: 10, language: "Python" };
+    const profile = { username: "Alice", score: 200, level: 3, language: "Python", isInitialized: true, plants: [1, 2, 3] };
     saveProfile(profile);
     expect(loadProfile()).toEqual(profile);
   });
@@ -41,25 +41,27 @@ describe("saveProfile / loadProfile", () => {
     expect(profile.username).toBe("Guest");
     expect(profile.score).toBe(0);
     expect(profile.level).toBe(1);
+    expect(profile.language).toBe("Python");
+    expect(profile.isInitialized).toBe(false);
   });
 
   test("saveProfile overwrites a previous save", () => {
-    saveProfile({ username: "Alice", score: 100, level: 1, num_questions_answered: 5, language: "Python" });
-    saveProfile({ username: "Bob",   score: 999, level: 5, num_questions_answered: 50, language: "JavaScript" });
+    saveProfile({ username: "Alice", score: 100, level: 1, language: "Python", isInitialized: true, plants: [0,0,0] });
+    saveProfile({ username: "Bob",   score: 999, level: 5, language: "JavaScript", isInitialized: true, plants: [3,3,3] });
     expect(loadProfile().username).toBe("Bob");
     expect(loadProfile().score).toBe(999);
   });
 
   test("saveProfile returns true on success", () => {
-    expect(saveProfile({ username: "Test", score: 0, level: 1, num_questions_answered: 0, language: "Python" })).toBe(true);
+    expect(saveProfile({ username: "Test", score: 0, level: 1, language: "Python", isInitialized: false, plants: [0,0,0] })).toBe(true);
   });
 });
 
 describe("clearProfile", () => {
-  test("removes the saved profile", () => {
-    saveProfile({ username: "Alice", score: 0, level: 1, num_questions_answered: 0, language: "Python" });
+  test("removes the saved profile and falls back to default", () => {
+    saveProfile({ username: "Alice", score: 0, level: 1, language: "Python", isInitialized: true, plants: [0,0,0] });
     clearProfile();
-    expect(loadProfile().username).toBe("Guest"); // falls back to default
+    expect(loadProfile().username).toBe("Guest");
   });
 
   test("is safe to call when no profile is saved", () => {
@@ -74,12 +76,18 @@ describe("saveState / loadState", () => {
     plants: [1, 0, 0],
     questions: ["Q1", "Q2"],
     answers: ["A1", "A2"],
+    base_scores: [50, 100],
+    level: 1,
     current_question_index: 1,
     current_input: "partial",
     incorrect_chars: 2,
-    timer: 45,
-    time_limit: 60,
-    base_score: 50,
+    time_limit: 3000,
+    question_start_time: 0,
+    end_time: 0,
+    remaining_on_pause: 60,
+    score: 50,
+    isActive: true,
+    isPaused: false,
   };
 
   test("saves and reloads game state", () => {
@@ -87,8 +95,8 @@ describe("saveState / loadState", () => {
     const loaded = loadState();
     expect(loaded.plants).toEqual([1, 0, 0]);
     expect(loaded.current_question_index).toBe(1);
-    expect(loaded.timer).toBe(45);
-    expect(loaded.base_score).toBe(50);
+    expect(loaded.score).toBe(50);
+    expect(loaded.base_scores).toEqual([50, 100]);
   });
 
   test("resets current_input to empty string on save", () => {
@@ -100,8 +108,8 @@ describe("saveState / loadState", () => {
     const state = loadState();
     expect(state.questions).toEqual([]);
     expect(state.answers).toEqual([]);
-    expect(state.timer).toBe(0);
-    expect(state.base_score).toBe(0);
+    expect(state.score).toBe(0);
+    expect(state.current_question_index).toBe(0);
   });
 
   test("saveState returns true on success", () => {
@@ -110,15 +118,18 @@ describe("saveState / loadState", () => {
 
   test("does not mutate the original state object", () => {
     saveState(sampleState);
-    expect(sampleState.current_input).toBe("partial"); // unchanged
+    expect(sampleState.current_input).toBe("partial");
   });
 });
 
 describe("clearState", () => {
-  test("removes the saved game state", () => {
-    saveState({ plants: [1,0,0], questions: [], answers: [], current_question_index: 0, current_input: "", incorrect_chars: 0, timer: 30, time_limit: 60, base_score: 0 });
+  test("removes the saved game state and falls back to default", () => {
+    saveState({ plants: [1,0,0], questions: [], answers: [], base_scores: [], level: 1,
+      current_question_index: 0, current_input: "", incorrect_chars: 0,
+      time_limit: 3000, question_start_time: 0, end_time: 0,
+      remaining_on_pause: 60, score: 99, isActive: false, isPaused: false });
     clearState();
-    expect(loadState().timer).toBe(0); // falls back to default
+    expect(loadState().score).toBe(0);
   });
 
   test("is safe to call when no state is saved", () => {
@@ -130,26 +141,35 @@ describe("clearState", () => {
 
 describe("clearAll", () => {
   test("removes both profile and state", () => {
-    saveProfile({ username: "Alice", score: 0, level: 1, num_questions_answered: 0, language: "Python" });
-    saveState({ plants: [0,0,0], questions: [], answers: [], current_question_index: 0, current_input: "", incorrect_chars: 0, timer: 30, time_limit: 60, base_score: 0 });
+    saveProfile({ username: "Alice", score: 0, level: 1, language: "Python", isInitialized: true, plants: [0,0,0] });
+    saveState({ plants: [0,0,0], questions: [], answers: [], base_scores: [], level: 1,
+      current_question_index: 0, current_input: "", incorrect_chars: 0,
+      time_limit: 3000, question_start_time: 0, end_time: 0,
+      remaining_on_pause: 60, score: 0, isActive: false, isPaused: false });
     clearAll();
     expect(loadProfile().username).toBe("Guest");
-    expect(loadState().timer).toBe(0);
+    expect(loadState().score).toBe(0);
   });
 });
 
 describe("saveAll", () => {
-  test("saves both profile and state", () => {
-    const profile = { username: "Eve", score: 50, level: 2, num_questions_answered: 5, language: "Python" };
-    const state = { plants: [2,0,0], questions: ["Q"], answers: ["A"], current_question_index: 0, current_input: "", incorrect_chars: 0, timer: 20, time_limit: 60, base_score: 50 };
+  test("saves both profile and state atomically", () => {
+    const profile = { username: "Eve", score: 50, level: 2, language: "Python", isInitialized: true, plants: [2,0,0] };
+    const state = { plants: [2,0,0], questions: ["Q"], answers: ["A"], base_scores: [50], level: 2,
+      current_question_index: 0, current_input: "", incorrect_chars: 0,
+      time_limit: 3000, question_start_time: 0, end_time: 0,
+      remaining_on_pause: 60, score: 50, isActive: false, isPaused: false };
     saveAll(profile, state);
     expect(loadProfile().username).toBe("Eve");
-    expect(loadState().timer).toBe(20);
+    expect(loadState().score).toBe(50);
   });
 
   test("returns true on success", () => {
-    const profile = { username: "Test", score: 0, level: 1, num_questions_answered: 0, language: "Python" };
-    const state = { plants: [0,0,0], questions: [], answers: [], current_question_index: 0, current_input: "", incorrect_chars: 0, timer: 0, time_limit: 60, base_score: 0 };
+    const profile = { username: "Test", score: 0, level: 1, language: "Python", isInitialized: false, plants: [0,0,0] };
+    const state = { plants: [0,0,0], questions: [], answers: [], base_scores: [], level: 1,
+      current_question_index: 0, current_input: "", incorrect_chars: 0,
+      time_limit: 3000, question_start_time: 0, end_time: 0,
+      remaining_on_pause: 60, score: 0, isActive: false, isPaused: false };
     expect(saveAll(profile, state)).toBe(true);
   });
 });
