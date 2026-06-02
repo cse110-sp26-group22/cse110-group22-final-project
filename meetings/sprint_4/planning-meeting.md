@@ -37,3 +37,11 @@ Members Not Present: Brenda Ramirez (communicated)
 ---
 ### Midterm 2
 Tuesday, June 2nd
+---
+### Retro
+- Dmitri asked how everyone is feeling about project
+- People expressed worries about proper testing and repo practices 
+- People expressed worries about how backend and frontend would configure
+- These issues were mapped to goals for the next 2 sprints. 
+
+
