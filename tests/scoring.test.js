@@ -2,6 +2,7 @@ import {
   calculateBaseScore,
   calculateAccuracyMultiplier,
   calculateTimeMultiplier,
+  addPlantBonus,
   calculateTotalScore,
 } from "../src/final/js/systems/scoring.js";
 
@@ -76,6 +77,22 @@ describe("calculateTimeMultiplier", () => {
     const result = calculateTimeMultiplier(30000, 60000);
     expect(result).toBeGreaterThanOrEqual(0.7);
     expect(result).toBeLessThanOrEqual(1.3);
+  });
+});
+
+// ── addPlantBonus ─────────────────────────────────────────────────────────────
+
+describe("addPlantBonus", () => {
+  test("returns 25 points per plant growth stage", () => {
+    expect(addPlantBonus(0)).toBe(0);
+    expect(addPlantBonus(1)).toBe(25);
+    expect(addPlantBonus(2)).toBe(50);
+    expect(addPlantBonus(3)).toBe(75);
+  });
+
+  test("clamps invalid plant stages to the valid range", () => {
+    expect(addPlantBonus(-1)).toBe(0);
+    expect(addPlantBonus(10)).toBe(75);
   });
 });
 
@@ -154,5 +171,25 @@ describe("calculateTotalScore", () => {
       time_limit: 3000,
     };
     expect(calculateTotalScore(state, 1000)).toBe(0);
+  });
+
+  test("adds plant bonuses from the current plant state", () => {
+    const state = {
+      base_scores: [100],
+      incorrect_chars: 0,
+      answers: ["hello"],
+      current_input: "",
+      current_question_index: 0,
+      plants: [1, 2, 3],
+      time_limit: 3000,
+    };
+
+    const scoreWithoutPlants = calculateTotalScore(
+      { ...state, plants: [0, 0, 0] },
+      3000
+    );
+    const scoreWithPlants = calculateTotalScore(state, 3000);
+
+    expect(scoreWithPlants - scoreWithoutPlants).toBe(150);
   });
 });
