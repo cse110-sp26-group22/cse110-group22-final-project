@@ -43,7 +43,6 @@ import {
 
 import { loadLevel }                      from "../src/final/js/systems/level.js";
 import { startTimer, stopTimer }          from "../src/final/js/systems/timer.js";
-import { saveProfile }                    from "../src/final/js/systems/storage.js";
 import { defaultGameState }               from "../src/final/js/models/models.js";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
