@@ -42,7 +42,7 @@ export function defaultProfile() {
  * @property {string[]}  questions            - Prompts for the current level (shuffled)
  * @property {string[]}  answers              - Answers parallel to questions[]
  * @property {number[]}  baseScores           - Score for each question derived from question set
- * @property {string[]}  language             - Selected language in main menu
+ * @property {string}    language             - Selected language in main menu
  * @property {number}    level                - Current game level
  * @property {number}    currentQuestionIndex - Index into questions[] / answers[]
  * @property {number}    maxPrefixLength      - Max input prefix length seen for respective answer

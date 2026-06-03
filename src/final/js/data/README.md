@@ -1,4 +1,3 @@
-# NOTE 5/19/26 SPRINT 3
+# NOTE 6/3/26 SPRINT 4
 
-Python.json is for testing purposes. Questions are way too hard but are in the proper shape for now. Difficulty value may be removed entirely in 
-favor of more time-restriction/penalty-punishing forms of difficulty.
+Question files are for testing purposes until Team 1 questions can be integrated.
