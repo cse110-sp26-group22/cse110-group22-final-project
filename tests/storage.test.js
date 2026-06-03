@@ -46,25 +46,25 @@ describe("saveProfile / loadProfile", () => {
     expect(profile.score).toBe(0);
     expect(profile.level).toBe(1);
     expect(profile.current_question_index).toBe(0);
-    expect(profile.language).toBe("Python");
+    expect(profile.language).toBe("python");
     expect(profile.isInitialized).toBe(false);
   });
 
   test("saveProfile overwrites a previous save", () => {
-    saveProfile({ username: "Alice", score: 100, level: 1, current_question_index: 5,  language: "Python",     isInitialized: true });
-    saveProfile({ username: "Bob",   score: 999, level: 5, current_question_index: 50, language: "JavaScript", isInitialized: true });
+    saveProfile({ username: "Alice", score: 100, level: 1, current_question_index: 5,  language: "python",     isInitialized: true });
+    saveProfile({ username: "Bob",   score: 999, level: 5, current_question_index: 50, language: "javaScript", isInitialized: true });
     expect(loadProfile().username).toBe("Bob");
     expect(loadProfile().score).toBe(999);
   });
 
   test("saveProfile returns true on success", () => {
-    expect(saveProfile({ username: "Test", score: 0, level: 1, current_question_index: 0, language: "Python", isInitialized: false })).toBe(true);
+    expect(saveProfile({ username: "Test", score: 0, level: 1, current_question_index: 0, language: "python", isInitialized: false })).toBe(true);
   });
 });
 
 describe("clearProfile", () => {
   test("removes the saved profile", () => {
-    saveProfile({ username: "Alice", score: 0, level: 1, current_question_index: 0, language: "Python", isInitialized: true });
+    saveProfile({ username: "Alice", score: 0, level: 1, current_question_index: 0, language: "python", isInitialized: true });
     clearProfile();
     expect(loadProfile().username).toBe("Guest");
   });
@@ -90,7 +90,7 @@ const sampleState = {
   questions:            ["Q1", "Q2"],
   answers:              ["A1", "A2"],
   baseScores:           [100, 100],
-  language:             "Python",
+  language:             "python",
   level:                1,
   currentQuestionIndex: 1,
   maxPrefixLength:      3,
@@ -146,7 +146,7 @@ describe("clearState", () => {
 
 describe("clearAll", () => {
   test("removes both profile and state", () => {
-    saveProfile({ username: "Alice", score: 0, level: 1, current_question_index: 0, language: "Python", isInitialized: true });
+    saveProfile({ username: "Alice", score: 0, level: 1, current_question_index: 0, language: "python", isInitialized: true });
     saveState(sampleState);
     clearAll();
     expect(loadProfile().username).toBe("Guest");
@@ -156,14 +156,14 @@ describe("clearAll", () => {
 
 describe("saveAll", () => {
   test("saves both profile and state", () => {
-    const profile = { username: "Eve", score: 50, level: 2, current_question_index: 5, language: "Python", isInitialized: true };
+    const profile = { username: "Eve", score: 50, level: 2, current_question_index: 5, language: "python", isInitialized: true };
     saveAll(profile, sampleState);
     expect(loadProfile().username).toBe("Eve");
     expect(loadState().score).toBe(50);
   });
 
   test("returns true on success", () => {
-    const profile = { username: "Test", score: 0, level: 1, current_question_index: 0, language: "Python", isInitialized: false };
+    const profile = { username: "Test", score: 0, level: 1, current_question_index: 0, language: "python", isInitialized: false };
     expect(saveAll(profile, sampleState)).toBe(true);
   });
 });

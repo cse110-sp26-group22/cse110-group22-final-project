@@ -20,9 +20,9 @@
  */
 
 const LEVELS = [
-  { levelNumber: 1, timeLimit: 30000, questionCount: 9, difficulty: 1 },
-  { levelNumber: 2, timeLimit: 25000, questionCount: 9, difficulty: 2 },
-  { levelNumber: 3, timeLimit: 20000, questionCount: 9, difficulty: 3 },
+  { levelNumber: 1, timeLimit: 30000, questionCount: 9, difficultyMin: 1, difficultyMax: 3  },
+  { levelNumber: 2, timeLimit: 25000, questionCount: 9, difficultyMin: 4, difficultyMax: 6  },
+  { levelNumber: 3, timeLimit: 20000, questionCount: 9, difficultyMin: 7, difficultyMax: 10 },
 ];
 
 /**
@@ -42,7 +42,7 @@ const LEVELS = [
 export async function loadLevel(levelNumber, category) {
   const config = LEVELS[levelNumber - 1];
 
-  const response = await fetch(`../data/${category}.json`);
+  const response = await fetch(`../../../questions/${category}.json`);
 
   if (!response.ok) {
     throw new Error(
@@ -54,13 +54,13 @@ export async function loadLevel(levelNumber, category) {
 
   // Filter by difficulty, shuffle, cap at questionCount
   const shuffled = allQuestions
-    .filter(q => q.difficulty === config.difficulty)
+    .filter(q => q.Difficulty >= config.difficultyMin && q.Difficulty <= config.difficultyMax)
     .sort(() => Math.random() - 0.5)
     .slice(0, config.questionCount);
 
   // Split into parallel arrays — same index = same question
-  const questions  = shuffled.map(q => q.prompt);
-  const answers    = shuffled.map(q => q.answer);
+  const questions  = shuffled.map(q => q.Question);
+  const answers    = shuffled.map(q => q.Answer);
   const baseScores = shuffled.map(q => q.baseScore);
 
   return {

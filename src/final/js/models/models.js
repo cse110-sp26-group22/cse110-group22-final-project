@@ -14,22 +14,22 @@
 
 /**
  * @typedef {Object} Profile
- * @property {string} username - The player's chosen username
- * @property {number} level - The player's current level
+ * @property {string} username               - The player's chosen username
+ * @property {number} level                  - The player's current level
  * @property {number} current_question_index - The index of the current question
- * @property {string} language - The player's preferred programming language
- * @property {number} score - The player's total accumulated score
- * @property {boolean} isInitialized - Flag indicating if the profile has been set up
+ * @property {string} language               - The player's preferred programming language
+ * @property {number} score                  - The player's total accumulated score
+ * @property {boolean} isInitialized         - Flag indicating if the profile has been set up
  */
 export function defaultProfile() {
   return {
-    username: "Guest",
-    score: 0,
-    level: 1,
+    username:               "Guest",
+    score:                  0,
+    level:                  1,
     current_question_index: 0,
-    language: "Python",
-    isInitialized: false,
-    plants: [0, 0, 0]
+    language:               "python",
+    isInitialized:          false,
+    plants:                 [0, 0, 0] // TODO: Change from array to int implementation
   };
 }
 
@@ -50,7 +50,7 @@ export function defaultProfile() {
  * @property {number}    incorrectInputs      - Wrong inputs for current question
  * @property {number}    timeLimit            - Total milliseconds allowed for the question
  * @property {number}    questionStartTime    - Timestamp when the current question started.
- * @property {number}    endTime              - Timestamp when the current question timer ends.
+ * @property {number}    questionEndTime      - Timestamp when the current question timer ends.
  * @property {number}    remainingOnPause     - Remaining ms for timer at pause.
  * @property {number}    score                - Points accumulated this session
  * @property {boolean}   isActive             - Is game started
@@ -61,7 +61,7 @@ export function defaultProfile() {
 /** @returns {GameState} */
 export function defaultGameState() {
   return {
-    plants:               [0, 0, 0],
+    plants:               [0, 0, 0], // TODO: Change from array to int implementation
     questions:            [],
     answers:              [],
     baseScores:           [],
@@ -72,7 +72,7 @@ export function defaultGameState() {
     incorrectInputs:      0,
     timeLimit:            600000,
     questionStartTime:    0,
-    endTime:              0,
+    questionEndTime:      0,
     remainingOnPause:     60,
     score:                0,
     isActive:             false,

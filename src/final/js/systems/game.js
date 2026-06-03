@@ -97,77 +97,19 @@ export function registerCallbacks(loadScreen, updateScreen) {
   callbacks.updateScreen = updateScreen;
 }
 
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
+// ── Lifecycle  ───────────────────────────────────────────────────────────────
+
+// ── Called by [mainmenu] UI (exclusive) ──────────────────────────────────────
 
 /**
- * Starts a level. Fetches and shuffles questions via level.js, merges the
- * result into state (replacing only level-specific fields), starts the timer,
- * and signals ui-core to show the game screen.
- *
- * Called by the level-select UI when the user picks a level.
- *
- * @param {number} levelNumber - 1-indexed level number
- * @param {string} category    - Question category slug, e.g. "python"
+ * Sets the language used for this game sequence
+ * @param {string} category    - Question category (e.g. "python, javascript")
  */
-export async function startLevel(levelNumber, category) {
-  
-  // Refresh state, load level data to state, start timer, set flags
-  state = defaultGameState();
-  state = await loadLevel(levelNumber, category);
-  state.endTime = startTimer( { ...state }, _onExpire);
-  state.isActive = true;
-  state.isPaused = false;
-
-  // Transition to the game screen
-  callbacks.loadScreen("game", { ...state });
+export function setLanguage(category) {
+  player.language = category;
 }
 
-/**
- * Ends the current game session: stops the timer, accumulates session results
- * into the player profile, persists both, clears in-progress state, and
- * signals ui-core to show the end screen.
- *
- * Called internally (all questions done, or timer expired) or by ui.js (quit).
- */
-export function endGame() {
-  state.isActive = false;
-  state.isPaused = false;
-
-  stopTimer();
-
-  // Persist profile, clear in-progress session state
-  saveProfile(player);
-
-  callbacks.loadScreen("endscreen", {...state });
-}
-
-export function goToNextLevel() {
-  state.isActive = true;
-  state.isPaused = false;
-
-  stopTimer();
-
-  savePlayerData();
-
-  callbacks.loadScreen("level_end", {...state });
-  // ui will call startLevel(state.level + 1, player.language) if the user clicks "Next Level"
-}
-
-/**
- * Pauses the active countdown timer and loads the pause screen.
- */
-export function pauseGame() {
-  if (state.isPaused) return;
-
-  state.isPaused = true;
-  state.isActive = true;
-
-  state.remainingOnPause = state.endTime - Date.now();
-
-  stopTimer();
-
-  callbacks.loadScreen("pause", { ...state });
-}
+// ── Called by [pause] UI (exclusive) ─────────────────────────────────────────
 
 /**
  * Resumes the countdown timer and loads the game screen.
@@ -178,44 +120,33 @@ export function resumeGame() {
   state.isPaused = false;
   state.isActive = true;
 
-  state.endTime = startTimer( { ...state }, _onExpire);
+  state.questionEndTime = startTimer( { ...state }, _onExpire);
   state.remainingOnPause = 0;
   
   callbacks.loadScreen("game", { ...state });
 }
 
+// ── Called by [game] UI (exclusive) ──────────────────────────────────────────
+
 /**
- * Exits the current session and returns to the level select screen.
- * Stops the timer and discards in-progress state without saving.
- * Called when the player presses the level select button.
+ * Pauses the active countdown timer and loads the pause screen.
  */
-export function goToLevelSelect() { // UI does not presently have a level selection feature, nor is this used anywhere right now
-  state.isActive = false;
-  state.isPaused = false;
+export function pauseGame() {
+  if (state.isPaused) return;
+
+  state.isPaused = true;
+  state.isActive = true;
+
+  state.remainingOnPause = state.questionEndTime - Date.now();
+
   stopTimer();
-  callbacks.loadScreen("levelselect", { ...state });
+
+  callbacks.loadScreen("pause", { ...state });
 }
 
 /**
- * Exits the current session and returns to the main menu.
- * Stops the timer and discards in-progress state without saving.
- * Called when the player presses the main menu button.
- */
-export function goToMainMenu() {
-  state.isActive = false;
-  state.isPaused = false;
-  stopTimer();
-  callbacks.loadScreen("mainmenu", { ...state });
-}
-
-// ── Game Input handling ────────────────────────────────────────────────────────────
-
-/**
- * Called on every input in the code input field.
+ * Recieves user text input, updates GameState, returns responses,
  * Checks the current input against the current prompt answer.
- *
- * ui.js wires this up like:
- *   inputEl.addEventListener("___", (e) => onInput(e.curr_input));
  *
  * Responses fired:
  * - "incorrect"     → prefix length of current input is not larger than max prefix length.
@@ -259,6 +190,77 @@ export function onInput(input) {
   return;
 }
 
+// ── Called by [mainmenu, pause, results] UI ────────────────────────────────
+
+/**
+ * Starts a level. Fetches and shuffles questions via level.js, merges the
+ * result into state (replacing only level-specific fields), starts the timer,
+ * and signals ui-core to show the game screen.
+ *
+ * @param {number} levelNumber - 1-indexed level number
+ * @param {string} category    - Question category slug, e.g. "python"
+ */
+export async function startLevel(levelNumber, category) {
+  
+  // Refresh state, load level data to state, start timer, set flags
+  state = defaultGameState();
+  state = await loadLevel(levelNumber, category);
+  state.questionStartTime = Date.now();
+  state.questionEndTime = startTimer( { ...state }, _onExpire);
+  state.language = player.language;
+  state.isActive = true;
+  state.isPaused = false;
+
+  // Transition to the game screen
+  callbacks.loadScreen("game", { ...state });
+}
+
+
+// ── Called by [pause, results] UI ────────────────────────────────────────
+
+/**
+ * Exits the current session and returns to the main menu.
+ * Stops the timer and discards in-progress state without saving.
+ * Called when the player presses the main menu button.
+ */
+export function goToMainMenu() {
+  state.isActive = false;
+  state.isPaused = false;
+  stopTimer();
+
+  player = defaultProfile();
+
+  callbacks.loadScreen("mainmenu", { ...state });
+}
+
+// ── Called internally ────────────────────────────────────────────────────
+
+/**
+ * Ends the current game session: stops the timer, accumulates session results
+ * into the player profile, clears in-progress state, and
+ * signals ui-core to show the end screen.
+ */
+function endGame() {
+  state.isActive = false;
+  state.isPaused = false;
+
+  savePlayerData();
+
+  stopTimer();
+
+  callbacks.loadScreen("endscreen", {...state });
+}
+
+export function goToResults() {
+  state.isActive = true;
+  state.isPaused = false;
+
+  stopTimer();
+
+  savePlayerData();
+
+  callbacks.loadScreen("results", {...state });
+}
 
 /**
  * Handles the end of a question
@@ -279,22 +281,21 @@ function handleQuestionComplete() {
 
   // Grow plant every 3rd question 
   if (state.currentQuestionIndex % 3 === 0) {
-    // TODO: Change from array to int implementation
-    state.plants[0]++; 
+    state.plants[0]++; // TODO: Change from array to int implementation
   }
 
   // If more questions exist -> Go to next question
   if (state.currentQuestionIndex < state.questions.length) {
-    state.longestPrefix = "";
+    state.maxPrefixLength = 0;
     state.incorrectInputs = 0;
-    state.endTime = startTimer( { ...state }, _onExpire);
+    state.questionEndTime = startTimer( { ...state }, _onExpire);
     callbacks.updateScreen("next-question", { ...state });
     return;
   }
 
   // If no more questions AND more levels exist -> Go to next level
   if (state.currentQuestionIndex >= state.questions.length && state.level < 3) {
-    goToNextLevel();
+    goToResults();
     return;
   }
 
@@ -302,8 +303,6 @@ function handleQuestionComplete() {
   endGame();
   return;
 }
-
-
 
 // ── Timer callbacks (internal) ────────────────────────────────────────────────
 

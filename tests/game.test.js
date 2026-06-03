@@ -35,12 +35,10 @@ jest.mock("../src/final/js/systems/plants.js", () => ({
 import {
   registerCallbacks,
   startLevel,
-  endGame,
   pauseGame,
   resumeGame,
-  goToLevelSelect,
   goToMainMenu,
-  goToNextLevel,
+  goToResults,
   onInput,
   savePlayerData,
 } from "../src/final/js/systems/game.js";
@@ -122,36 +120,6 @@ describe("startLevel", () => {
   });
 });
 
-// ── endGame ───────────────────────────────────────────────────────────────────
-
-describe("endGame", () => {
-  beforeEach(async () => {
-    await startLevel(1, "python");
-    jest.clearAllMocks();
-  });
-
-  test("stops the timer", () => {
-    endGame();
-    expect(stopTimer).toHaveBeenCalled();
-  });
-
-  test("saves the player profile", () => {
-    endGame();
-    expect(saveProfile).toHaveBeenCalledTimes(1);
-  });
-
-  test("loads the endscreen", () => {
-    endGame();
-    expect(mockLoadScreen).toHaveBeenCalledWith("endscreen", expect.any(Object));
-  });
-
-  test("does not call clearState", () => {
-    const { clearState } = require("../src/final/js/systems/storage.js");
-    endGame();
-    expect(clearState).not.toHaveBeenCalled();
-  });
-});
-
 // ── pauseGame ─────────────────────────────────────────────────────────────────
 
 describe("pauseGame", () => {
@@ -207,25 +175,6 @@ describe("resumeGame", () => {
   });
 });
 
-// ── goToLevelSelect ───────────────────────────────────────────────────────────
-
-describe("goToLevelSelect", () => {
-  beforeEach(async () => {
-    await startLevel(1, "python");
-    jest.clearAllMocks();
-  });
-
-  test("stops the timer", () => {
-    goToLevelSelect();
-    expect(stopTimer).toHaveBeenCalled();
-  });
-
-  test("loads the levelselect screen", () => {
-    goToLevelSelect();
-    expect(mockLoadScreen).toHaveBeenCalledWith("levelselect", expect.any(Object));
-  });
-});
-
 // ── goToMainMenu ──────────────────────────────────────────────────────────────
 
 describe("goToMainMenu", () => {
@@ -245,27 +194,27 @@ describe("goToMainMenu", () => {
   });
 });
 
-// ── goToNextLevel ─────────────────────────────────────────────────────────────
+// ── goToResults ─────────────────────────────────────────────────────────────
 
-describe("goToNextLevel", () => {
+describe("goToResults", () => {
   beforeEach(async () => {
     await startLevel(1, "python");
     jest.clearAllMocks();
   });
 
   test("stops the timer", () => {
-    goToNextLevel();
+    goToResults();
     expect(stopTimer).toHaveBeenCalled();
   });
 
   test("saves the player profile", () => {
-    goToNextLevel();
+    goToResults();
     expect(saveProfile).toHaveBeenCalledTimes(1);
   });
 
   test("loads the level_end screen", () => {
-    goToNextLevel();
-    expect(mockLoadScreen).toHaveBeenCalledWith("level_end", expect.any(Object));
+    goToResults();
+    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
   });
 });
 
@@ -375,7 +324,7 @@ describe("onInput", () => {
     await startLevel(1, "python");
     jest.clearAllMocks();
     onInput("ab");
-    expect(mockLoadScreen).toHaveBeenCalledWith("level_end", expect.any(Object));
+    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
   });
 
   test("fires 'level_end' when the last answer is completed on level 2", async () => {
@@ -388,7 +337,7 @@ describe("onInput", () => {
     await startLevel(2, "python");
     jest.clearAllMocks();
     onInput("ab");
-    expect(mockLoadScreen).toHaveBeenCalledWith("level_end", expect.any(Object));
+    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
   });
 
   test("state passed to updateScreen contains expected fields", () => {
