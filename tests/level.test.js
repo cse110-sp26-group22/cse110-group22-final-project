@@ -1,22 +1,33 @@
 import { loadLevel, getLevelCount } from "../src/final/js/systems/level.js";
 
-// Sample question pool used in all fetch mocks
-const MOCK_QUESTIONS = [
-  { prompt: "What is 1+1?", answer: "2",    difficulty: "very easy", category: "math" },
-  { prompt: "What is 2+2?", answer: "4",    difficulty: "very easy", category: "math" },
-  { prompt: "What is 3+3?", answer: "6",    difficulty: "very easy", category: "math" },
-  { prompt: "Hard q 1",     answer: "ans1", difficulty: "hard",      category: "math" },
-  { prompt: "Hard q 2",     answer: "ans2", difficulty: "hard",      category: "math" },
-];
+// ── Mock helpers ──────────────────────────────────────────────────────────────
 
-function mockFetch(questions) {
+function makeMockPool(count, difficulty, baseScore = 100) {
+  return Array.from({ length: count }, (_, i) => ({
+    prompt:     `Prompt ${i + 1}`,
+    answer:     `Answer ${i + 1}`,
+    baseScore,
+    difficulty,
+    category:   "test",
+  }));
+}
+
+function mockFetch(questions, ok = true) {
   global.fetch = jest.fn().mockResolvedValue({
+    ok,
     json: jest.fn().mockResolvedValue(questions),
   });
 }
 
+// Mixed pool: 10 difficulty-1, 10 difficulty-2, 10 difficulty-3
+const MIXED_POOL = [
+  ...makeMockPool(10, 1, 100),
+  ...makeMockPool(10, 2, 150),
+  ...makeMockPool(10, 3, 200),
+];
+
 beforeEach(() => {
-  mockFetch(MOCK_QUESTIONS);
+  mockFetch(MIXED_POOL);
 });
 
 afterEach(() => {
@@ -26,110 +37,166 @@ afterEach(() => {
 // ── getLevelCount ─────────────────────────────────────────────────────────────
 
 describe("getLevelCount", () => {
-  test("returns 5", () => {
-    expect(getLevelCount()).toBe(5);
+  test("returns 3", () => {
+    expect(getLevelCount()).toBe(3);
   });
 });
 
-// ── loadLevel ─────────────────────────────────────────────────────────────────
+// ── loadLevel — fetch behaviour ───────────────────────────────────────────────
 
-describe("loadLevel", () => {
-  test("returns an object with questions and answers arrays", async () => {
-    const state = await loadLevel(1, "math");
-    expect(Array.isArray(state.questions)).toBe(true);
-    expect(Array.isArray(state.answers)).toBe(true);
-  });
-
-  test("filters questions by the correct difficulty for level 1 (very easy)", async () => {
-    const state = await loadLevel(1, "math");
-    // Level 1 = "very easy", pool has 3 matching questions
-    expect(state.questions.length).toBe(3);
-  });
-
-  test("filters questions by the correct difficulty for level 4 (hard)", async () => {
-    const state = await loadLevel(4, "math");
-    expect(state.questions.length).toBe(2);
-  });
-
-  test("questions and answers arrays have the same length", async () => {
-    const state = await loadLevel(1, "math");
-    expect(state.questions.length).toBe(state.answers.length);
-  });
-
-  test("returns state with timer equal to time_limit", async () => {
-    const state = await loadLevel(1, "math");
-    expect(state.timer).toBe(state.time_limit);
-  });
-
-  test("returns state with time_limit of 60 for level 1", async () => {
-    const state = await loadLevel(1, "math");
-    expect(state.time_limit).toBe(60);
-  });
-
-  test("returns plants as [0, 0, 0]", async () => {
-    const state = await loadLevel(1, "math");
-    expect(state.plants).toEqual([0, 0, 0]);
-  });
-
-  test("returns current_question_index of 0", async () => {
-    const state = await loadLevel(1, "math");
-    expect(state.current_question_index).toBe(0);
-  });
-
-  test("returns empty current_input string", async () => {
-    const state = await loadLevel(1, "math");
-    expect(state.current_input).toBe("");
-  });
-
-  test("returns incorrect_chars of 0", async () => {
-    const state = await loadLevel(1, "math");
-    expect(state.incorrect_chars).toBe(0);
-  });
-
-  test("returns base_score of 0", async () => {
-    const state = await loadLevel(1, "math");
-    expect(state.base_score).toBe(0);
-  });
-
-  test("fetches from the correct category URL", async () => {
-    await loadLevel(2, "python");
+describe("loadLevel — fetch", () => {
+  test("fetches from ../data/<category>.json", async () => {
+    await loadLevel(1, "python");
     expect(global.fetch).toHaveBeenCalledWith("../data/python.json");
   });
 
-  test("questions array contains prompt strings, not objects", async () => {
-    const state = await loadLevel(1, "math");
-    state.questions.forEach((q) => expect(typeof q).toBe("string"));
+  test("uses the category slug in the URL", async () => {
+    await loadLevel(1, "unix");
+    expect(global.fetch).toHaveBeenCalledWith("../data/unix.json");
   });
 
-  test("answers array contains answer strings, not objects", async () => {
-    const state = await loadLevel(1, "math");
-    state.answers.forEach((a) => expect(typeof a).toBe("string"));
+  test("throws when response.ok is false", async () => {
+    mockFetch([], false);
+    await expect(loadLevel(1, "python")).rejects.toThrow("Failed to load questions for python");
+  });
+});
+
+// ── loadLevel — return shape ──────────────────────────────────────────────────
+
+describe("loadLevel — return shape", () => {
+  test("returns questions as an array of strings", async () => {
+    const { questions } = await loadLevel(1, "test");
+    expect(Array.isArray(questions)).toBe(true);
+    questions.forEach(q => expect(typeof q).toBe("string"));
   });
 
-  test("question and answer at the same index are paired correctly", async () => {
-    // Use a deterministic pool so we can verify pairing
+  test("returns answers as an array of strings", async () => {
+    const { answers } = await loadLevel(1, "test");
+    expect(Array.isArray(answers)).toBe(true);
+    answers.forEach(a => expect(typeof a).toBe("string"));
+  });
+
+  test("returns baseScores as an array of numbers", async () => {
+    const { baseScores } = await loadLevel(1, "test");
+    expect(Array.isArray(baseScores)).toBe(true);
+    baseScores.forEach(s => expect(typeof s).toBe("number"));
+  });
+
+  test("questions, answers, and baseScores all have the same length", async () => {
+    const { questions, answers, baseScores } = await loadLevel(1, "test");
+    expect(answers.length).toBe(questions.length);
+    expect(baseScores.length).toBe(questions.length);
+  });
+
+  test("returns level equal to the levelNumber argument", async () => {
+    expect((await loadLevel(1, "test")).level).toBe(1);
+    expect((await loadLevel(2, "test")).level).toBe(2);
+    expect((await loadLevel(3, "test")).level).toBe(3);
+  });
+
+  test("returns timeLimit of 30000 for level 1", async () => {
+    expect((await loadLevel(1, "test")).timeLimit).toBe(30000);
+  });
+
+  test("returns timeLimit of 25000 for level 2", async () => {
+    expect((await loadLevel(2, "test")).timeLimit).toBe(25000);
+  });
+
+  test("returns timeLimit of 20000 for level 3", async () => {
+    expect((await loadLevel(3, "test")).timeLimit).toBe(20000);
+  });
+
+  test("returns language equal to the category argument", async () => {
+    expect((await loadLevel(1, "python")).language).toBe("python");
+    expect((await loadLevel(1, "unix")).language).toBe("unix");
+  });
+});
+
+// ── loadLevel — filtering ─────────────────────────────────────────────────────
+
+describe("loadLevel — difficulty filtering", () => {
+  test("level 1 only returns difficulty-1 questions", async () => {
     const pool = [
-      { prompt: "P1", answer: "A1", difficulty: "easy", category: "test" },
-      { prompt: "P2", answer: "A2", difficulty: "easy", category: "test" },
+      { prompt: "Easy Q", answer: "Easy A", baseScore: 100, difficulty: 1 },
+      { prompt: "Hard Q", answer: "Hard A", baseScore: 200, difficulty: 3 },
     ];
-    global.fetch = jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue(pool),
-    });
+    mockFetch(pool);
+    const { questions } = await loadLevel(1, "test");
+    expect(questions).toEqual(["Easy Q"]);
+  });
 
-    const state = await loadLevel(2, "test"); // level 2 = "easy"
-    for (let i = 0; i < state.questions.length; i++) {
-      // Find original pair and confirm prompt/answer still match
-      const original = pool.find((q) => q.prompt === state.questions[i]);
-      expect(state.answers[i]).toBe(original.answer);
+  test("level 2 only returns difficulty-2 questions", async () => {
+    const pool = [
+      { prompt: "D1", answer: "A1", baseScore: 100, difficulty: 1 },
+      { prompt: "D2", answer: "A2", baseScore: 150, difficulty: 2 },
+      { prompt: "D3", answer: "A3", baseScore: 200, difficulty: 3 },
+    ];
+    mockFetch(pool);
+    const { questions } = await loadLevel(2, "test");
+    expect(questions).toEqual(["D2"]);
+  });
+
+  test("level 3 only returns difficulty-3 questions", async () => {
+    const pool = [
+      { prompt: "D1", answer: "A1", baseScore: 100, difficulty: 1 },
+      { prompt: "D3", answer: "A3", baseScore: 200, difficulty: 3 },
+    ];
+    mockFetch(pool);
+    const { questions } = await loadLevel(3, "test");
+    expect(questions).toEqual(["D3"]);
+  });
+
+  test("returns empty arrays when no questions match the difficulty", async () => {
+    mockFetch([]);
+    const { questions, answers, baseScores } = await loadLevel(1, "test");
+    expect(questions.length).toBe(0);
+    expect(answers.length).toBe(0);
+    expect(baseScores.length).toBe(0);
+  });
+
+  test("caps results at 9 questions when the pool is larger", async () => {
+    const bigPool = makeMockPool(12, 1);
+    mockFetch(bigPool);
+    const { questions } = await loadLevel(1, "test");
+    expect(questions.length).toBe(9);
+  });
+
+  test("returns all questions when pool is smaller than questionCount", async () => {
+    const smallPool = makeMockPool(5, 1);
+    mockFetch(smallPool);
+    const { questions } = await loadLevel(1, "test");
+    expect(questions.length).toBe(5);
+  });
+});
+
+// ── loadLevel — question/answer pairing ──────────────────────────────────────
+
+describe("loadLevel — pairing", () => {
+  test("each question is paired with its original answer after shuffle", async () => {
+    const pool = [
+      { prompt: "P1", answer: "A1", baseScore: 100, difficulty: 1 },
+      { prompt: "P2", answer: "A2", baseScore: 100, difficulty: 1 },
+      { prompt: "P3", answer: "A3", baseScore: 100, difficulty: 1 },
+    ];
+    mockFetch(pool);
+    const { questions, answers } = await loadLevel(1, "test");
+    for (let i = 0; i < questions.length; i++) {
+      const original = pool.find(q => q.prompt === questions[i]);
+      expect(answers[i]).toBe(original.answer);
     }
   });
 
-  test("returns empty questions array when no questions match difficulty", async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue([]),
-    });
-    const state = await loadLevel(3, "empty");
-    expect(state.questions.length).toBe(0);
-    expect(state.answers.length).toBe(0);
+  test("each question is paired with its original baseScore after shuffle", async () => {
+    const pool = [
+      { prompt: "P1", answer: "A1", baseScore: 111, difficulty: 1 },
+      { prompt: "P2", answer: "A2", baseScore: 222, difficulty: 1 },
+      { prompt: "P3", answer: "A3", baseScore: 333, difficulty: 1 },
+    ];
+    mockFetch(pool);
+    const { questions, baseScores } = await loadLevel(1, "test");
+    for (let i = 0; i < questions.length; i++) {
+      const original = pool.find(q => q.prompt === questions[i]);
+      expect(baseScores[i]).toBe(original.baseScore);
+    }
   });
 });

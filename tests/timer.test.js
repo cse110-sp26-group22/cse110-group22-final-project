@@ -2,7 +2,7 @@ import { startTimer, stopTimer, isRunning } from "../src/final/js/systems/timer.
 
 beforeEach(() => {
   jest.useFakeTimers();
-  stopTimer(); // ensure clean state before each test
+  stopTimer();
 });
 
 afterEach(() => {
@@ -18,13 +18,19 @@ describe("isRunning", () => {
   });
 
   test("returns true after startTimer is called", () => {
-    startTimer({ timer: 5 }, () => {}, () => {});
+    startTimer({ timeLimit: 5000 }, () => {});
     expect(isRunning()).toBe(true);
   });
 
   test("returns false after stopTimer is called", () => {
-    startTimer({ timer: 5 }, () => {}, () => {});
+    startTimer({ timeLimit: 5000 }, () => {});
     stopTimer();
+    expect(isRunning()).toBe(false);
+  });
+
+  test("returns false once onExpire fires", () => {
+    startTimer({ timeLimit: 1000 }, () => {});
+    jest.advanceTimersByTime(1000);
     expect(isRunning()).toBe(false);
   });
 });
@@ -36,68 +42,67 @@ describe("stopTimer", () => {
     expect(() => stopTimer()).not.toThrow();
   });
 
-  test("stops onTick from firing after stopTimer", () => {
-    const onTick = jest.fn();
-    startTimer({ timer: 5 }, onTick, () => {});
-    jest.advanceTimersByTime(2000);
+  test("prevents onExpire from firing after stopTimer", () => {
+    const onExpire = jest.fn();
+    startTimer({ timeLimit: 3000 }, onExpire);
+    jest.advanceTimersByTime(1000);
     stopTimer();
-    jest.advanceTimersByTime(3000); // should not fire any more ticks
-    expect(onTick).toHaveBeenCalledTimes(2);
+    jest.advanceTimersByTime(3000);
+    expect(onExpire).not.toHaveBeenCalled();
   });
 });
 
 // ── startTimer ────────────────────────────────────────────────────────────────
 
 describe("startTimer", () => {
-  test("calls onTick once per second", () => {
-    const onTick = jest.fn();
-    startTimer({ timer: 3 }, onTick, () => {});
-    jest.advanceTimersByTime(3000);
-    expect(onTick).toHaveBeenCalledTimes(3);
-  });
-
-  test("passes decreasing time remaining to onTick", () => {
-    const ticks = [];
-    startTimer({ timer: 3 }, (t) => ticks.push(t), () => {});
-    jest.advanceTimersByTime(3000);
-    expect(ticks).toEqual([2, 1, 0]);
-  });
-
-  test("calls onExpire when timer reaches 0", () => {
+  test("calls onExpire after state.timeLimit ms", () => {
     const onExpire = jest.fn();
-    startTimer({ timer: 2 }, () => {}, onExpire);
+    startTimer({ timeLimit: 3000 }, onExpire);
+    jest.advanceTimersByTime(3000);
+    expect(onExpire).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not call onExpire before time runs out", () => {
+    const onExpire = jest.fn();
+    startTimer({ timeLimit: 5000 }, onExpire);
+    jest.advanceTimersByTime(4999);
+    expect(onExpire).not.toHaveBeenCalled();
+  });
+
+  test("calls onExpire exactly once even with extra time elapsed", () => {
+    const onExpire = jest.fn();
+    startTimer({ timeLimit: 2000 }, onExpire);
+    jest.advanceTimersByTime(5000);
+    expect(onExpire).toHaveBeenCalledTimes(1);
+  });
+
+  test("uses remainingOnPause as duration when it is > 0", () => {
+    const onExpire = jest.fn();
+    startTimer({ timeLimit: 5000, remainingOnPause: 2000 }, onExpire);
     jest.advanceTimersByTime(2000);
     expect(onExpire).toHaveBeenCalledTimes(1);
   });
 
-  test("stops ticking after expiry (onExpire calls stopTimer)", () => {
-    const onTick = jest.fn();
-    startTimer({ timer: 2 }, onTick, () => {});
-    jest.advanceTimersByTime(5000); // extra time after expiry
-    expect(onTick).toHaveBeenCalledTimes(2); // only the 2 real ticks
-  });
-
-  test("restarting stops the previous timer", () => {
-    const onTick = jest.fn();
-    startTimer({ timer: 10 }, onTick, () => {});
-    jest.advanceTimersByTime(2000); // 2 ticks from first timer
-    startTimer({ timer: 5 }, onTick, () => {});
-    jest.advanceTimersByTime(2000); // 2 ticks from second timer
-    // total = 4 ticks; first timer was stopped so no double-firing
-    expect(onTick).toHaveBeenCalledTimes(4);
-  });
-
-  test("reads starting time from state.timer", () => {
-    const ticks = [];
-    startTimer({ timer: 2 }, (t) => ticks.push(t), () => {});
-    jest.advanceTimersByTime(1000);
-    expect(ticks[0]).toBe(1); // started from 2, first tick is 1
-  });
-
-  test("onExpire is not called before time runs out", () => {
+  test("uses timeLimit as duration when remainingOnPause is 0", () => {
     const onExpire = jest.fn();
-    startTimer({ timer: 5 }, () => {}, onExpire);
-    jest.advanceTimersByTime(4000);
+    startTimer({ timeLimit: 3000, remainingOnPause: 0 }, onExpire);
+    jest.advanceTimersByTime(3000);
+    expect(onExpire).toHaveBeenCalledTimes(1);
+  });
+
+  test("restarting cancels the previous timer", () => {
+    const onExpire = jest.fn();
+    startTimer({ timeLimit: 5000 }, onExpire);
+    jest.advanceTimersByTime(2000);
+    startTimer({ timeLimit: 5000 }, onExpire);
+    jest.advanceTimersByTime(2000);
     expect(onExpire).not.toHaveBeenCalled();
+  });
+
+  test("returns Date.now() + state.timeLimit", () => {
+    const now = Date.now();
+    const timeLimit = 5000;
+    const result = startTimer({ timeLimit }, () => {});
+    expect(result).toBe(now + timeLimit);
   });
 });
