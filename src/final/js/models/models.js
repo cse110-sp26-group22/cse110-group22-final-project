@@ -38,39 +38,44 @@ export function defaultProfile() {
  * Populated by level.js on each new level and reset between levels.
  * Safe to clear without affecting the persistent player profile.
  *
- * @property {number[]}  plants                 - Plant array holding plants indexed (0 - 2). Each plant has growth level stored as int at respective index.
- * @property {string[]}  questions              - Prompts for the current level (shuffled)
- * @property {string[]}  answers                - Answers parallel to questions[]
- * @property {number}    level                  - Current game level
- * @property {number}    current_question_index - Index into questions[] / answers[]
- * @property {string}    current_input          - Player's in-progress input for the active question
- * @property {number}    incorrect_chars        - Wrong keystrokes for the current question (reset each question)
- * @property {number}    time_limit             - Total milliseconds allowed for the question
- * @property {number}    question_start_time    - Timestamp when the current question started.
- * @property {number}    end_time               - Timestamp when the current question timer ends.
- * @property {number}    remaining_on_pause     - Remaining ms for timer at pause.
- * @property {number}    base_score             - Points accumulated this session
- * @property {boolean}   isActive               - Is game started
- * @property {boolean}   isPaused               - Is game paused
+ * @property {number[]}  plants               - Plants growth levels indexed (0 - 2)
+ * @property {string[]}  questions            - Prompts for the current level (shuffled)
+ * @property {string[]}  answers              - Answers parallel to questions[]
+ * @property {number[]}  baseScores           - Score for each question derived from question set
+ * @property {string[]}  language             - Selected language in main menu
+ * @property {number}    level                - Current game level
+ * @property {number}    currentQuestionIndex - Index into questions[] / answers[]
+ * @property {number}    maxPrefixLength      - Max input prefix length seen for respective answer
+ * @property {number}    incorrectInputs      - Wrong inputs for current question
+ * @property {number}    timeLimit            - Total milliseconds allowed for the question
+ * @property {number}    questionStartTime    - Timestamp when the current question started.
+ * @property {number}    endTime              - Timestamp when the current question timer ends.
+ * @property {number}    remainingOnPause     - Remaining ms for timer at pause.
+ * @property {number}    score                - Points accumulated this session
+ * @property {boolean}   isActive             - Is game started
+ * @property {boolean}   isPaused             - Is game paused
+ * @property {boolean}   isOver               - Is game completed
  */
 
 /** @returns {GameState} */
 export function defaultGameState() {
   return {
-    plants:                 [0, 0, 0],
-    questions:              [],
-    answers:                [],
-    base_scores:            [],
-    level:                  1,
-    current_question_index: 0,
-    current_input:          "",
-    incorrect_chars:        0,
-    time_limit:             600000,
-    question_start_time:    0,
-    end_time:               0,
-    remaining_on_pause:     60,
-    score:                  0,
-    isActive:              false,
-    isPaused:              false
+    plants:               [0, 0, 0],
+    questions:            [],
+    answers:              [],
+    baseScores:           [],
+    language:             null,
+    level:                1,
+    currentQuestionIndex: 0,
+    maxPrefixLength:      0,
+    incorrectInputs:      0,
+    timeLimit:            600000,
+    questionStartTime:    0,
+    endTime:              0,
+    remainingOnPause:     60,
+    score:                0,
+    isActive:             false,
+    isPaused:             false,
+    isOver:               false
   };
 }

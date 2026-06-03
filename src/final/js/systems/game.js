@@ -111,14 +111,15 @@ export function registerCallbacks(loadScreen, updateScreen) {
  * @param {string} category    - Question category slug, e.g. "python"
  */
 export async function startLevel(levelNumber, category) {
- 
+  
+  // Refresh state, load level data to state, start timer, set flags
+  state = defaultGameState();
   state = await loadLevel(levelNumber, category);
+  state.endTime = startTimer( { ...state }, _onExpire);
   state.isActive = true;
   state.isPaused = false;
-  // Start the countdown timer
-  startQuestionTimer();
 
-  // Signal ui-core to transition to the game screen
+  // Transition to the game screen
   callbacks.loadScreen("game", { ...state });
 }
 
@@ -132,15 +133,11 @@ export async function startLevel(levelNumber, category) {
 export function endGame() {
   state.isActive = false;
   state.isPaused = false;
-  stopTimer();
 
-  // Accumulate session results into the persistent player profile
-  player.score += calculateTotalScore(state.base_score, { ...state });
-  player.num_questions_answered += state.current_question_index;
+  stopTimer();
 
   // Persist profile, clear in-progress session state
   saveProfile(player);
-  clearState();
 
   callbacks.loadScreen("endscreen", {...state });
 }
@@ -148,10 +145,10 @@ export function endGame() {
 export function goToNextLevel() {
   state.isActive = true;
   state.isPaused = false;
+
   stopTimer();
 
   savePlayerData();
-  state = defaultGameState();
 
   callbacks.loadScreen("level_end", {...state });
   // ui will call startLevel(state.level + 1, player.language) if the user clicks "Next Level"
@@ -161,12 +158,15 @@ export function goToNextLevel() {
  * Pauses the active countdown timer and loads the pause screen.
  */
 export function pauseGame() {
+  if (state.isPaused) return;
+
   state.isPaused = true;
   state.isActive = true;
 
-  state.remaining_on_pause = state.end_time - Date.now();
+  state.remainingOnPause = state.endTime - Date.now();
 
   stopTimer();
+
   callbacks.loadScreen("pause", { ...state });
 }
 
@@ -179,14 +179,9 @@ export function resumeGame() {
   state.isPaused = false;
   state.isActive = true;
 
-  if(state.remaining_on_pause <= 0) {
-    _onExpire();
-    return;
-  }
+  state.endTime = startTimer( { ...state }, _onExpire);
+  state.remainingOnPause = 0;
   
-  state.end_time = Date.now() + state.remaining_on_pause;
-
-  startTimer(state.end_time, _onExpire);
   callbacks.loadScreen("game", { ...state });
 }
 
@@ -195,11 +190,10 @@ export function resumeGame() {
  * Stops the timer and discards in-progress state without saving.
  * Called when the player presses the level select button.
  */
-export function goToLevelSelect() { //UI does not presently have a level selection feature, nor is this used anywhere right now
+export function goToLevelSelect() { // UI does not presently have a level selection feature, nor is this used anywhere right now
   state.isActive = false;
   state.isPaused = false;
   stopTimer();
-  state = defaultGameState();
   callbacks.loadScreen("levelselect", { ...state });
 }
 
@@ -212,128 +206,107 @@ export function goToMainMenu() {
   state.isActive = false;
   state.isPaused = false;
   stopTimer();
-  state = defaultGameState();
   callbacks.loadScreen("mainmenu", { ...state });
 }
 
 // ── Game Input handling ────────────────────────────────────────────────────────────
 
 /**
- * Called on every keypress in the code input field.
- * Checks the typed key against the expected next character in the current answer.
+ * Called on every input in the code input field.
+ * Checks the current input against the current prompt answer.
  *
  * ui.js wires this up like:
- *   inputEl.addEventListener("keyup", (e) => onInput(e.key));
+ *   inputEl.addEventListener("___", (e) => onInput(e.curr_input));
  *
  * Responses fired:
- * - "incorrect"     → wrong character typed
- * - "correct-char"  → right character, answer not yet complete
+ * - "incorrect"     → prefix length of current input is not larger than max prefix length.
+ * - "correct"       → prefix length of current input is larger than max prefix length.
  * - "next-question" → answer complete, index advanced to next question
  * - (endGame)       → answer complete and no more questions remain
  *
- * @param {string} key - Single character typed by the player (e.key)
+ * @param {string} input - Input entered by Player 
  */
-export function onInput(key) {
+export function onInput(input) {
   if (!state.isActive || state.isPaused) return;
 
-  const answer = state.answers[state.current_question_index];
+  const answer = state.answers[state.currentQuestionIndex];
   if (!answer) return;
 
-  const i = state.current_input.length;
-
-  // ignore invalid keys like Shift, etc.
-  if (!key || key.length !== 1) return;
-
-  const expectedChar = answer[i];
-
-  //correctness is evaluated per keystroke
-  if (key === expectedChar) {
-    state.current_input += key;
-
-    callbacks.updateScreen("correct-char", {
-      index: i,
-      char: key,
-      ...state,
-    });
-  } else {
-    state.incorrect_chars++;
-
-    callbacks.updateScreen("incorrect", {
-      index: i,
-      typed: key,
-      expected: expectedChar,
-      ...state,
-    });
+  // Calculate input prefix length
+  let prefixLength = 0;
+  for (let i = 0; i < input.length; i++) {
+    if (input[i] != answer[i]) {
+      break;
+    }
+    prefixLength++;
   }
 
-  // completion check
-  if (state.current_input === answer) {
+  // Correct input + Completed answer 
+  if (input === answer) {
     handleQuestionComplete();
+    return;
+  } 
+
+  // Incorrect input
+  if (prefixLength <= state.maxPrefixLength) {
+    state.incorrectInputs++;
+    callbacks.updateScreen("incorrect", { ...state });
+    return;
   }
+
+  // Correct input
+  state.maxPrefixLength = prefixLength;
+  callbacks.updateScreen("correct", { ...state });
+  return;
 }
+
 
 /**
  * Handles the end of a question
  */
 function handleQuestionComplete() {
-  //init time
-   const elapsedTime = Date.now() - state.question_start_time;
 
-  //calculate score and add to total score
-  if(elapsedTime <= state.time_limit) { //can probably be simplified by changes to scoring.js
-    state.score += calculateTotalScore(state, elapsedTime);
+  // Calculate post-question score
+  const elapsedTime = Date.now() - state.questionStartTime;
+  if (elapsedTime <= state.timeLimit) { //can probably be simplified by changes to scoring.js
+    state.score += calculateTotalScore( { ...state }, elapsedTime);
   }
   else{
     state.score += 0;
   }
 
-  if(state.current_question_index % 3 === 0) {
-    state.plants = growNextPlant(state);
-    callbacks.updateScreen("plant-growth", { ...state });
+  // Increment current question
+  state.currentQuestionIndex++;
+
+  // Grow plant every 3rd question 
+  if (state.currentQuestionIndex % 3 === 0) {
+    // TODO: Change from array to int implementation
+    state.plants[0]++; 
   }
 
-  state.current_input = "";
-  state.incorrect_chars = 0;
-
-  state.current_question_index++;
-
-  if (state.current_question_index >= state.questions.length) {
-    if (state.level >= 3) {
-      endGame();
-    }
-    else {     
-      goToNextLevel();
-    }
+  // If more questions exist -> Go to next question
+  if (state.currentQuestionIndex < state.questions.length) {
+    state.longestPrefix = "";
+    state.incorrectInputs = 0;
+    state.endTime = startTimer( { ...state }, _onExpire);
+    callbacks.updateScreen("next-question", { ...state });
     return;
   }
 
-  startQuestionTimer();
+  // If no more questions AND more levels exist -> Go to next level
+  if (state.currentQuestionIndex >= state.questions.length && state.level < 3) {
+    goToNextLevel();
+    return;
+  }
 
-  callbacks.updateScreen("next-question", { ...state });
+  // If no more questions AND no more levels exist -> End game
+  endGame();
+  return;
 }
+
 
 
 // ── Timer callbacks (internal) ────────────────────────────────────────────────
-
-
-/**
- * Starts a timer that expires at a specific timestamp
- * Called internally when a new question starts
- */
-function startQuestionTimer() {
-  stopTimer();
-
-  state.question_start_time = Date.now();
-
-  state.end_time =
-      state.question_start_time +
-      state.time_limit;
-
-  startTimer(
-      state.end_time,
-      _onExpire
-  );
-}
 
 /**
  * Fired by timer.js when the countdown reaches 0.
@@ -342,12 +315,13 @@ function _onExpire() {
   handleQuestionComplete(); 
 }
 
+// ── Profile management handling ────────────────────────────────────────────────
+
 /** 
  * Save relevant session data in the player profile
 */
 export function savePlayerData(){
-  player.score = state.score; 
+  player.score += state.score; 
   player.level = state.level;
-  player.current_question_index = state.current_question_index;
   saveProfile(player);
 }
