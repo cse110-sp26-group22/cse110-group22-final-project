@@ -29,7 +29,7 @@
  * - level.js      : loadLevel(levelNumber, category)
  * - timer.js      : startTimer(), stopTimer()
  * - scoring.js    : calculateTotalScore()
- * - storage.js    : saveProfile(), saveState(), clearState()
+ * - storage.js    : saveProfile(), saveState()
  * - models/models.js : defaultGameState()
  *
  * Responses emitted via updateScreen():
@@ -49,9 +49,8 @@
 import { loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
 import { calculateTotalScore } from "./scoring.js";
-import { saveProfile, clearState } from "./storage.js";
+import { saveProfile } from "./storage.js";
 import { defaultGameState, defaultProfile } from "../models/models.js";
-import { growNextPlant } from "./plants.js";
 
 
 
