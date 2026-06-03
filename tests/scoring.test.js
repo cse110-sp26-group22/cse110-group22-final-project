@@ -83,16 +83,16 @@ describe("calculateTimeMultiplier", () => {
 // ── addPlantBonus ─────────────────────────────────────────────────────────────
 
 describe("addPlantBonus", () => {
-  test("returns 25 points per plant growth stage", () => {
+  test("returns 10 points per plant growth stage", () => {
     expect(addPlantBonus(0)).toBe(0);
-    expect(addPlantBonus(1)).toBe(25);
-    expect(addPlantBonus(2)).toBe(50);
-    expect(addPlantBonus(3)).toBe(75);
+    expect(addPlantBonus(1)).toBe(10);
+    expect(addPlantBonus(2)).toBe(20);
+    expect(addPlantBonus(3)).toBe(30);
   });
 
   test("clamps invalid plant stages to the valid range", () => {
     expect(addPlantBonus(-1)).toBe(0);
-    expect(addPlantBonus(10)).toBe(75);
+    expect(addPlantBonus(10)).toBe(30);
   });
 });
 
@@ -190,6 +190,6 @@ describe("calculateTotalScore", () => {
     );
     const scoreWithPlants = calculateTotalScore(state, 3000);
 
-    expect(scoreWithPlants - scoreWithoutPlants).toBe(150);
+    expect(scoreWithPlants - scoreWithoutPlants).toBe(60);
   });
 });
