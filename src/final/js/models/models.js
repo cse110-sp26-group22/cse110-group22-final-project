@@ -28,7 +28,8 @@ export function defaultProfile() {
     level: 1,
     current_question_index: 0,
     language: "Python",
-    isInitialized: false
+    isInitialized: false,
+    plants: [0, 0, 0]
   };
 }
 

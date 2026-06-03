@@ -5,18 +5,18 @@
   width: 100%;
   flex: 1;
   background-image:
-    url("../assets/images/game-backdrop.jpg"),
-    linear-gradient(to bottom, 
-      #91D1DD 0%,
-      #91D1DD 32.25%,
-      #113B23 32.25%,
-      #113B23 100%
+    url("../assets/images/background-v1.jpg"),
+    linear-gradient(to bottom,
+      #C1F6F1 0%,
+      #C1F6F1 32.5%,
+      #ACD679 32.5%,
+      #ACD679 100%
     );
   /* show the whole image, align to top, and keep green behind it */
   background-size:contain;
   background-position: top center;
   background-repeat: no-repeat;
-  color: #ecfff4;
+  color: #3D2B1F;
 
   padding-top: 0.25rem;
   display: grid;
@@ -40,14 +40,43 @@
 .pause-menu {
   position: absolute;
   inset: 0;
-  background: rgba(6, 17, 13, 0.85);
+  background: rgba(130, 170, 90, 0.88);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  color: #ecfff4;
+  color: #3D2B1F;
+}
+/*#endregion */
+
+/*#region NotificationDisplay styles */
+.notification-display {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-15px);
+
+  padding: 12px 24px;
+  border-radius: 12px;
+
+  background-color: #8BBF5A;
+  color: #F4F9ED;
+  font-weight: bold;
+
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.notification-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 /*#endregion */
 
@@ -86,8 +115,8 @@
   grid-column: stats-display /span 2;
   
   font-size: 14px;
-  border: 1px solid #2ecc71;
-  background-color: #0b1812;
+  border: 1px solid #8BBF5A;
+  background-color: #F4F9ED;
   padding: 8px;
   border-radius: 6px;
   width: fit-content;
@@ -97,10 +126,10 @@
 
 /*#region PromptDisplay styles */
 .prompt-display {
-  background: #162820;
+  background: #F4F9ED;
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #244f38;
+  border: 1px solid #8BBF5A;
   margin-top: auto;
 }
 /*#endregion */
@@ -144,9 +173,9 @@
 .code-input {
   flex: 1;
   padding: 8px;
-  background: #0b1812;
-  border: 1px solid #2ecc71;
-  color: white;
+  background: #F4F9ED;
+  border: 1px solid #8BBF5A;
+  color: #3D2B1F;
   border-radius: 6px;
   font-size: 1em;
   line-height: 1;
@@ -164,10 +193,10 @@
 
   font-family: 'Courier New', monospace;
   letter-spacing: 0.05em;
-  color: rgb(253, 203, 38);
+  color: #D4714A;
   font-size: 1.5em;
-  border: 1px solid #2ecc71;
-  background-color: #0b1812;
+  border: 1px solid #8BBF5A;
+  background-color: #F4F9ED;
   padding: 0.25em 0.75em;
   border-radius: 6px;
   text-align: center;
@@ -181,11 +210,11 @@
   grid-column: stats-display /span 2;
   font-family: 'Courier New', monospace;
   letter-spacing: 0.05em;
-  color: rgb(46, 204, 113);
+  color: #5A8040;
   font-size: 1.5em;
 
-  border: 1px solid #2ecc71;
-  background-color: #0b1812;
+  border: 1px solid #8BBF5A;
+  background-color: #F4F9ED;
   padding: 0.2em 0.75em;
   border-radius: 6px;
   text-align: center;
@@ -215,7 +244,7 @@
 .combo.flashed::before {
   position: absolute;
   content: attr(data-flash-text);
-  color: #35b76d;
+  color: #5A8040;
   font-size: 1em;
   animation: combo-flash-highlight 0.2s linear;
   transform: translate(20%, -0.1em) scale(1.4);
@@ -232,7 +261,7 @@
   }
   15% {
     opacity: 0.35;
-    color:#33c833;
+    color:#5A8040;
     transform: translate(20%, -0.2em) scale(1.6);
   }
   60% {
@@ -260,8 +289,8 @@
   align-items: center;
   padding: 0.5rem;
   gap: 1rem;
-  background-color: #0a140a;
+  background-color: #8BBF5A;
   height: 4rem;
-  border-top: 3px ridge #118c7786;
+  border-top: 3px ridge #6BA04286;
 }
 /*#endregion */

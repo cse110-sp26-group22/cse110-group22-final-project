@@ -9,7 +9,7 @@
 }
 
 body {
-  background: #06110d;
+  background: #C1F6F1;
 
   display: flex;
   justify-content: center;
@@ -18,14 +18,14 @@ body {
   gap: 1rem;
 
   min-height: 100vh;
-  color: white;
+  color: #3D2B1F;
   font-family: Arial, sans-serif;
   overflow-x: hidden;
 }
 
 .site-title {
   text-align: center;
-  color: white;
+  color: #3D2B1F;
   margin-left: 0.75rem;
 }
 
