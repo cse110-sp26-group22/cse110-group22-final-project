@@ -215,6 +215,12 @@ export async function startLevel(levelNumber, category) {
   callbacks.loadScreen("game", { ...state });
 }
 
+/**
+ * DEPRECIATED
+ */
+export function goToLevelSelect() {
+  return;
+}
 
 // ── Called by [pause, results] UI ────────────────────────────────────────
 
@@ -251,7 +257,7 @@ function endGame() {
   callbacks.loadScreen("endscreen", {...state });
 }
 
-export function goToResults() {
+function goToResults() {
   state.isActive = true;
   state.isPaused = false;
 
@@ -318,7 +324,7 @@ function _onExpire() {
 /** 
  * Save relevant session data in the player profile
 */
-export function savePlayerData(){
+function savePlayerData(){
   player.score += state.score; 
   player.level = state.level;
   saveProfile(player);
