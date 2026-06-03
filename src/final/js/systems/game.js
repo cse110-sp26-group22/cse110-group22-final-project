@@ -216,7 +216,7 @@ export async function startLevel(levelNumber, category) {
 }
 
 /**
- * DEPRECIATED
+ * TODO: Remove. Depreciated handler.
  */
 export function goToLevelSelect() {
   return;

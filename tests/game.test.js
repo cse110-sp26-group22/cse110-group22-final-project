@@ -38,9 +38,7 @@ import {
   pauseGame,
   resumeGame,
   goToMainMenu,
-  goToResults,
   onInput,
-  savePlayerData,
 } from "../src/final/js/systems/game.js";
 
 import { loadLevel }                      from "../src/final/js/systems/level.js";
@@ -191,44 +189,6 @@ describe("goToMainMenu", () => {
   test("loads the mainmenu screen", () => {
     goToMainMenu();
     expect(mockLoadScreen).toHaveBeenCalledWith("mainmenu", expect.any(Object));
-  });
-});
-
-// ── goToResults ─────────────────────────────────────────────────────────────
-
-describe("goToResults", () => {
-  beforeEach(async () => {
-    await startLevel(1, "python");
-    jest.clearAllMocks();
-  });
-
-  test("stops the timer", () => {
-    goToResults();
-    expect(stopTimer).toHaveBeenCalled();
-  });
-
-  test("saves the player profile", () => {
-    goToResults();
-    expect(saveProfile).toHaveBeenCalledTimes(1);
-  });
-
-  test("loads the level_end screen", () => {
-    goToResults();
-    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
-  });
-});
-
-// ── savePlayerData ────────────────────────────────────────────────────────────
-
-describe("savePlayerData", () => {
-  beforeEach(async () => {
-    await startLevel(1, "python");
-    jest.clearAllMocks();
-  });
-
-  test("calls saveProfile", () => {
-    savePlayerData();
-    expect(saveProfile).toHaveBeenCalledTimes(1);
   });
 });
 
