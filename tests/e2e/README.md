@@ -7,7 +7,8 @@ Here is what you need to know and follow going forward:
 1. New Commands to Run Tests
 Please pull the latest changes from the main branch and test using these specific scripts:
 • Unit Tests (node & jsdom): `npm run test`
-• E2E Tests (Puppeteer): `npm run build && npm run test:e2e`
+• E2E Tests (Puppeteer): `npm run build` and `npm run test:e2e` (you can chain them with the syntax that corresponds to the OS you are using or do it in two separate commands) 
+    - Note: You MUST have Puppeteer installed prior to running the build or the tests. If you do not have it installed, run `npm install puppeteer` first 
 
 
 Note: E2E tests run against our production bundle inside `/dist`. Always chain `npm run build` before running the E2E tests so Puppeteer is testing your latest local changes!. 
