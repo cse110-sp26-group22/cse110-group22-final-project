@@ -11,11 +11,13 @@ import { mainMenu, gameUI, resultsScreen } from "./ui.js";
  * @param {*} data 
  */
 function handleLoadScreen(screenName, data) {
+    console.debug(`Loading screen: ${screenName} with data:`, data);
     if (screenName === 'game') {
         mainMenu.hide();
         resultsScreen.hide();
         gameUI.show();
-        gameUI.sendQuestion(data.questions[data.current_question_index], data.answers[data.current_question_index]);
+        gameUI.sendQuestion(data.questions[data.currentQuestionIndex], data.answers[data.currentQuestionIndex]);
+        console.debug(`Loaded game screen with question: ${data.questions[data.currentQuestionIndex]} and answer: ${data.answers[data.currentQuestionIndex]}`);
     }
     if (screenName === 'pause') {
         gameUI.show();
@@ -58,7 +60,7 @@ function handleUpdateScreen(response, data) {
         gameUI.combo.reset();
     }
     if (response === 'next-question') {
-        gameUI.sendQuestion(data.questions[data.current_question_index], data.answers[data.current_question_index]);
+        gameUI.sendQuestion(data.questions[data.currentQuestionIndex], data.answers[data.currentQuestionIndex]);
     }
 }
 
