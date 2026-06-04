@@ -26,23 +26,22 @@
  * Elapsed time = state.time_limit - state.timer.
  *
  * Dependencies:
- * - level.js      : loadLevel(levelNumber, category)
- * - timer.js      : startTimer(), stopTimer()
- * - scoring.js    : calculateTotalScore()
- * - storage.js    : saveProfile(), saveState()
+ * - level.js         : loadLevel(levelNumber, category)
+ * - timer.js         : startTimer(), stopTimer()
+ * - scoring.js       : calculateTotalScore()
+ * - storage.js       : saveProfile(),
  * - models/models.js : defaultGameState()
  *
  * Responses emitted via updateScreen():
- * - "correct-char"   → user typed a correct character 
- * - "incorrect"      → user typed a wrong character 
+ * - "correct"        → user entered a correct input
+ * - "incorrect"      → user entered a wrong input
  * - "next-question"  → answer complete, next question ready
- * - "tick"           → timer fired, update timer display
  *
  * Screens emitted via loadScreen():
  * - "game"           → switch to game screen (level just started or resumed)
  * - "pause"          → switch to pause screen
- * - "endscreen"      → switch to end screen (time up or all questions done)
- * - "levelselect"    → switch to level select screen (player exits session)
+ * - "results"        → switch to results screen (time up or all questions done)
+ * = "endscreen"      → switch to end screen (all levels completed)
  * - "mainmenu"       → switch to main menu (player exits session)
  */
 
@@ -204,7 +203,7 @@ export async function startLevel(levelNumber, category) {
   
   // Refresh state, load level data to state, start timer, set flags
   state = defaultGameState();
-  state = await loadLevel(levelNumber, category);
+  Object.assign(state, await loadLevel(levelNumber, category));
   state.questionStartTime = Date.now();
   state.questionEndTime = startTimer( { ...state }, _onExpire);
   state.language = player.language;
