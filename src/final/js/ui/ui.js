@@ -46,6 +46,7 @@ function main() {
     resultsScreen.onRetry(() => {
         resultsScreen.hide();
         gameUI.show();
+        glue.startLevel(1, lastLanguage);
     });
 
     gameUI.onPause(glue.pauseGame);
