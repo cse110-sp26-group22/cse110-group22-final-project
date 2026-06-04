@@ -22,6 +22,9 @@ import NotificationDisplay from "./NotificationDisplay.js";
  * </div>
  */
 export default class GameUI {
+
+    /** @type {number | null} */
+    clockInterval = null;
     /**
      * Binds this GameUI to the given element.
      * @param {HTMLElement} element
@@ -44,7 +47,7 @@ export default class GameUI {
         
         this.gameTray = new GameTray(assertHTMLElement(this.element.querySelector('.game-tray')));
         
-        setInterval(() => this.clockTick(), 1000); 
+        this.clockInterval = setInterval(() => this.clockTick(), 1000); 
     }
 
     /**
@@ -52,7 +55,15 @@ export default class GameUI {
      */
     clockTick(){
         this.timer.rerender();
-        this.statsDisplay.rerender();
+        //this.statsDisplay.rerender();
+    }
+
+    /**
+     * Stops the countdown timer from updating. 
+     */
+    stopCountdown(){
+        clearInterval(this.clockInterval);
+        this.clockInterval = null;
     }
 
     /**
@@ -67,10 +78,16 @@ export default class GameUI {
         this.codeInputField.setGhostText(answer);
     }
 
+    /**
+     * Renders this GameUI
+     */
     show() {
         this.element.classList.remove('hidden');
     }
 
+    /**
+     * Hides this GameUI.
+     */
     hide() {
         this.element.classList.add('hidden');
     }

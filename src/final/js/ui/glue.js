@@ -6,10 +6,7 @@ import {
 import { store } from "./store.js";
 import { mainMenu, gameUI, resultsScreen } from "./ui.js";
 
-/** @type {number | null} */
-let countdownIntervalId = null;
-/** @type {*} */
-let latestGameData = null;
+let latestGameData;
 
 /**
  * @param {*} data
@@ -19,35 +16,6 @@ function getCurrentQuestion(data) {
         question: data.questions[data.currentQuestionIndex],
         answer: data.answers[data.currentQuestionIndex],
     };
-}
-
-/**
- * @param {boolean} clearLatestData
- */
-function stopCountdown(clearLatestData = true) {
-    if (countdownIntervalId !== null) {
-        clearInterval(countdownIntervalId);
-        countdownIntervalId = null;
-    }
-    if (clearLatestData) latestGameData = null;
-}
-
-/**
- * Updates the visible timer using the backend's question end timestamp.
- * @param {number} questionEndTime
- */
-function startCountdown(questionEndTime) {
-    stopCountdown(false);
-
-    const updateTimer = () => {
-        const remainingSeconds = Math.max(0, Math.ceil((questionEndTime - Date.now()) / 1000));
-        store.update('timer', remainingSeconds);
-        if (latestGameData) updateGameStats(latestGameData);
-        if (remainingSeconds === 0) stopCountdown();
-    };
-
-    updateTimer();
-    countdownIntervalId = setInterval(updateTimer, 1000);
 }
 
 /**
@@ -99,7 +67,7 @@ function getLiveStats(data) {
     return {
         score: data.score ?? 0,
         accuracy: `${Math.round(accuracy * 100)}%`,
-        cpm: elapsedMinutes > 0 ? Math.round(correctCharacters / elapsedMinutes) : 0
+        cpm: elapsedMinutes > 0 ? Math.round(correctCharacters / elapsedMinutes) : 0,
     };
 }
 
@@ -126,24 +94,24 @@ function handleLoadScreen(screenName, data) {
         gameUI.sendQuestion(question, answer);
         gameUI.plantDisplayGroup.setGrowthLevels(data.growthLevel ?? [0]);
         updateGameStats(data);
-        startCountdown(data.questionEndTime);
+        store.update('questionEndTime', data.questionEndTime);
         console.debug(`Loaded game screen with question: ${question} and answer: ${answer}`);
     }
     if (screenName === 'pause') {
-        stopCountdown();
+        gameUI.stopCountdown();
         gameUI.show();
         gameUI.pauseMenu.show();
         resultsScreen.hide();
         mainMenu.hide();
     }
     if (screenName === 'results' || screenName === 'endscreen') {
-        stopCountdown();
+        gameUI.stopCountdown();
         gameUI.hide();
         resultsScreen.show(getResultsStats(data));
         mainMenu.hide();
     }
     if (screenName === 'mainmenu' || screenName === 'levelselect') {
-        stopCountdown();
+        gameUI.stopCountdown();
         gameUI.hide();
         gameUI.pauseMenu.hide();
         resultsScreen.hide();
@@ -156,9 +124,6 @@ function handleLoadScreen(screenName, data) {
  * @param {*} data 
  */
 function handleUpdateScreen(response, data) {
-    if (response === 'tick') {
-        store.update('timer', data.timer);
-    }
     if (response === 'correct') {
         gameUI.combo.increment();
         updateGameStats(data);
@@ -171,7 +136,7 @@ function handleUpdateScreen(response, data) {
         const { question, answer } = getCurrentQuestion(data);
         gameUI.sendQuestion(question, answer);
         updateGameStats(data);
-        startCountdown(data.questionEndTime);
+        store.update('questionEndTime', data.questionEndTime);
     }
     if (response === 'plant-growth') {
         gameUI.plantDisplayGroup.setGrowthLevels(data.growthLevel);
@@ -188,7 +153,6 @@ export function initializeBackend() {
  * @param {string} input
  */
 export function handleInputChange(input){
-    console.log(`Input changed: ${input}`);
     onInput(input); //backend naming is different from our convention
 }
 

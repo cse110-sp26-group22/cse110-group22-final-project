@@ -40,25 +40,13 @@ export default class ResultsScreen {
 
     /**
      * Populates and shows the results screen.
+     * @param {{ score: number, accuracy: string, cpm: number, language: string }} stats
      */
-    show() {
-        const stats = { //TODO: kind of hacky, we can improve this
-            score: store.retrieve('score') || 0,
-            cpm: store.retrieve('cpm') || 0,
-            language: store.retrieve('language') || 'python'
-        };
-
-        const incorrectInputs = store.retrieve('incorrectInputs') || 0;
-        const totalInputs = store.retrieve('totalInputs') || 0;
-        stats.accuracy = totalInputs > 0 ? ((1 - (incorrectInputs / totalInputs)) * 100).toFixed(2) + '%' : '100%';
-
-        const numCorrectQuestions = store.retrieve('numCorrectQuestions') || 0;
-        const totalQuestions = store.retrieve('totalQuestions') || 0;
-      
+    show(stats) {
         this.scoreEl.textContent = `${stats.score}`;
         this.accuracyEl.textContent = `${stats.accuracy}`;
         this.cpmEl.textContent = `${stats.cpm}`;
-        this.questionsEl.textContent = `${numCorrectQuestions} / ${totalQuestions}`;
+        this.questionsEl.textContent = `${stats.questionsAnswered} / ${stats.totalQuestions}`;
         this.languageEl.textContent = stats.language;
         this.element.classList.remove('hidden');
     }
