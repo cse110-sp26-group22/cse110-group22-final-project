@@ -46,11 +46,12 @@ function main() {
     resultsScreen.onRetry(() => {
         resultsScreen.hide();
         gameUI.show();
+        glue.startLevel(1, lastLanguage);
     });
 
     gameUI.onPause(glue.pauseGame);
     gameUI.onResume(glue.resumeGame);
-    gameUI.codeInputField.onKeyPress(glue.handleKeyPress);
+    gameUI.codeInputField.onInputChange(glue.handleInputChange);
 
     resultsScreen.onMainMenu(() => {
         resultsScreen.hide();
