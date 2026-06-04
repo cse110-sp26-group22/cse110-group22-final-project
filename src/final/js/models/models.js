@@ -39,7 +39,8 @@ export function defaultProfile() {
  * Populated by level.js on each new level and reset between levels.
  * Safe to clear without affecting the persistent player profile.
  *
- * @property {number[]}  plants               - Plants growth levels indexed (0 - 2)
+ * @property {number[]}  plants               - Plants 
+ * @property {number}    growthLevel          - Plants growth levels indexed (0 - 2)
  * @property {string[]}  questions            - Prompts for the current level (shuffled)
  * @property {string[]}  answers              - Answers parallel to questions[]
  * @property {number[]}  baseScores           - Score for each question derived from question set
@@ -47,7 +48,9 @@ export function defaultProfile() {
  * @property {number}    level                - Current game level
  * @property {number}    currentQuestionIndex - Index into questions[] / answers[]
  * @property {number}    maxPrefixLength      - Max input prefix length seen for respective answer
+ * @property {number}    totalInputs          - Total inputs entered for current level
  * @property {number}    incorrectInputs      - Wrong inputs for current question
+ * @property {number}    combo                - Number of correct inputs entered in a row
  * @property {number}    timeLimit            - Total milliseconds allowed for the question
  * @property {number}    questionStartTime    - Timestamp when the current question started.
  * @property {number}    questionEndTime      - Timestamp when the current question timer ends.
@@ -61,7 +64,8 @@ export function defaultProfile() {
 /** @returns {GameState} */
 export function defaultGameState() {
   return {
-    plants:               [0, 0, 0], // TODO: Change from array to int implementation
+    plants:               [0, 0, 0], // TODO: Possibly depreciated. May need removal.
+    growthLevel:          0,  // Needs implementation in handleQuestionComplete()
     questions:            [],
     answers:              [],
     baseScores:           [],
@@ -69,7 +73,9 @@ export function defaultGameState() {
     level:                1,
     currentQuestionIndex: 0,
     maxPrefixLength:      0,
+    totalInputs:          0,  // TODO: Needs implementation in onInput()
     incorrectInputs:      0,
+    combo:                0,  // TODO: Needs implementation in onInput()
     timeLimit:            600000,
     questionStartTime:    0,
     questionEndTime:      0,
