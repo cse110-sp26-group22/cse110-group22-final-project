@@ -22,9 +22,11 @@ import NotificationDisplay from "./NotificationDisplay.js";
  * </div>
  */
 export default class GameUI {
-
     /** @type {number | null} */
     clockInterval = null;
+    /** @type {EventTarget} */
+    clockEventTarget = new EventTarget();
+
     /**
      * Binds this GameUI to the given element.
      * @param {HTMLElement} element
@@ -46,16 +48,32 @@ export default class GameUI {
         this.onResume(() => this.pauseMenu.hide());
         
         this.gameTray = new GameTray(assertHTMLElement(this.element.querySelector('.game-tray')));
-        
-        this.clockInterval = setInterval(() => this.clockTick(), 1000); 
+        this.onClockTick(() => this.updateLiveData());
+    }
+
+    /**
+     * Registers a callback to be called when the clock ticks.
+     * @param {(event: Event) => void} callback
+     */
+    onClockTick(callback) {
+        this.clockEventTarget.addEventListener('clockTick', callback);
     }
 
     /**
      * Updates all subcomponents that rely on the clock.
      */
-    clockTick(){
+    updateLiveData(){
+        console.log('clock tick');
         this.timer.rerender();
         //this.statsDisplay.rerender();
+    }
+
+    /**
+     * Starts the countdown timer.
+     */
+    startCountdown() {
+        if (this.clockInterval) return; // Countdown is already running
+        this.clockInterval = setInterval(() => this.clockEventTarget.dispatchEvent(new Event('clockTick')), 500);
     }
 
     /**

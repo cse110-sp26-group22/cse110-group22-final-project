@@ -156,6 +156,13 @@ export function handleInputChange(input){
     onInput(input); //backend naming is different from our convention
 }
 
+export function gameUIReady() {
+    gameUI.startCountdown();
+    gameUI.onClockTick(() => {
+        if (latestGameData) updateGameStats(latestGameData);
+    });
+}
+
 /**
  * Starts a level and keeps the backend profile language in sync.
  * @param {number} levelNumber

@@ -32,6 +32,8 @@ function main() {
     gameUI = new GameUI(gameDisplayElement);
     gameUI.hide();
 
+    glue.gameUIReady();
+
     const resultsScreenElement = assertHTMLElement(document.querySelector('.results-screen'));
     resultsScreen = new ResultsScreen(resultsScreenElement);
     resultsScreen.hide();
