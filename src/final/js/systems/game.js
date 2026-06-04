@@ -41,12 +41,11 @@
  * Screens emitted via loadScreen():
  * - "game"           → switch to game screen (level just started or resumed)
  * - "pause"          → switch to pause screen
- * - "results"        → switch to results screen (time up or all questions done)
- * - "endscreen"      → switch to end screen (all levels completed)
+ * - "results"        → switch to results screen (all levels completed)
  * - "mainmenu"       → switch to main menu (player exits session)
  */
 
-import { loadLevel } from "./level.js";
+import { getLevelCount, loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
 import { calculateTotalScore } from "./scoring.js";
 import { saveProfile } from "./storage.js";
@@ -80,6 +79,28 @@ const callbacks = {
   /** @type {((response: string, data: object) => void)|null} */
   updateScreen: null,
 };
+
+const MAX_PLANT_GROWTH_LEVEL = 2;
+
+function copyState() {
+  return {
+    ...state,
+    growthLevel: [...state.growthLevel],
+    timeUsed: [...state.timeUsed],
+  };
+}
+
+function growActivePlant() {
+  if (state.growthLevel.length === 0) state.growthLevel.push(0);
+
+  const activePlantIndex = state.growthLevel.length - 1;
+  if (state.growthLevel[activePlantIndex] < MAX_PLANT_GROWTH_LEVEL) {
+    state.growthLevel[activePlantIndex]++;
+    return;
+  }
+
+  state.growthLevel.push(0);
+}
 
 // ── Callback registration ─────────────────────────────────────────────────────
 
@@ -121,10 +142,12 @@ export function resumeGame() {
   state.isPaused = false;
   state.isActive = true;
 
-  state.questionEndTime = startTimer( { ...state }, _onExpire);
+  const timeRemaining = state.remainingOnPause > 0 ? state.remainingOnPause : state.timeLimit;
+  startTimer( { ...state }, _onExpire);
+  state.questionEndTime = Date.now() + timeRemaining;
   state.remainingOnPause = 0;
   
-  callbacks.loadScreen("game", { ...state });
+  callbacks.loadScreen("game", copyState());
 }
 
 // ── Called by [game] UI (exclusive) ──────────────────────────────────────────
@@ -138,11 +161,11 @@ export function pauseGame() {
   state.isPaused = true;
   state.isActive = true;
 
-  state.remainingOnPause = state.questionEndTime - Date.now();
+  state.remainingOnPause = Math.max(0, state.questionEndTime - Date.now());
 
   stopTimer();
 
-  callbacks.loadScreen("pause", { ...state });
+  callbacks.loadScreen("pause", copyState());
 }
 
 /**
@@ -157,10 +180,19 @@ export function pauseGame() {
  *
  * @param {string} input - Input entered by Player 
  */
-export function onInput(input) {
+export async function onInput(input) {
   if (!state.isActive || state.isPaused) return;
 
-  state.totalInputs++;
+  const previousInput = state.currentInput;
+  const isDeletion = input.length < previousInput.length;
+  const addedText = input.length > previousInput.length
+    ? input.slice(previousInput.length)
+    : "";
+  const isWhitespaceOnlyInput = addedText.length > 0 && addedText.trim() === "";
+  const shouldCountInput = !isDeletion && !isWhitespaceOnlyInput;
+  state.currentInput = input;
+
+  if (shouldCountInput) state.totalInputs++;
 
   const answer = state.answers[state.currentQuestionIndex];
   if (!answer) return;
@@ -177,22 +209,25 @@ export function onInput(input) {
   // Correct input + Completed answer 
   if (input === answer) {
     console.debug("Answer complete for question index", state.currentQuestionIndex);
-    handleQuestionComplete();
+    await handleQuestionComplete(true);
     return;
   } 
 
   // Incorrect input
   if (prefixLength <= state.maxPrefixLength) {
-    state.incorrectInputs++;
+    if (shouldCountInput) {
+      state.incorrectInputs++;
+      state.totalIncorrectInputs++;
+    }
     state.combo = 0;
-    callbacks.updateScreen("incorrect", { ...state });
+    callbacks.updateScreen("incorrect", copyState());
     return;
   }
 
   // Correct input
   state.maxPrefixLength = prefixLength;
   state.combo++;
-  callbacks.updateScreen("correct", { ...state });
+  callbacks.updateScreen("correct", copyState());
   return;
 }
 
@@ -210,15 +245,17 @@ export async function startLevel(levelNumber, category) {
   
   // Refresh state, load level data to state, start timer, set flags
   state = defaultGameState();
+  player.language = category;
   Object.assign(state, await loadLevel(levelNumber, category));
+  state.totalQuestions = state.questions.length;
   state.questionStartTime = Date.now();
   state.questionEndTime = startTimer( { ...state }, _onExpire);
-  state.language = player.language;
+  state.language = category;
   state.isActive = true;
   state.isPaused = false;
 
   // Transition to the game screen
-  callbacks.loadScreen("game", { ...state });
+  callbacks.loadScreen("game", copyState());
 }
 
 /**
@@ -242,47 +279,58 @@ export function goToMainMenu() {
 
   player = defaultProfile();
 
-  callbacks.loadScreen("mainmenu", { ...state });
+  callbacks.loadScreen("mainmenu", copyState());
 }
 
 // ── Called internally ────────────────────────────────────────────────────
 
-/**
- * Ends the current game session: stops the timer, accumulates session results
- * into the player profile, clears in-progress state, and
- * signals ui-core to show the end screen.
- */
-function endGame() {
+function goToResults() {
   state.isActive = false;
   state.isPaused = false;
 
-  savePlayerData();
-
   stopTimer();
 
-  callbacks.loadScreen("endscreen", {...state });
+  savePlayerData();
+
+  callbacks.loadScreen("results", copyState());
 }
 
-function goToResults() {
+async function advanceToNextLevel() {
+  const nextLevel = state.level + 1;
+  const category = state.language ?? player.language;
+  const previousTotalQuestions = state.totalQuestions;
+
+  Object.assign(state, await loadLevel(nextLevel, category));
+  state.totalQuestions = previousTotalQuestions + state.questions.length;
+  state.currentQuestionIndex = 0;
+  state.currentInput = "";
+  state.maxPrefixLength = 0;
+  state.incorrectInputs = 0;
+  state.combo = 0;
+  state.remainingOnPause = 0;
+  state.questionStartTime = Date.now();
+  state.questionEndTime = startTimer( { ...state }, _onExpire);
   state.isActive = true;
   state.isPaused = false;
 
-  stopTimer();
-
-  savePlayerData();
-
-  callbacks.loadScreen("results", {...state });
+  callbacks.loadScreen("game", copyState());
 }
 
 /**
  * Handles the end of a question
  */
-function handleQuestionComplete() {
+async function handleQuestionComplete(answeredCorrectly = false) {
 
   // Calculate post-question score
-  const elapsedTime = Date.now() - state.questionStartTime;
-  if (elapsedTime <= state.timeLimit) { 
-    state.score += calculateTotalScore( { ...state }, elapsedTime);
+  const timeRemaining = Math.max(0, state.questionEndTime - Date.now());
+  const elapsedTime = Math.max(0, state.timeLimit - timeRemaining);
+  const answer = state.answers[state.currentQuestionIndex] ?? "";
+  state.timeUsed.push(elapsedTime);
+  state.totalAnswerCharacters += answer.length;
+  const answeredWithinTime = answeredCorrectly && elapsedTime <= state.timeLimit;
+
+  if (answeredWithinTime) {
+    state.score += calculateTotalScore(copyState(), elapsedTime);
     state.numCorrectQuestions++;
   }
   else{
@@ -293,30 +341,30 @@ function handleQuestionComplete() {
   state.currentQuestionIndex++;
 
   // Grow plant every 3rd question answered within time limit
-  if (state.numCorrectQuestions % 3 === 0) {
-    if(state.growthLevel < 3){
-      state.growthLevel++;
-      callbacks.updateScreen("plant-growth", { ...state });
-    }
+  if (answeredWithinTime && state.numCorrectQuestions % 3 === 0) {
+    growActivePlant();
+    callbacks.updateScreen("plant-growth", copyState());
   }
 
   // If more questions exist -> Go to next question
   if (state.currentQuestionIndex < state.questions.length) {
     state.maxPrefixLength = 0;
+    state.currentInput = "";
     state.incorrectInputs = 0;
+    state.questionStartTime = Date.now();
     state.questionEndTime = startTimer( { ...state }, _onExpire);
-    callbacks.updateScreen("next-question", { ...state });
+    callbacks.updateScreen("next-question", copyState());
     return;
   }
 
   // If no more questions AND more levels exist -> Go to next level
-  if (state.currentQuestionIndex >= state.questions.length && state.level < 3) {
-    goToResults();
+  if (state.currentQuestionIndex >= state.questions.length && state.level < getLevelCount()) {
+    await advanceToNextLevel();
     return;
   }
 
-  // If no more questions AND no more levels exist -> End game
-  endGame();
+  // If no more questions AND no more levels exist -> Go to results
+  goToResults();
   return;
 }
 
@@ -326,7 +374,7 @@ function handleQuestionComplete() {
  * Fired by timer.js when the countdown reaches 0.
  */
 function _onExpire() {
-  handleQuestionComplete(); 
+  handleQuestionComplete(false);
 }
 
 // ── Profile management handling ────────────────────────────────────────────────

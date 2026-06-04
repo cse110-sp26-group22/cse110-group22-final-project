@@ -23,4 +23,13 @@ export default class PlantDisplay  {
         this.plantImageElement.classList.add('plant-image');
         this.element.appendChild(this.plantImageElement);
     }
+
+    /**
+     * Sets the plant's growth stage and updates the rendered image.
+     * @param {number} growthLevel
+     */
+    setGrowthLevel(growthLevel) {
+        this.growthLevel = Math.max(0, Math.min(growthLevel, PlantDisplay.PLANT_IMAGES.length - 1));
+        this.plantImageElement.src = `../assets/images/plant/${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`;
+    }
 }
