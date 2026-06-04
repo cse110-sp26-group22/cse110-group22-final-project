@@ -46,7 +46,7 @@ export async function loadLevel(levelNumber, category) {
       `Failed to load questions for ${category}`
     );
   }
-
+  console.debug(`Loaded questions for ${category} category`);
   const allQuestions = await response.json();
 
   // Filter by difficulty, shuffle, cap at questionCount
@@ -59,7 +59,7 @@ export async function loadLevel(levelNumber, category) {
   const questions  = shuffled.map(q => q.Question);
   const answers    = shuffled.map(q => q.Answer);
   const baseScores = shuffled.map(q => q.baseScore);
-
+  console.debug(`Selected questions for level ${config.levelNumber}:`, questions);
   return {
     questions,
     answers,
