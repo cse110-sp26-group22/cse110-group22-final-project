@@ -7,7 +7,6 @@ import PlantDisplayGroup from "./game/plants/PlantDisplayGroup.js";
 import GameTray from "./game/tray/GameTray.js";
 import Combo from "./game/Combo.js";
 import Timer from "./game/Timer.js";
-import { store } from "../store.js";
 import NotificationDisplay from "./NotificationDisplay.js";
 
 
