@@ -95,6 +95,7 @@ const callbacks = {
 export function registerCallbacks(loadScreen, updateScreen) {
   callbacks.loadScreen = loadScreen;
   callbacks.updateScreen = updateScreen;
+  console.debug("Registered game.js callbacks");
 }
 
 // ── Lifecycle  ───────────────────────────────────────────────────────────────
@@ -175,6 +176,7 @@ export function onInput(input) {
 
   // Correct input + Completed answer 
   if (input === answer) {
+    console.debug("Answer complete for question index", state.currentQuestionIndex);
     handleQuestionComplete();
     return;
   } 
