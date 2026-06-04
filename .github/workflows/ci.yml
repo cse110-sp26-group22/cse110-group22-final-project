@@ -1,10 +1,5 @@
 name: CI/CD Pipeline
 
-# Note: frontend tests using jsdom should please start their files with
-#  /**
-#   * @jest-environment jsdom
-#  */ 
-
 on:
   push:
     branches:
