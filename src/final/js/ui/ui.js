@@ -50,7 +50,7 @@ function main() {
 
     gameUI.onPause(glue.pauseGame);
     gameUI.onResume(glue.resumeGame);
-    gameUI.codeInputField.onKeyPress(glue.handleKeyPress);
+    gameUI.codeInputField.onInputChange(glue.handleInputChange);
 
     resultsScreen.onMainMenu(() => {
         resultsScreen.hide();

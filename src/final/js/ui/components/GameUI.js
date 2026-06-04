@@ -45,7 +45,15 @@ export default class GameUI {
         
         this.gameTray = new GameTray(assertHTMLElement(this.element.querySelector('.game-tray')));
         
-        store.subscribe('timer', (/** @type {number} */ value) => this.timer.remainingTime = value);
+        setInterval(() => this.clockTick(), 1000); 
+    }
+
+    /**
+     * Updates all subcomponents that rely on the clock.
+     */
+    clockTick(){
+        this.timer.rerender();
+        this.statsDisplay.rerender();
     }
 
     /**
