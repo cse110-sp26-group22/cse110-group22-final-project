@@ -26,9 +26,7 @@ jest.mock("../src/final/js/systems/storage.js", () => ({
   clearState:  jest.fn(),
 }));
 
-jest.mock("../src/final/js/systems/plants.js", () => ({
-  growNextPlant: jest.fn(),
-}));
+
 
 // ── Imports ───────────────────────────────────────────────────────────────────
 
