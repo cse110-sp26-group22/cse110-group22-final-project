@@ -15,7 +15,7 @@ Note: E2E tests run against our production bundle inside `/dist`. Always chain `
 
 2. Boilerplate Template for E2E Tests
 If you are assigned to write E2E tests for a feature (e.g., UI interactions, user flows), create your file in tests/e2e/<feature-name>.test.js and use the exact template in tests/e2e/template.test.js.
-- Do not modify the beforeAll or afterAll blocks. They are specifically configured to boot up the Vite preview server, initialize Chromium with sandbox flags for GitHub Actions, and cleanly kill the background processes on completion so our ports don't lock up.
+- Do not modify the  `beforeAll` or `afterAll blocks`. They are specifically configured to boot up the Vite preview server, initialize Chromium with sandbox flags for GitHub Actions, and cleanly kill the background processes on completion so our ports don't lock up.
 
 3. Key Files That Were Updated (Do Not Revert)
 
