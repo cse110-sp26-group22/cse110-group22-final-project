@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "- /src → source code\r - /tests → test files\r - /docs → technical documentation\r - /meetings → meeting notes\r - /ai-use → AI use log",
   "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "directories": {
     "doc": "docs",
     "test": "tests"
@@ -12,7 +12,8 @@
     "test": "jest",
     "lint": "eslint .",
     "build": "vite build",
-    "test:e2e": "jest --config jest.e2e.config.js --runInBand"
+    "preview": "vite preview --host 127.0.0.1",
+    "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config=./jest.config.e2e.js --forceExit"
   },
   "repository": {
     "type": "git",
