@@ -43,6 +43,26 @@ export function calculateComboBonus(combo) {
 }
 
 /**
+ * Calculates the bonus score for one plant based on its growth stage.
+ *
+ * Plants are stored as numbers from 0 to 3:
+ * - 0 means no growth
+ * - 3 means fully grown
+ *
+ * The stage is clamped so invalid values do not create negative or excessive
+ * bonuses.
+ *
+ * @param {number} plant - Current growth stage of one plant.
+ * @returns {number} Bonus points earned from that plant.
+ */
+export function addPlantBonus(plant) {
+    const growthStage = Number(plant) || 0;
+    const clampedStage = Math.max(0, Math.min(growthStage, 3));
+
+    return clampedStage * PLANT_BONUS;
+}
+
+/**
  * Calculates the score for the current question.
  *
  * The final score combines:
@@ -64,8 +84,7 @@ export function calculateTotalScore(state, elapsedMs = 0) {
         currentQuestionIndex = 0,
         timeLimit = 0,
         combo = 0,
-        plants = [],
-        growthLevel = 0
+        plants = []
     } = state;
 
     const answer = answers[currentQuestionIndex] || "";
@@ -86,8 +105,8 @@ export function calculateTotalScore(state, elapsedMs = 0) {
 
     // Sum the bonus from each plant in the current farm state.
     const plantBonus = plants.reduce((total, plant) => {
-        return total + Number(plant || 0) * PLANT_BONUS;
-    }, growthLevel * PLANT_BONUS);
+        return total + addPlantBonus(plant);
+    }, 0);
 
     const finalScore =
         questionBaseScore *
