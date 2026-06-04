@@ -1,5 +1,3 @@
-import { store } from '../../store.js';
-
 /**
  * The component responsible for displaying the user's current score and accuracy.
  * 

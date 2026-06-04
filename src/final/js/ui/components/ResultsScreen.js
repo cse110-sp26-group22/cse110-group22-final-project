@@ -1,5 +1,4 @@
 import { assertHTMLElement } from "../utils.js";
-import { store } from "../store.js";
 
 /**
  * The results screen shown at the end of a game round.
