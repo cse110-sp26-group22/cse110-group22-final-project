@@ -182,14 +182,14 @@ export function onInput(input) {
   // Incorrect input
   if (prefixLength <= state.maxPrefixLength) {
     state.incorrectInputs++;
-    combo = 0;
+    state.combo = 0;
     callbacks.updateScreen("incorrect", { ...state });
     return;
   }
 
   // Correct input
   state.maxPrefixLength = prefixLength;
-  combo++;
+  state.combo++;
   callbacks.updateScreen("correct", { ...state });
   return;
 }
@@ -281,7 +281,7 @@ function handleQuestionComplete() {
   const elapsedTime = Date.now() - state.questionStartTime;
   if (elapsedTime <= state.timeLimit) { 
     state.score += calculateTotalScore( { ...state }, elapsedTime);
-    numCorrectQuestions++;
+    state.numCorrectQuestions++;
   }
   else{
     state.score += 0;
