@@ -6,8 +6,8 @@ To make this work flawlessly with Vite and Puppeteer, I upgraded our project arc
 Here is what you need to know and follow going forward:
 1. New Commands to Run Tests
 Please pull the latest changes from the main branch and test using these specific scripts:
-• Unit Tests (node & jsdom): `npm run test`
-• E2E Tests (Puppeteer): `npm run build` and `npm run test:e2e` (you can chain them with the syntax that corresponds to the OS you are using or do it in two separate commands) 
+- Unit Tests (node & jsdom): `npm run test`
+- E2E Tests (Puppeteer): `npm run build` and `npm run test:e2e` (you can chain them with the syntax that corresponds to the OS you are using or do it in two separate commands) 
     - Note: You MUST have Puppeteer installed prior to running the build or the tests. If you do not have it installed, run `npm install puppeteer` first 
 
 
@@ -19,9 +19,9 @@ If you are assigned to write E2E tests for a feature (e.g., UI interactions, use
 
 3. Key Files That Were Updated (Do Not Revert)
 
-`package.json`: Updated to `"type": "module"` and added `--experimental-vm-modules` to execution paths to natively allow Jest to process ES Module scopes.
-`jest.config.js`: Updated to 1export default1 and configured `testPathIgnorePatterns` to make sure standard unit tests completely skip the tests/e2e/ directory.
-`jest.config.e2e.js`: Clean configuration explicitly handling E2E test environments.
-`babel.config.cjs`: Renamed to .cjs so Babel compiles under a legacy CommonJS context without breaking our modern module runtime environment.
+- `package.json`: Updated to `"type": "module"` and added `--experimental-vm-modules` to execution paths to natively allow Jest to process ES Module scopes.
+- `jest.config.js`: Updated to 1export default1 and configured `testPathIgnorePatterns` to make sure standard unit tests completely skip the tests/e2e/ directory.
+- `jest.config.e2e.js`: Clean configuration explicitly handling E2E test environments.
+- `babel.config.cjs`: Renamed to .cjs so Babel compiles under a legacy CommonJS context without breaking our modern module runtime environment.
 
 
