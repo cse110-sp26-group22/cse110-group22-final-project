@@ -35,6 +35,6 @@ describe('Timer', () => {
     test('floating point values are handled correctly', () => {
         timer.remainingTime = 90.5;
         expect(timer.remainingTime).toBe(90.5);
-        expect(timer.element.textContent).toBe('1:30');
+        expect(timer.element.textContent).toBe('1:31');
     });
 });

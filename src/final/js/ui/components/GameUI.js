@@ -7,7 +7,6 @@ import PlantDisplayGroup from "./game/plants/PlantDisplayGroup.js";
 import GameTray from "./game/tray/GameTray.js";
 import Combo from "./game/Combo.js";
 import Timer from "./game/Timer.js";
-import { store } from "../store.js";
 import NotificationDisplay from "./NotificationDisplay.js";
 
 
@@ -45,7 +44,15 @@ export default class GameUI {
         
         this.gameTray = new GameTray(assertHTMLElement(this.element.querySelector('.game-tray')));
         
-        store.subscribe('timer', (/** @type {number} */ value) => this.timer.remainingTime = value);
+        setInterval(() => this.clockTick(), 1000); 
+    }
+
+    /**
+     * Updates all subcomponents that rely on the clock.
+     */
+    clockTick(){
+        this.timer.rerender();
+        this.statsDisplay.rerender();
     }
 
     /**

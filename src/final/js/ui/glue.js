@@ -17,6 +17,9 @@ function handleLoadScreen(screenName, data) {
         resultsScreen.hide();
         gameUI.show();
         gameUI.sendQuestion(data.questions[data.currentQuestionIndex], data.answers[data.currentQuestionIndex]);
+        store.update('questionEndTime', data.questionEndTime);
+        store.update('language', data.language);
+        store.update('totalQuestions', data.questions.length);
         console.debug(`Loaded game screen with question: ${data.questions[data.currentQuestionIndex]} and answer: ${data.answers[data.currentQuestionIndex]}`);
     }
     if (screenName === 'pause') {
@@ -25,17 +28,10 @@ function handleLoadScreen(screenName, data) {
         resultsScreen.hide();
         mainMenu.hide();
     }
-    if (screenName === 'endscreen') {
+    if (screenName === 'endscreen' || screenName === 'results') {
         gameUI.hide();
-        //TODO: pass real data here
-        resultsScreen.show({ 
-            score: 0,
-            questionsAnswered: 0,
-            totalQuestions: 0,
-            accuracy: '0%',
-            cpm: 0,
-            language: 'python'
-        });
+        store.update('numCorrectQuestions', data.numCorrectQuestions);
+        resultsScreen.show();
         mainMenu.hide();
     }
     if (screenName === 'mainmenu' || screenName === 'levelselect') {
@@ -50,15 +46,11 @@ function handleLoadScreen(screenName, data) {
  * @param {*} data 
  */
 function handleUpdateScreen(response, data) {
-    if (response === 'tick') {
-        store.update('timer', data.timer);
-    }
-    if (response === 'correct-char') {
-        gameUI.combo.increment();
-    }
-    if (response === 'incorrect') {
-        gameUI.combo.reset();
-    }
+    console.debug(`Updating screen with response: ${response} and data:`, data);
+    store.update('combo', data.combo);
+    store.update('score', data.score);
+    store.update('incorrectInputs', data.incorrectInputs);
+    store.update('totalInputs', data.totalInputs);
     if (response === 'next-question') {
         gameUI.sendQuestion(data.questions[data.currentQuestionIndex], data.answers[data.currentQuestionIndex]);
     }
@@ -70,11 +62,10 @@ export function initializeBackend() {
 
 /**
  * Relays user input from the UI to the backend.
- * @param {string} key 
+ * @param {string} input - The user's input, e.g. a key press.
  */
-export function handleKeyPress(key){
-    console.log(`Key pressed: ${key}`);
-    onInput(key); //backend naming is different from our convention
+export function handleInputChange(input){
+    onInput(input); // backend naming is different from our convention
 }
 
 export { startLevel, pauseGame, resumeGame, goToLevelSelect, goToMainMenu };

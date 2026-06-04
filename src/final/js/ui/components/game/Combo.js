@@ -1,4 +1,5 @@
 import { assertHTMLElement } from "../../utils.js";
+import { store } from "../../store.js";
 /**
  * The component responsible for displaying the combo count.
  * 
@@ -20,6 +21,7 @@ export default class Combo {
     constructor(element){
         this.element = element;
         this.countElement = assertHTMLElement(element.querySelector('span'));
+        store.subscribe('combo', (/** @type {number} */ value) => this.setValue(value));
     }
 
     /**
@@ -51,6 +53,29 @@ export default class Combo {
         this.element.offsetWidth; //force reflow to restart animation if already flashed
         this.element.classList.add('flashed');
     }
+    
+    /**
+     * Sets the combo count and updates the display.
+     * @param {number} newCombo - The new combo count.
+     */
+    setValue(newCombo) {
+        if(newCombo > this.#comboCount){
+            if(!this.#rollDownPromise) this.renderedComboCount = this.#comboCount;
+            this.#comboCount = newCombo;
+            setTimeout(() => this.renderedComboCount = this.#comboCount, 20);
+            this.flash();
+        } else {
+            this.#comboCount = newCombo;
+            this.rollDown();
+        }
+    }
+
+    /**
+     * Returns the current combo count held by this component.
+     */
+    get combo() {
+        return this.#comboCount;
+    }
 
     /**
      * Increments the combo count by 1 and updates the display.
@@ -63,7 +88,7 @@ export default class Combo {
     }
 
     /**
-     * Repeatedly decrements the rendered combo count by 1 every 0.01 seconds until it reaches 0.
+     * Repeatedly decrements the rendered combo count by 1 until it reaches 0.
      * @private
      */
     rollDown(){
