@@ -295,6 +295,7 @@ function handleQuestionComplete() {
     if(state.growthLevel < 3){
       state.growthLevel++;
     }
+    callbacks.updateScreen("plant-growth", { ...state });
   }
 
   // If more questions exist -> Go to next question
