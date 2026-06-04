@@ -15,23 +15,18 @@ let timeoutId = null;
  * @param {function(number): void} onTick - Called every second with the updated time
  * @param {function(): void} onExpire - Called when the timer reaches 0
  */
-export function startTimer(end_time, onExpire) {
+export function startTimer(state, onExpire) {
   stopTimer();
-  const timeRemaining = end_time - Date.now();
   
-  if (timeRemaining <= 0) {
-    onExpire();
-    return;
-  }
+  const timeRemaining = state.remainingOnPause > 0 ? state.remainingOnPause : state.timeLimit;
 
   timeoutId = setTimeout(() => {
     timeoutId = null;
     onExpire();
   }, timeRemaining);
+
+  return Date.now() + state.timeLimit;
 }
-
-
-
 
 /**
  * Stops the countdown timer without triggering onExpire.

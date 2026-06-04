@@ -17,16 +17,20 @@ describe("isRunning", () => {
     expect(isRunning()).toBe(false);
   });
 
-  test("returns true after startTimer is called with future end_time", () => {
-    const futureTime = Date.now() + 5000;
-    startTimer(futureTime, () => {});
+  test("returns true after startTimer is called", () => {
+    startTimer({ timeLimit: 5000 }, () => {});
     expect(isRunning()).toBe(true);
   });
 
   test("returns false after stopTimer is called", () => {
-    const futureTime = Date.now() + 5000;
-    startTimer(futureTime, () => {});
+    startTimer({ timeLimit: 5000 }, () => {});
     stopTimer();
+    expect(isRunning()).toBe(false);
+  });
+
+  test("returns false once onExpire fires", () => {
+    startTimer({ timeLimit: 1000 }, () => {});
+    jest.advanceTimersByTime(1000);
     expect(isRunning()).toBe(false);
   });
 });
@@ -40,11 +44,10 @@ describe("stopTimer", () => {
 
   test("prevents onExpire from firing after stopTimer", () => {
     const onExpire = jest.fn();
-    const futureTime = Date.now() + 3000;
-    startTimer(futureTime, onExpire);
+    startTimer({ timeLimit: 3000 }, onExpire);
     jest.advanceTimersByTime(1000);
     stopTimer();
-    jest.advanceTimersByTime(5000);
+    jest.advanceTimersByTime(3000);
     expect(onExpire).not.toHaveBeenCalled();
   });
 });
@@ -52,50 +55,54 @@ describe("stopTimer", () => {
 // ── startTimer ────────────────────────────────────────────────────────────────
 
 describe("startTimer", () => {
-  test("calls onExpire after the specified duration", () => {
+  test("calls onExpire after state.timeLimit ms", () => {
     const onExpire = jest.fn();
-    const futureTime = Date.now() + 2000;
-    startTimer(futureTime, onExpire);
-    jest.advanceTimersByTime(2000);
+    startTimer({ timeLimit: 3000 }, onExpire);
+    jest.advanceTimersByTime(3000);
     expect(onExpire).toHaveBeenCalledTimes(1);
   });
 
   test("does not call onExpire before time runs out", () => {
     const onExpire = jest.fn();
-    const futureTime = Date.now() + 5000;
-    startTimer(futureTime, onExpire);
-    jest.advanceTimersByTime(4000);
+    startTimer({ timeLimit: 5000 }, onExpire);
+    jest.advanceTimersByTime(4999);
     expect(onExpire).not.toHaveBeenCalled();
   });
 
-  test("calls onExpire immediately if end_time is in the past", () => {
+  test("calls onExpire exactly once even with extra time elapsed", () => {
     const onExpire = jest.fn();
-    const pastTime = Date.now() - 1000;
-    startTimer(pastTime, onExpire);
+    startTimer({ timeLimit: 2000 }, onExpire);
+    jest.advanceTimersByTime(5000);
     expect(onExpire).toHaveBeenCalledTimes(1);
   });
 
-  test("restarting stops the previous timer and starts a new one", () => {
-    const onExpire1 = jest.fn();
-    const onExpire2 = jest.fn();
-    startTimer(Date.now() + 5000, onExpire1);
-    startTimer(Date.now() + 3000, onExpire2);
-    jest.advanceTimersByTime(5000);
-    expect(onExpire1).not.toHaveBeenCalled();
-    expect(onExpire2).toHaveBeenCalledTimes(1);
-  });
-
-  test("timer is not running after onExpire fires", () => {
-    startTimer(Date.now() + 1000, () => {});
-    jest.advanceTimersByTime(1000);
-    expect(isRunning()).toBe(false);
-  });
-
-  test("stopTimer prevents onExpire from being called", () => {
+  test("uses remainingOnPause as duration when it is > 0", () => {
     const onExpire = jest.fn();
-    startTimer(Date.now() + 2000, onExpire);
-    stopTimer();
+    startTimer({ timeLimit: 5000, remainingOnPause: 2000 }, onExpire);
+    jest.advanceTimersByTime(2000);
+    expect(onExpire).toHaveBeenCalledTimes(1);
+  });
+
+  test("uses timeLimit as duration when remainingOnPause is 0", () => {
+    const onExpire = jest.fn();
+    startTimer({ timeLimit: 3000, remainingOnPause: 0 }, onExpire);
     jest.advanceTimersByTime(3000);
+    expect(onExpire).toHaveBeenCalledTimes(1);
+  });
+
+  test("restarting cancels the previous timer", () => {
+    const onExpire = jest.fn();
+    startTimer({ timeLimit: 5000 }, onExpire);
+    jest.advanceTimersByTime(2000);
+    startTimer({ timeLimit: 5000 }, onExpire);
+    jest.advanceTimersByTime(2000);
     expect(onExpire).not.toHaveBeenCalled();
+  });
+
+  test("returns Date.now() + state.timeLimit", () => {
+    const now = Date.now();
+    const timeLimit = 5000;
+    const result = startTimer({ timeLimit }, () => {});
+    expect(result).toBe(now + timeLimit);
   });
 });
