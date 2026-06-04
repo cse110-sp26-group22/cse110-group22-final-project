@@ -73,7 +73,7 @@ export function defaultGameState() {
     timeLimit:            600000,
     questionStartTime:    0,
     questionEndTime:      0,
-    remainingOnPause:     60,
+    remainingOnPause:     0,
     score:                0,
     isActive:             false,
     isPaused:             false,

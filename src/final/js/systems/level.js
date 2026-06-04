@@ -5,9 +5,6 @@
  * Fetches questions from the category JSON, filters by difficulty, shuffles,
  * and returns a plain state object that game.js merges into its active state.
  *
- * The returned object is JSON-serializable and can be passed directly to
- * storage.js — no methods, no closures, no hidden state.
- *
  * game.js advances through questions by incrementing state.current_question_index.
  * The current prompt and answer are always:
  *   state.questions[state.current_question_index]
@@ -36,7 +33,7 @@ const LEVELS = [
  * via storage.js without any conversion.
  *
  * @param {number} levelNumber - 1-indexed level number
- * @param {string} category    - Question category slug (e.g. "python", "unix")
+ * @param {string} category    - Question category (e.g. "python", "javascript")
  * @returns {Promise<GameState>}
  */
 export async function loadLevel(levelNumber, category) {
