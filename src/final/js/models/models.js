@@ -64,18 +64,18 @@ export function defaultProfile() {
 /** @returns {GameState} */
 export function defaultGameState() {
   return {
-    plants:               [0, 0, 0], // TODO: Possibly depreciated. May need removal.
-    growthLevel:          0,  // Needs implementation in handleQuestionComplete()
+    growthLevel:          0,  
     questions:            [],
     answers:              [],
     baseScores:           [],
     language:             null,
     level:                1,
     currentQuestionIndex: 0,
+    numCorrectQuestions:  0,  
     maxPrefixLength:      0,
-    totalInputs:          0,  // TODO: Needs implementation in onInput()
+    totalInputs:          0,  
     incorrectInputs:      0,
-    combo:                0,  // TODO: Needs implementation in onInput()
+    combo:                0,  
     timeLimit:            600000,
     questionStartTime:    0,
     questionEndTime:      0,

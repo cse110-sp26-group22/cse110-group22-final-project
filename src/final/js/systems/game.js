@@ -36,12 +36,13 @@
  * - "correct"        → user entered a correct input
  * - "incorrect"      → user entered a wrong input
  * - "next-question"  → answer complete, next question ready
+ * - "plant-growth"    → plant growth level increased
  *
  * Screens emitted via loadScreen():
  * - "game"           → switch to game screen (level just started or resumed)
  * - "pause"          → switch to pause screen
  * - "results"        → switch to results screen (time up or all questions done)
- * = "endscreen"      → switch to end screen (all levels completed)
+ * - "endscreen"      → switch to end screen (all levels completed)
  * - "mainmenu"       → switch to main menu (player exits session)
  */
 
@@ -158,6 +159,8 @@ export function pauseGame() {
 export function onInput(input) {
   if (!state.isActive || state.isPaused) return;
 
+  state.totalInputs++;
+
   const answer = state.answers[state.currentQuestionIndex];
   if (!answer) return;
 
@@ -179,12 +182,14 @@ export function onInput(input) {
   // Incorrect input
   if (prefixLength <= state.maxPrefixLength) {
     state.incorrectInputs++;
+    combo = 0;
     callbacks.updateScreen("incorrect", { ...state });
     return;
   }
 
   // Correct input
   state.maxPrefixLength = prefixLength;
+  combo++;
   callbacks.updateScreen("correct", { ...state });
   return;
 }
@@ -274,8 +279,9 @@ function handleQuestionComplete() {
 
   // Calculate post-question score
   const elapsedTime = Date.now() - state.questionStartTime;
-  if (elapsedTime <= state.timeLimit) { //can probably be simplified by changes to scoring.js
+  if (elapsedTime <= state.timeLimit) { 
     state.score += calculateTotalScore( { ...state }, elapsedTime);
+    numCorrectQuestions++;
   }
   else{
     state.score += 0;
@@ -284,9 +290,11 @@ function handleQuestionComplete() {
   // Increment current question
   state.currentQuestionIndex++;
 
-  // Grow plant every 3rd question 
-  if (state.currentQuestionIndex % 3 === 0) {
-    state.plants[0]++; // TODO: Change from array to int implementation
+  // Grow plant every 3rd question answered within time limit
+  if (state.numCorrectQuestions % 3 === 0) {
+    if(state.growthLevel < 3){
+      state.growthLevel++;
+    }
   }
 
   // If more questions exist -> Go to next question

@@ -31,10 +31,9 @@ export function calculateTimeMultiplier(elapsedMs, timeLimit) {
     return Math.max(0.7, Math.min(multiplier, 1.3));
 }
 
-// streak is presently unused, but we will implement streak multipliers in the future
-// export function calculateStreakBonus(streak) {
-//    return Math.min(1 + streak * 0.05, 2.0);
-// }
+export function calculateComboBonus(combo) {
+   return Math.min(1 + combo * 0.05, 2.0);
+}
 
 export function calculateTotalScore(state, elapsedMs = 0) {
     const {
@@ -43,7 +42,8 @@ export function calculateTotalScore(state, elapsedMs = 0) {
         answers = [],
         current_input = "",
         current_question_index = 0,
-        time_limit = 0
+        time_limit = 0,
+        combo = 0
     } = state;
 
     const answer = answers[current_question_index] || "";
@@ -60,13 +60,13 @@ export function calculateTotalScore(state, elapsedMs = 0) {
         time_limit
     );
 
-    //const streakMultiplier = calculateStreakMultiplier(streak);
+    const comboMultiplier = calculateComboBonus(combo);
 
     const finalScore =
         questionBaseScore *
         accuracyMultiplier *
-        timeMultiplier;
-        //streakMultiplier;
+        timeMultiplier *
+        comboMultiplier;
 
     return Math.round(Math.max(0, finalScore));
 }
