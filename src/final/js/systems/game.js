@@ -85,7 +85,6 @@ const MAX_PLANT_GROWTH_LEVEL = 2;
 function copyState() {
   return {
     ...state,
-    growthLevel: [...state.growthLevel],
     timeUsed: [...state.timeUsed],
   };
 }
