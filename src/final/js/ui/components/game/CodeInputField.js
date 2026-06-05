@@ -40,6 +40,14 @@ export default class CodeInputField {
     }
 
     /**
+     * Clears the current input and rerenders the ghost text.
+     */
+    clearInput() {
+        this.codeInput.value = '';
+        this.renderGhostText();
+    }
+
+    /**
      * Renders the ghost text based on the current input value. 
      * The part of the ghost text that overlaps with the input value is rendered in the "invisible" span, while the rest is rendered in the "visible" span.
      */
