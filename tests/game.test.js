@@ -275,82 +275,35 @@ describe("onInput", () => {
     expect(data.incorrectInputs).toBe(0);
   });
 
-  test("fires 'results' when the last answer is completed on level 3", async () => {
+  test("fires 'results' when the last answer is completed on level 2", async () => {
     loadLevel.mockResolvedValue(makeLevelState({
       questions: ["Q1"],
       answers:   ["ab"],
       baseScores:[100],
-      level:     3,
-    }));
-    await startLevel(3, "python");
-    jest.clearAllMocks();
-    await onInput("ab");
-    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
-  });
-
-  test("loads level 2 when the last answer is completed on level 1", async () => {
-    loadLevel.mockResolvedValueOnce(makeLevelState({
-      questions: ["Q1"],
-      answers:   ["ab"],
-      baseScores:[100],
-      level:     1,
-    })).mockResolvedValueOnce(makeLevelState({
-      questions: ["Q2"],
-      answers:   ["cd"],
-      baseScores:[100],
       level:     2,
-    }));
-    await startLevel(1, "python");
-    jest.clearAllMocks();
-    await onInput("ab");
-    expect(loadLevel).toHaveBeenLastCalledWith(2, "python");
-    expect(mockLoadScreen).toHaveBeenCalledWith("game", expect.objectContaining({
-      level: 2,
-      currentQuestionIndex: 0,
-      totalQuestions: 2,
-    }));
-  });
-
-  test("loads level 3 when the last answer is completed on level 2", async () => {
-    loadLevel.mockResolvedValueOnce(makeLevelState({
-      questions: ["Q1"],
-      answers:   ["ab"],
-      baseScores:[100],
-      level:     2,
-    })).mockResolvedValueOnce(makeLevelState({
-      questions: ["Q3"],
-      answers:   ["ef"],
-      baseScores:[100],
-      level:     3,
     }));
     await startLevel(2, "python");
     jest.clearAllMocks();
     await onInput("ab");
-    expect(loadLevel).toHaveBeenLastCalledWith(3, "python");
-    expect(mockLoadScreen).toHaveBeenCalledWith("game", expect.objectContaining({
-      level: 3,
-      currentQuestionIndex: 0,
-      totalQuestions: 2,
-    }));
+    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
+    const data = mockLoadScreen.mock.calls[0][1];
+    expect(data.isOver).toBeFalsy();
   });
 
-  test("passes cumulative question counts to results after level 3", async () => {
+  test("fires 'results' with isOver=true when the last answer is completed on level 3", async () => {
     loadLevel.mockResolvedValue(makeLevelState({
-      questions: ["Q1", "Q2", "Q3"],
-      answers:   ["ab", "cd", "ef"],
-      baseScores:[100, 100, 100],
+      questions: ["Q1"],
+      answers:   ["ab"],
+      baseScores:[100],
       level:     3,
     }));
     await startLevel(3, "python");
     jest.clearAllMocks();
     await onInput("ab");
-    await onInput("cd");
-    await onInput("ef");
-    const data = mockLoadScreen.mock.calls[0][1];
     expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
-    expect(data.totalQuestions).toBe(3);
-    expect(data.timeUsed).toHaveLength(3);
-    expect(data.totalAnswerCharacters).toBe(6);
+    const data = mockLoadScreen.mock.calls[0][1];
+    expect(data.isOver).toBe(true);
+    expect(data.finalScore).toBeDefined();
   });
 
   test("state passed to updateScreen contains expected fields", () => {

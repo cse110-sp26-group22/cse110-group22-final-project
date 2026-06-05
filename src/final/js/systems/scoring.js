@@ -80,7 +80,7 @@ export function calculateTotalScore(state, elapsedMs = 0) {
         baseScores = [],
         incorrectInputs = 0,
         answers = [],
-        currentInput = "",
+        currentInput = "",  // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
         currentQuestionIndex = 0,
         timeLimit = 0,
         combo = 0,
@@ -89,7 +89,7 @@ export function calculateTotalScore(state, elapsedMs = 0) {
 
     const answer = answers[currentQuestionIndex] || "";
     const questionBaseScore = baseScores[currentQuestionIndex] || 0;
-    const totalChars = Math.max(answer.length, currentInput.length);
+    const totalChars = Math.max(answer.length, currentInput.length);   // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
 
     const accuracyMultiplier = calculateAccuracyMultiplier(
         incorrectInputs,

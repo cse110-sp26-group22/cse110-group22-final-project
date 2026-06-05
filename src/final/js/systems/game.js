@@ -6,7 +6,7 @@
  *
  * Main responsibilities:
  * - Initialize and own GameState as single source of truth
- * - Handle game lifecycle: startLevel(), endGame(), pauseGame(), resumeGame()
+ * - Handle game lifecycle: startLevel(), pauseGame(), resumeGame()
  * - Process player input (onInput) and update state accordingly
  * - Coordinate modules: level.js, scoring.js, timer.js, storage.js
  * - Fire callbacks back to ui-core.js after each state change
@@ -183,14 +183,14 @@ export function pauseGame() {
 export async function onInput(input) {
   if (!state.isActive || state.isPaused) return;
 
-  const previousInput = state.currentInput;
+  const previousInput = state.currentInput;  // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
   const isDeletion = input.length < previousInput.length;
   const addedText = input.length > previousInput.length
     ? input.slice(previousInput.length)
     : "";
   const isWhitespaceOnlyInput = addedText.length > 0 && addedText.trim() === "";
   const shouldCountInput = !isDeletion && !isWhitespaceOnlyInput;
-  state.currentInput = input;
+  state.currentInput = input;                // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
 
   if (shouldCountInput) state.totalInputs++;
 
@@ -295,27 +295,6 @@ function goToResults() {
   callbacks.loadScreen("results", copyState());
 }
 
-async function advanceToNextLevel() {
-  const nextLevel = state.level + 1;
-  const category = state.language ?? player.language;
-  const previousTotalQuestions = state.totalQuestions;
-
-  Object.assign(state, await loadLevel(nextLevel, category));
-  state.totalQuestions = previousTotalQuestions + state.questions.length;
-  state.currentQuestionIndex = 0;
-  state.currentInput = "";
-  state.maxPrefixLength = 0;
-  state.incorrectInputs = 0;
-  state.combo = 0;
-  state.remainingOnPause = 0;
-  state.questionStartTime = Date.now();
-  state.questionEndTime = startTimer( { ...state }, _onExpire);
-  state.isActive = true;
-  state.isPaused = false;
-
-  callbacks.loadScreen("game", copyState());
-}
-
 /**
  * Handles the end of a question
  */
@@ -349,21 +328,24 @@ async function handleQuestionComplete(answeredCorrectly = false) {
   // If more questions exist -> Go to next question
   if (state.currentQuestionIndex < state.questions.length) {
     state.maxPrefixLength = 0;
-    state.currentInput = "";
+    state.currentInput = "";    // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
     state.incorrectInputs = 0;
     state.questionStartTime = Date.now();
     state.questionEndTime = startTimer( { ...state }, _onExpire);
-    callbacks.updateScreen("next-question", copyState());
+    callbacks.updateScreen("next-question", { ...state });
     return;
   }
 
-  // If no more questions AND more levels exist -> Go to next level
+  // If no more questions AND more levels exist -> Go to results
   if (state.currentQuestionIndex >= state.questions.length && state.level < getLevelCount()) {
-    await advanceToNextLevel();
+    player.score += state.score;
+    goToResults();
     return;
   }
 
-  // If no more questions AND no more levels exist -> Go to results
+  // If no more questions AND no more levels exist -> Go to results + Gameover state updates
+  state.isOver = true;
+  state.finalScore = player.score;
   goToResults();
   return;
 }

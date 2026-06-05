@@ -47,11 +47,12 @@ export function defaultProfile() {
  * @property {string}    language             - Selected language in main menu
  * @property {number}    level                - Current game level
  * @property {number}    currentQuestionIndex - Index into questions[] / answers[]
- * @property {string}    currentInput         - Current text entered by the player
+ * @property {string}    currentInput         - Current text entered by the player      // TODO: Remove. Depreciated value. Does not work with front-end.
  * @property {number}    maxPrefixLength      - Max input prefix length seen for respective answer
  * @property {number}    totalInputs          - Total inputs entered for current level
  * @property {number}    totalIncorrectInputs - Wrong input events this level
- * @property {number}    totalQuestions       - Total questions loaded for this game session
+ * @property {number}    clicksPerMinute      - CPM for current level
+ * @property {number}    totalQuestions       - Total questions loaded for this level
  * @property {number}    totalAnswerCharacters - Total answer length for completed questions
  * @property {number}    incorrectInputs      - Wrong inputs for current question
  * @property {number}    combo                - Number of correct inputs entered in a row
@@ -60,7 +61,8 @@ export function defaultProfile() {
  * @property {number}    questionStartTime    - Timestamp when the current question started.
  * @property {number}    questionEndTime      - Timestamp when the current question timer ends.
  * @property {number}    remainingOnPause     - Remaining ms for timer at pause.
- * @property {number}    score                - Points accumulated this session
+ * @property {number}    score                - Points accumulated this level
+ * @property {number}    finalScore           - Total points accumilated this game session
  * @property {boolean}   isActive             - Is game started
  * @property {boolean}   isPaused             - Is game paused
  * @property {boolean}   isOver               - Is game completed
@@ -81,6 +83,7 @@ export function defaultGameState() {
     maxPrefixLength:      0,
     totalInputs:          0,  
     totalIncorrectInputs: 0,
+    clicksPerMinute:      0,
     totalQuestions:       0,
     totalAnswerCharacters: 0,
     incorrectInputs:      0,
@@ -91,6 +94,7 @@ export function defaultGameState() {
     questionEndTime:      0,
     remainingOnPause:     0,
     score:                0,
+    finalScore:           0,
     isActive:             false,
     isPaused:             false,
     isOver:               false
