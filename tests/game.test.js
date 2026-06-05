@@ -54,13 +54,16 @@ import { defaultGameState }               from "../src/final/js/models/models.js
  */
 function makeLevelState(overrides = {}) {
   return {
-    ...defaultGameState(),   // picks up any new GameState fields automatically
+    ...defaultGameState(),
     questions:  ["Q1", "Q2"],
     answers:    ["ab", "cd"],
     baseScores: [100, 100],
     level:      1,
     timeLimit:  30000,
     language:   "python",
+    growthLevel: 1,           
+    currentInput: "",     
+    totalIncorrectInputs: 0,  
     ...overrides,
   };
 }
