@@ -1,6 +1,7 @@
 import GameUI from './components/GameUI.js';
 import MainMenu from './components/MainMenu.js';
 import ResultsScreen from './components/ResultsScreen.js';
+import RulesBox from './components/RulesBox.js';
 import { assertHTMLElement } from './utils.js';
 import * as glue from './glue.js';
 
@@ -14,6 +15,8 @@ let gameUI;
 let mainMenu;
 /** @type {ResultsScreen} */
 let resultsScreen;
+/** @type {RulesBox} */
+let rulesBox;
 
 // TODO: update when multiple languages are added
 /** @type {string} Last language the user started a game with, used for Retry. */
@@ -38,15 +41,21 @@ function main() {
     resultsScreen = new ResultsScreen(resultsScreenElement);
     resultsScreen.hide();
 
+    const rulesBoxElement = assertHTMLElement(document.querySelector('.rules-box'));
+    rulesBox = new RulesBox(rulesBoxElement);
+    rulesBox.hide();
+
     mainMenu.onStart((language) => {
         lastLanguage = language;
         mainMenu.hide();
+        rulesBox.show()
         gameUI.show();
         glue.startLevel(1, language);
     });
 
     resultsScreen.onRetry(() => {
         resultsScreen.hide();
+        rulesBox.show()
         gameUI.show();
         glue.startLevel(1, lastLanguage);
     });
@@ -57,12 +66,12 @@ function main() {
 
     resultsScreen.onMainMenu(() => {
         resultsScreen.hide();
+        rulesBox.hide();
         mainMenu.show();
         glue.goToMainMenu();
     });
 }
 
-// TODO: make sure this gets called eventually
 /**
  * Call this when the game round ends to transition to the results screen.
  * @param {{ score: number, accuracy: string, cpm: number, questionsAnswered: number, totalQuestions: number }} stats
@@ -74,4 +83,4 @@ export function showResults(stats) {
 
 document.addEventListener('DOMContentLoaded', main);
 
-export { gameUI, mainMenu, resultsScreen };
+export { gameUI, mainMenu, resultsScreen, rulesBox };

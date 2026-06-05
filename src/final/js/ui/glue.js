@@ -4,7 +4,7 @@ import {
 } from "../systems/game.js"
 
 import { store } from "./store.js";
-import { mainMenu, gameUI, resultsScreen } from "./ui.js";
+import { mainMenu, gameUI, resultsScreen, rulesBox } from "./ui.js";
 
 let latestGameData;
 
@@ -88,6 +88,7 @@ function handleLoadScreen(screenName, data) {
     if (screenName === 'game') {
         mainMenu.hide();
         resultsScreen.hide();
+        rulesBox.show();
         gameUI.show();
         gameUI.pauseMenu.hide();
         const { question, answer } = getCurrentQuestion(data);
@@ -107,6 +108,7 @@ function handleLoadScreen(screenName, data) {
     if (screenName === 'results' || screenName === 'endscreen') {
         gameUI.stopCountdown();
         gameUI.hide();
+        rulesBox.hide();
         resultsScreen.show(getResultsStats(data));
         mainMenu.hide();
     }
@@ -114,6 +116,7 @@ function handleLoadScreen(screenName, data) {
         gameUI.stopCountdown();
         gameUI.hide();
         gameUI.pauseMenu.hide();
+        rulesBox.hide();
         resultsScreen.hide();
         mainMenu.show();
     }
