@@ -20,15 +20,11 @@
 
   <!-- MainMenu -->
   <div id="main-menu">
-    <h3>Main Menu</h3>
-    <p>Select a language and play!</p>
-    <select class="main-menu-language-select">
-      <option value="python">Python</option>
-      <option value="language2">Language 2</option>
-      <option value="language3">Language 3</option>
-      <option value="language4">Language 4</option>
-    </select>
-    <button type="button" class="main-menu-start">Start Game</button>
+    <h1>Typing Game</h1>
+    <ul class="main-menu-list">
+      <li><button type="button" class="main-menu-btn" data-language="python">Python</button></li>
+      <li><button type="button" class="main-menu-btn" data-language="javascript">JavaScript</button></li>
+    </ul>
   </div>
 
   <!-- ResultsScreen: hidden until game engine calls showResults() -->
