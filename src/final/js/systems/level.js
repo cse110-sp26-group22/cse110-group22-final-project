@@ -67,6 +67,10 @@ export async function loadLevel(levelNumber, category) {
     level:                config.levelNumber,
     timeLimit:            config.timeLimit,
     language:             category,
+    currentQuestionIndex: 0,  
+    growthLevel:          1,       
+    currentInput:         "",       
+    totalIncorrectInputs: 0,
   };
 }
 
