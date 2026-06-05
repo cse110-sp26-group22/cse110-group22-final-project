@@ -250,7 +250,7 @@ export function goToMainMenu() {
 /**
  * Ends the current game session: stops the timer, accumulates session results
  * into the player profile, clears in-progress state, and
- * signals ui-core to show the end screen.
+ * signals ui-core to show the results screen.
  */
 function endGame() {
   state.isActive = false;
@@ -260,7 +260,7 @@ function endGame() {
 
   stopTimer();
 
-  callbacks.loadScreen("endscreen", {...state });
+  callbacks.loadScreen("results", {...state });
 }
 
 function goToResults() {
