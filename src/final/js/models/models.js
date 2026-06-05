@@ -71,7 +71,7 @@ export function defaultProfile() {
 /** @returns {GameState} */
 export function defaultGameState() {
   return {
-    growthLevel:          [0],
+    growthLevel:          1,
     questions:            [],
     answers:              [],
     baseScores:           [],
@@ -93,6 +93,7 @@ export function defaultGameState() {
     questionStartTime:    0,
     questionEndTime:      0,
     remainingOnPause:     0,
+    levelAccuracyPercent: 0,
     score:                0,
     finalScore:           0,
     isActive:             false,

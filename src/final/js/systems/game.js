@@ -90,18 +90,6 @@ function copyState() {
   };
 }
 
-function growActivePlant() {
-  if (state.growthLevel.length === 0) state.growthLevel.push(0);
-
-  const activePlantIndex = state.growthLevel.length - 1;
-  if (state.growthLevel[activePlantIndex] < MAX_PLANT_GROWTH_LEVEL) {
-    state.growthLevel[activePlantIndex]++;
-    return;
-  }
-
-  state.growthLevel.push(0);
-}
-
 // ── Callback registration ─────────────────────────────────────────────────────
 
 /**
@@ -209,7 +197,7 @@ export async function onInput(input) {
   // Correct input + Completed answer 
   if (input === answer) {
     console.debug("Answer complete for question index", state.currentQuestionIndex);
-    await handleQuestionComplete(true);
+    await handleQuestionComplete();
     return;
   } 
 
@@ -291,17 +279,17 @@ function goToResults() {
 /**
  * Handles the end of a question
  */
-async function handleQuestionComplete(answeredCorrectly = false) {
+async function handleQuestionComplete() {
 
   // Calculate post-question score
   const timeRemaining = Math.max(0, state.questionEndTime - Date.now());
   const elapsedTime = Math.max(0, state.timeLimit - timeRemaining);
   const answer = state.answers[state.currentQuestionIndex] ?? "";
-  state.timeUsed.push(elapsedTime);
-  state.totalAnswerCharacters += answer.length;
-  const answeredWithinTime = answeredCorrectly && elapsedTime <= state.timeLimit;
 
-  if (answeredWithinTime) {
+  state.timeUsed.push(elapsedTime);
+  // state.totalAnswerCharacters += answer.length; this line was used nowhere else. accuracy is based on total inputs vs total incorrect inputs, not answer length, so this line was removed.
+  
+  if (elapsedTime <= state.timeLimit) {
     state.score += calculateTotalScore(copyState(), elapsedTime);
     state.numCorrectQuestions++;
   }
@@ -313,9 +301,11 @@ async function handleQuestionComplete(answeredCorrectly = false) {
   state.currentQuestionIndex++;
 
   // Grow plant every 3rd question answered within time limit
-  if (answeredWithinTime && state.numCorrectQuestions % 3 === 0) {
-    growActivePlant();
-    callbacks.updateScreen("plant-growth", copyState());
+  if (elapsedTime <= state.timeLimit && state.numCorrectQuestions % 3 === 0) {
+    if(state.growthLevel < MAX_PLANT_GROWTH_LEVEL) {
+      state.growthLevel++;
+      callbacks.updateScreen("plant-growth", copyState());
+    }
   }
 
   // If more questions exist -> Go to next question
@@ -323,6 +313,7 @@ async function handleQuestionComplete(answeredCorrectly = false) {
     state.maxPrefixLength = 0;
     state.currentInput = "";    // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
     state.incorrectInputs = 0;
+    state.combo = 0;
     state.questionStartTime = Date.now();
     state.questionEndTime = startTimer( { ...state }, _onExpire);
     callbacks.updateScreen("next-question", { ...state });
@@ -332,6 +323,10 @@ async function handleQuestionComplete(answeredCorrectly = false) {
   // If no more questions AND more levels exist -> Go to results
   if (state.currentQuestionIndex >= state.questions.length && state.level < getLevelCount()) {
     player.score += state.score;
+
+    const accuracyPercentage = (1 - (state.totalIncorrectInputs / state.totalInputs)) * 100;
+    state.levelAccuracyPercent = accuracyPercentage.toFixed(2);
+
     goToResults();
     return;
   }
@@ -349,7 +344,7 @@ async function handleQuestionComplete(answeredCorrectly = false) {
  * Fired by timer.js when the countdown reaches 0.
  */
 function _onExpire() {
-  handleQuestionComplete(false);
+  handleQuestionComplete();
 }
 
 // ── Profile management handling ────────────────────────────────────────────────

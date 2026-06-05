@@ -84,7 +84,7 @@ export function calculateTotalScore(state, elapsedMs = 0) {
         currentQuestionIndex = 0,
         timeLimit = 0,
         combo = 0,
-        growthLevel = []
+        growthLevel = 0
     } = state;
 
     const answer = answers[currentQuestionIndex] || "";
@@ -102,10 +102,8 @@ export function calculateTotalScore(state, elapsedMs = 0) {
 
     const comboMultiplier = calculateComboBonus(combo);
 
-    // Sum the bonus from each plant in the current growth state.
-    const plantBonus = growthLevel.reduce((total, plant) => {
-        return total + addPlantBonus(plant);
-    }, 0);
+    // Sum the bonus from the plant in the current growth state.
+    const plantBonus = addPlantBonus(growthLevel);
 
     const finalScore =
         questionBaseScore *
