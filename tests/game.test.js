@@ -9,7 +9,18 @@
 // ── Dependency mocks ──────────────────────────────────────────────────────────
 
 jest.mock("../src/final/js/systems/level.js", () => ({
-  loadLevel: jest.fn(),
+  loadLevel: jest.fn(async (levelNumber, category) => ({
+    questions: ["Q1", "Q2"],
+    answers: ["ab", "cd"],
+    baseScores: [100, 100],
+    level: levelNumber,
+    timeLimit: 30000,
+    language: category,
+    currentQuestionIndex: 0,
+    growthLevel: 1,
+    currentInput: "",
+    totalIncorrectInputs: 0,
+  })),
   getLevelCount: jest.fn(() => 3),
 }));
 
