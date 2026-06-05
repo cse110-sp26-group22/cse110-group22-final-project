@@ -287,7 +287,7 @@ async function handleQuestionComplete() {
   const answer = state.answers[state.currentQuestionIndex] ?? "";
 
   state.timeUsed.push(elapsedTime);
-  // state.totalAnswerCharacters += answer.length; this line was used nowhere else. accuracy is based on total inputs vs total incorrect inputs, not answer length, so this line was removed.
+  state.totalAnswerCharacters += answer.length; //this line was used nowhere else. accuracy is based on total inputs vs total incorrect inputs, not answer length, so this line was removed.
   
   if (elapsedTime <= state.timeLimit) {
     state.score += calculateTotalScore(copyState(), elapsedTime);
