@@ -177,6 +177,82 @@ function loadFinalUI() {
   return { document, gameUI };
 }
 
+function isLocalAssetReference(assetPath) {
+  return (
+    assetPath &&
+    !assetPath.startsWith("#") &&
+    !assetPath.startsWith("data:") &&
+    !assetPath.startsWith("http://") &&
+    !assetPath.startsWith("https://")
+  );
+}
+
+function stripQueryAndHash(assetPath) {
+  return assetPath.split(/[?#]/)[0];
+}
+
+function getHtmlAssetReferences(html) {
+  const htmlDir = path.dirname(finalHtmlPath);
+  const assetPattern = /<(script|link|img)\b[^>]*(?:src|href)="([^"]+)"/g;
+  const references = [];
+  let match;
+
+  while ((match = assetPattern.exec(html)) !== null) {
+    const [, tagName, assetPath] = match;
+
+    if (isLocalAssetReference(assetPath)) {
+      references.push({
+        source: `${tagName} ${assetPath}`,
+        absolutePath: path.resolve(htmlDir, stripQueryAndHash(assetPath)),
+      });
+    }
+  }
+
+  return references;
+}
+
+function getCssAssetReferences(cssPath) {
+  const css = fs.readFileSync(cssPath, "utf8");
+  const cssDir = path.dirname(cssPath);
+  const urlPattern = /url\((['"]?)([^'")]+)\1\)/g;
+  const references = [];
+  let match;
+
+  while ((match = urlPattern.exec(css)) !== null) {
+    const assetPath = match[2].trim();
+
+    if (isLocalAssetReference(assetPath)) {
+      references.push({
+        source: `${path.relative(rootDir, cssPath)} url(${assetPath})`,
+        absolutePath: path.resolve(cssDir, stripQueryAndHash(assetPath)),
+      });
+    }
+  }
+
+  return references;
+}
+
+function createBrowserLaunchOptions() {
+  const options = {
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    timeout: 30000,
+  };
+
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+
+  return options;
+}
+
+async function clearCodeInput(page) {
+  await page.$eval(".code-input", (input) => {
+    input.value = "";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+
 function getContentType(filePath) {
   const extension = path.extname(filePath);
 
@@ -224,6 +300,24 @@ function startStaticServer(rootPath) {
   });
 }
 
+describe("final game static integration", () => {
+  test("references only existing local scripts, stylesheets, and image assets", () => {
+    const html = fs.readFileSync(finalHtmlPath, "utf8");
+    const htmlAssets = getHtmlAssetReferences(html);
+    const stylesheetAssets = htmlAssets
+      .filter((asset) => asset.absolutePath.endsWith(".css"))
+      .flatMap((asset) => getCssAssetReferences(asset.absolutePath));
+    const missingAssets = [...htmlAssets, ...stylesheetAssets]
+      .filter((asset) => !fs.existsSync(asset.absolutePath))
+      .map((asset) => ({
+        source: asset.source,
+        missingPath: path.relative(rootDir, asset.absolutePath),
+      }));
+
+    expect(missingAssets).toEqual([]);
+  });
+});
+
 describe("final game end-to-end UI flow", () => {
   afterEach(() => {
     delete global.document;
@@ -265,6 +359,54 @@ describe("final game end-to-end UI flow", () => {
     expect(plantGroup.children[0].children[0].tagName).toBe("IMG");
     expect(plantGroup.children[0].children[0].src).toBe("../assets/images/plant/plant-small.png");
   });
+
+  test("resets typed input and ghost text when a new question is sent", () => {
+    const { document, gameUI } = loadFinalUI();
+    const prompt = document.querySelector(".prompt-display-text");
+    const input = document.querySelector(".code-input");
+    const invisibleGhost = document.querySelector(".ghost-text-invisible");
+    const visibleGhost = document.querySelector(".ghost-text-visible");
+    const plantGroup = document.querySelector(".plant-display-group");
+
+    gameUI.sendQuestion("First prompt", "print(\"Hello, World!\")");
+    input.value = "print";
+    input.dispatchEvent({ type: "input" });
+
+    gameUI.sendQuestion("Second prompt", "len(my_list)");
+
+    expect(prompt.textContent).toBe("Second prompt");
+    expect(input.value).toBe("");
+    expect(invisibleGhost.textContent).toBe("");
+    expect(visibleGhost.textContent).toBe("len(my_list)");
+
+    input.dispatchEvent({ type: "keydown", key: "Enter" });
+    expect(plantGroup.children).toHaveLength(0);
+
+    input.value = "len(my_list)";
+    input.dispatchEvent({ type: "keydown", key: "Enter" });
+
+    expect(plantGroup.children).toHaveLength(1);
+  });
+
+  test("does not submit on non-Enter keys and rejects almost-correct answers", () => {
+    const { document, gameUI } = loadFinalUI();
+    const input = document.querySelector(".code-input");
+    const plantGroup = document.querySelector(".plant-display-group");
+
+    gameUI.sendQuestion("Assign 10 to x", "x = 10");
+
+    input.value = "x = 10";
+    input.dispatchEvent({ type: "keydown", key: "Tab" });
+    expect(plantGroup.children).toHaveLength(0);
+
+    input.value = "x = 10 ";
+    input.dispatchEvent({ type: "keydown", key: "Enter" });
+    expect(plantGroup.children).toHaveLength(0);
+
+    input.value = "x = 10";
+    input.dispatchEvent({ type: "keydown", key: "Enter" });
+    expect(plantGroup.children).toHaveLength(1);
+  });
 });
 
 describe("final game Puppeteer end-to-end flow", () => {
@@ -273,11 +415,7 @@ describe("final game Puppeteer end-to-end flow", () => {
 
   beforeAll(async () => {
     server = await startStaticServer(finalDir);
-    browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      timeout: 30000,
-    });
+    browser = await puppeteer.launch(createBrowserLaunchOptions());
   });
 
   afterAll(async () => {
@@ -309,10 +447,7 @@ describe("final game Puppeteer end-to-end flow", () => {
     await page.keyboard.press("Enter");
     await expect(page.$$eval(".plant-display", (plants) => plants.length)).resolves.toBe(0);
 
-    await page.$eval(".code-input", (input) => {
-      input.value = "";
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    await clearCodeInput(page);
     await page.type(".code-input", "print(\"Hello, World!\")");
     await page.keyboard.press("Enter");
 
@@ -334,10 +469,7 @@ describe("final game Puppeteer end-to-end flow", () => {
     await page.keyboard.press("Enter");
     await expect(page.$$eval(".plant-display", (plants) => plants.length)).resolves.toBe(0);
 
-    await page.$eval(".code-input", (input) => {
-      input.value = "";
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    await clearCodeInput(page);
 
     await page.type(".code-input", "print(\"Hello, World!\")");
     await page.keyboard.press("Enter");
@@ -385,6 +517,53 @@ describe("final game Puppeteer end-to-end flow", () => {
     expect(gameUiMetrics.backgroundImage).toContain("game-backdrop.jpg");
     expect(gameUiMetrics.width).toBeGreaterThan(0);
     expect(gameUiMetrics.height).toBeGreaterThan(0);
+
+    await page.close();
+  });
+
+  test("does not emit page errors or fail local asset requests on startup", async () => {
+    const page = await browser.newPage();
+    const pageErrors = [];
+    const consoleErrors = [];
+    const failedResponses = [];
+
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") {
+        consoleErrors.push(message.text());
+      }
+    });
+    page.on("response", (response) => {
+      if (response.url().startsWith(server.baseUrl) && response.status() >= 400) {
+        failedResponses.push(`${response.status()} ${response.url()}`);
+      }
+    });
+
+    await page.goto(`${server.baseUrl}/html/index.html`, { waitUntil: "networkidle0" });
+
+    expect(pageErrors).toEqual([]);
+    expect(consoleErrors).toEqual([]);
+    expect(failedResponses).toEqual([]);
+
+    await page.close();
+  });
+
+  test("rejects a trailing-space answer, then accepts the exact corrected answer", async () => {
+    const page = await browser.newPage();
+
+    await page.goto(`${server.baseUrl}/html/index.html`, { waitUntil: "networkidle0" });
+
+    await page.click(".code-input");
+    await page.type(".code-input", "print(\"Hello, World!\") ");
+    await page.keyboard.press("Enter");
+    await expect(page.$$eval(".plant-display", (plants) => plants.length)).resolves.toBe(0);
+
+    await clearCodeInput(page);
+    await page.type(".code-input", "print(\"Hello, World!\")");
+    await page.keyboard.press("Enter");
+
+    await page.waitForSelector(".plant-display img");
+    await expect(page.$$eval(".plant-display", (plants) => plants.length)).resolves.toBe(1);
 
     await page.close();
   });
