@@ -47,7 +47,7 @@ export function defaultProfile() {
  * @property {string}    language             - Selected language in main menu
  * @property {number}    level                - Current game level
  * @property {number}    currentQuestionIndex - Index into questions[] / answers[]
- * @property {string}    currentInput         - Current text entered by the player      // TODO: Remove. Depreciated value. Does not work with front-end.
+ * @property {string}    currentInput         - Current text entered by the player     
  * @property {number}    maxPrefixLength      - Max input prefix length seen for respective answer
  * @property {number}    totalInputs          - Total inputs entered for current level
  * @property {number}    totalIncorrectInputs - Wrong input events this level

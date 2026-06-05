@@ -183,14 +183,13 @@ export function pauseGame() {
 export async function onInput(input) {
   if (!state.isActive || state.isPaused) return;
 
-  const previousInput = state.currentInput;  // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
-  const isDeletion = input.length < previousInput.length;
+  const previousInput = state.currentInput;  
   const addedText = input.length > previousInput.length
     ? input.slice(previousInput.length)
     : "";
   const isWhitespaceOnlyInput = addedText.length > 0 && addedText.trim() === "";
   const shouldCountInput = !isDeletion && !isWhitespaceOnlyInput;
-  state.currentInput = input;                // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
+  state.currentInput = input;               
 
   if (shouldCountInput) state.totalInputs++;
 
@@ -256,13 +255,6 @@ export async function startLevel(levelNumber, category) {
 
   // Transition to the game screen
   callbacks.loadScreen("game", copyState());
-}
-
-/**
- * TODO: Remove. Depreciated handler.
- */
-export function goToLevelSelect() {
-  return;
 }
 
 // ── Called by [pause, results] UI ────────────────────────────────────────
