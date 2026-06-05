@@ -173,4 +173,4 @@ function startLevel(levelNumber, category) {
     return backendStartLevel(levelNumber, category);
 }
 
-export { startLevel, pauseGame, resumeGame, goToLevelSelect, goToMainMenu };
+export { startLevel, pauseGame, resumeGame, goToMainMenu };
