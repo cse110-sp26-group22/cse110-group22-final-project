@@ -35,6 +35,7 @@ export default class ResultsScreen {
 
         this.retryBtn = assertHTMLElement(element.querySelector('.results-retry'));
         this.mainMenuBtn = assertHTMLElement(element.querySelector('.results-main-menu'));
+        this.nextBtn = assertHTMLElement(element.querySelector('.results-next'));
     }
 
     /**
@@ -62,5 +63,10 @@ export default class ResultsScreen {
     /** @param {() => void} callback */
     onMainMenu(callback) {
         this.mainMenuBtn.addEventListener('click', callback);
+    }
+
+    /** @param {() => void} callback */
+    onNext(callback) {
+        this.nextBtn.addEventListener('click', callback);
     }
 }
