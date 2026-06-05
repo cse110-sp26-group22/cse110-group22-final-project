@@ -39,6 +39,7 @@ export default class GameUI {
     sendQuestion(question, answer) {
         if(!this.promptDisplay || !this.codeInputField) return;
         this.promptDisplay.setText(question);
+        this.codeInputField.clearInput();
         this.codeInputField.setGhostText(answer);
 
         this.currentQuestion = question;
