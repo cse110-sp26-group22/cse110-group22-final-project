@@ -184,6 +184,7 @@ export async function onInput(input) {
   if (!state.isActive || state.isPaused) return;
 
   const previousInput = state.currentInput;  
+  const isDeletion = input.length < previousInput.length;
   const addedText = input.length > previousInput.length
     ? input.slice(previousInput.length)
     : "";
