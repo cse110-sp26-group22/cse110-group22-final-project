@@ -1,6 +1,6 @@
 import {
     registerCallbacks, startLevel as backendStartLevel, pauseGame, resumeGame,
-    goToMainMenu, goToLevelSelect, onInput, setLanguage
+    goToMainMenu, onInput, setLanguage
 } from "../systems/game.js"
 
 import { store } from "./store.js";
