@@ -1,5 +1,3 @@
-import { assertHTMLElement } from "../utils.js";
-
 /**
  * The main menu component for the game.
  *
