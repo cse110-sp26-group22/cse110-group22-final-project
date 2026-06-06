@@ -65,6 +65,23 @@ function main() {
     gameUI.onResume(glue.resumeGame);
     gameUI.codeInputField.onInputChange(glue.handleInputChange);
 
+    gameUI.onRestart(() => {
+        glue.startLevel(1, lastLanguage);
+    });
+
+    gameUI.onLevelSelect(() => {
+        gameUI.hide();
+        mainMenu.show();
+        glue.goToLevelSelect();
+    });
+
+    gameUI.onMainMenu(() => {
+        gameUI.hide();
+        mainMenu.show();
+        glue.goToMainMenu();
+    });
+
+
     resultsScreen.onMainMenu(() => {
         resultsScreen.hide();
         rulesBox.hide();
