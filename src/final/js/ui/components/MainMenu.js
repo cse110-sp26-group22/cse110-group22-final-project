@@ -19,7 +19,7 @@ export default class MainMenu {
      */
     constructor(element) {
         this.element = element;
-        this.languageButtons = this.element.querySelectorAll('.main-menu-language-btn');
+        this.languageButtons = this.element.querySelectorAll('.main-menu-btn');
     }
 
     /**
