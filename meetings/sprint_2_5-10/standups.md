@@ -10,7 +10,11 @@
 
 #### Dmitri
 * **Accomplishments:**
-  * Outlined the 4-step sprint plan: 1) Build document structure based on the gardening game, 2) Create individual wireframe/concept art branches, 3) Vote on the optimal choice (75% majority required), 4) Split by features for prototype development.
+  * Outlined the 4-step sprint plan: 
+  * 1) Build document structure based on the gardening game
+  * 2) Create individual wireframe/concept art branches
+  * 3) Vote on the optimal choice (75% majority required)
+  * 4) Split by features for prototype development.
   * Clarified that Figma can be used for wireframes, and frontend implementation will focus on HTML/CSS.
   * Shared core gameplay breakdown from the meeting: Player selects language, starting level, and farm name at start; questions load from database; plant grows every 3 questions, levels up/gets a new plant every 9 questions.
   * Relayed feedback from Professor Powell: Use placeholder boxes with explicit IDs/classes to test layout connectivity before adding assets.
