@@ -109,7 +109,6 @@ export function calculateTotalScore(state, elapsedMs = 0) {
         questionBaseScore *
         accuracyMultiplier *
         timeMultiplier * comboMultiplier + plantBonus;
-    //streakMultiplier;
 
     return Math.round(Math.max(0, finalScore));
 }

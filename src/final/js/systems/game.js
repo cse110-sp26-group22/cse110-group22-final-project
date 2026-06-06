@@ -286,7 +286,7 @@ async function handleQuestionComplete() {
   const answer = state.answers[state.currentQuestionIndex] ?? "";
 
   state.timeUsed.push(elapsedTime);
-  state.totalAnswerCharacters += answer.length; //this line was used nowhere else. accuracy is based on total inputs vs total incorrect inputs, not answer length, so this line was removed.
+  state.totalAnswerCharacters += answer.length; 
   
   if (elapsedTime <= state.timeLimit) {
     state.score += calculateTotalScore(copyState(), elapsedTime);
@@ -323,7 +323,7 @@ async function handleQuestionComplete() {
   if (state.currentQuestionIndex >= state.questions.length && state.level < getLevelCount()) {
     player.score += state.score;
 
-    const accuracyPercentage = (1 - (state.totalIncorrectInputs / state.totalInputs)) * 100;
+    const accuracyPercentage = (1 - (state.totalIncorrectInputs / state.totalInputs));
     state.levelAccuracyPercent = accuracyPercentage.toFixed(2);
 
     goToResults();
@@ -333,6 +333,10 @@ async function handleQuestionComplete() {
   // If no more questions AND no more levels exist -> Go to results + Gameover state updates
   state.isOver = true;
   state.finalScore = player.score;
+
+  const accuracyPercentage = (1 - (state.totalIncorrectInputs / state.totalInputs));
+  state.levelAccuracyPercent = accuracyPercentage.toFixed(2);
+
   goToResults();
   return;
 }
