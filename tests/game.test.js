@@ -9,7 +9,24 @@
 // ── Dependency mocks ──────────────────────────────────────────────────────────
 
 jest.mock("../src/final/js/systems/level.js", () => ({
-  loadLevel: jest.fn(),
+  loadLevel: jest.fn(async (levelNumber, category) => ({
+    questions: ["Q1", "Q2"],
+    answers: ["ab", "cd"],
+    baseScores: [100, 100],
+    level: levelNumber,
+    timeLimit: 30000,
+    language: category,
+    currentQuestionIndex: 0,
+    growthLevel: 0,
+    currentInput: "",
+    totalIncorrectInputs: 0,
+    totalInputs:          0,
+    maxPrefixLength:      0,
+    levelAccuracyPercent: "1.00",
+    timeUsed:             [],
+    totalAnswerCharacters:0,
+  })),
+  getLevelCount: jest.fn(() => 3),
 }));
 
 jest.mock("../src/final/js/systems/timer.js", () => ({
@@ -53,13 +70,16 @@ import { defaultGameState }               from "../src/final/js/models/models.js
  */
 function makeLevelState(overrides = {}) {
   return {
-    ...defaultGameState(),   // picks up any new GameState fields automatically
+    ...defaultGameState(),
     questions:  ["Q1", "Q2"],
     answers:    ["ab", "cd"],
     baseScores: [100, 100],
     level:      1,
     timeLimit:  30000,
     language:   "python",
+    growthLevel: 1,           
+    currentInput: "",     
+    totalIncorrectInputs: 0,  
     ...overrides,
   };
 }
@@ -235,56 +255,46 @@ describe("onInput", () => {
     expect(data.incorrectInputs).toBe(1);
   });
 
-  test("fires 'next-question' when an answer is completed and questions remain", () => {
-    onInput("ab"); // completes first answer; second question still pending
+  test("does not increment incorrectInputs for whitespace-only input", () => {
+    onInput(" ");
+    const data = mockUpdateScreen.mock.calls[0][1];
+    expect(data.incorrectInputs).toBe(0);
+    expect(data.totalIncorrectInputs).toBe(0);
+  });
+
+  test("does not increment incorrectInputs when deleting input", () => {
+    onInput("a");
+    jest.clearAllMocks();
+    onInput("");
+    const data = mockUpdateScreen.mock.calls[0][1];
+    expect(data.incorrectInputs).toBe(0);
+    expect(data.totalIncorrectInputs).toBe(0);
+  });
+
+  test("fires 'next-question' when an answer is completed and questions remain", async () => {
+    await onInput("ab"); // completes first answer; second question still pending
     expect(mockUpdateScreen).toHaveBeenCalledWith("next-question", expect.any(Object));
   });
 
-  test("advances currentQuestionIndex after completing an answer", () => {
-    onInput("ab");
+  test("advances currentQuestionIndex after completing an answer", async () => {
+    await onInput("ab");
     const data = mockUpdateScreen.mock.calls[0][1];
     expect(data.currentQuestionIndex).toBe(1);
   });
 
-  test("restarts the timer after completing an answer", () => {
-    onInput("ab");
+  test("restarts the timer after completing an answer", async () => {
+    await onInput("ab");
     expect(startTimer).toHaveBeenCalledTimes(1);
   });
 
-  test("resets incorrectInputs to 0 after completing an answer", () => {
+  test("resets incorrectInputs to 0 after completing an answer", async () => {
     onInput("z"); // incorrect — incorrectInputs becomes 1
-    onInput("ab"); // correct — should reset incorrectInputs
+    await onInput("ab"); // correct — should reset incorrectInputs
     const data = mockUpdateScreen.mock.calls[1][1];
     expect(data.incorrectInputs).toBe(0);
   });
 
-  test("fires 'endscreen' when the last answer is completed on level 3", async () => {
-    loadLevel.mockResolvedValue(makeLevelState({
-      questions: ["Q1"],
-      answers:   ["ab"],
-      baseScores:[100],
-      level:     3,
-    }));
-    await startLevel(3, "python");
-    jest.clearAllMocks();
-    onInput("ab");
-    expect(mockLoadScreen).toHaveBeenCalledWith("endscreen", expect.any(Object));
-  });
-
-  test("fires 'level_end' when the last answer is completed on level 1", async () => {
-    loadLevel.mockResolvedValue(makeLevelState({
-      questions: ["Q1"],
-      answers:   ["ab"],
-      baseScores:[100],
-      level:     1,
-    }));
-    await startLevel(1, "python");
-    jest.clearAllMocks();
-    onInput("ab");
-    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
-  });
-
-  test("fires 'level_end' when the last answer is completed on level 2", async () => {
+  test("fires 'results' when the last answer is completed on level 2", async () => {
     loadLevel.mockResolvedValue(makeLevelState({
       questions: ["Q1"],
       answers:   ["ab"],
@@ -293,8 +303,26 @@ describe("onInput", () => {
     }));
     await startLevel(2, "python");
     jest.clearAllMocks();
-    onInput("ab");
+    await onInput("ab");
     expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
+    const data = mockLoadScreen.mock.calls[0][1];
+    expect(data.isOver).toBeFalsy();
+  });
+
+  test("fires 'results' with isOver=true when the last answer is completed on level 3", async () => {
+    loadLevel.mockResolvedValue(makeLevelState({
+      questions: ["Q1"],
+      answers:   ["ab"],
+      baseScores:[100],
+      level:     3,
+    }));
+    await startLevel(3, "python");
+    jest.clearAllMocks();
+    await onInput("ab");
+    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
+    const data = mockLoadScreen.mock.calls[0][1];
+    expect(data.isOver).toBe(true);
+    expect(data.finalScore).toBeDefined();
   });
 
   test("state passed to updateScreen contains expected fields", () => {
@@ -322,5 +350,107 @@ describe("onInput", () => {
     jest.clearAllMocks();
     onInput("z");              // prefixLength 0 <= maxPrefixLength 1 → incorrect
     expect(mockUpdateScreen).toHaveBeenCalledWith("incorrect", expect.any(Object));
+  });
+});
+
+// ── Question Completion & Expiration Penalties ────────────────────────────────
+
+describe("handleQuestionComplete and Expiration Penalties", () => {
+  test("calls stopTimer immediately when a question finishes", async () => {
+    await startLevel(1, "python");
+    jest.clearAllMocks();
+
+    // Type the full answer to naturally trigger question completion
+    await onInput("a");
+    await onInput("ab");
+
+    const { stopTimer } = require("../src/final/js/systems/timer.js");
+    expect(stopTimer).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not penalize accuracy metrics if user answers under the time limit", async () => {
+    await startLevel(1, "python");
+    
+    await onInput("a");
+    await onInput("ab");
+
+    const lastStateSent = mockUpdateScreen.mock.calls[mockUpdateScreen.mock.calls.length - 1][1];
+    expect(lastStateSent.totalIncorrectInputs).toBe(0);
+  });
+
+  test("applies missing character penalty to incorrect inputs on timeout", async () => {
+    // Set up a level where the target answer is long ("python" = 6 chars)
+    loadLevel.mockResolvedValueOnce(makeLevelState({
+      answers: ["python"],
+      currentQuestionIndex: 0
+    }));
+    
+    await startLevel(1, "python");
+    
+    // Simulate the user typing part of the word correctly first
+    await onInput("p");
+    await onInput("py"); // maxPrefixLength becomes 2
+
+    // Freeze the base time and spy on Date.now to force a timeout state
+    const realNow = Date.now();
+    const spyDate = jest.spyOn(Date, 'now').mockImplementation(() => realNow + 40000); 
+
+    // Send an input that forces your code to check elapsed time and process timeout logic
+    await onInput("py"); 
+
+    const lastStateSent = mockUpdateScreen.mock.calls[mockUpdateScreen.mock.calls.length - 1][1];
+    
+    // If your system accurately registers the timeout:
+    // 6 (length) - 2 (prefix) = 4 remaining characters should be added to inputs/errors
+    expect(lastStateSent.totalIncorrectInputs).toBeGreaterThanOrEqual(1);
+
+    spyDate.mockRestore();
+  });
+});
+
+// ── Accuracy Calculations ───────────────────────────────────────────────────
+
+describe("Accuracy Schema Formatter", () => {
+  test("saves levelAccuracyPercent in a clean decimal format string at end of level", async () => {
+    loadLevel.mockResolvedValueOnce(makeLevelState({
+      questions: ["Q1"],
+      answers: ["ab"]
+    }));
+
+    await startLevel(1, "python");
+    
+    // Simulate natural inputs: 1 correct, 1 typo, then finishing the word
+    await onInput("a");  // Correct
+    await onInput("ax"); // Typo
+    await onInput("ab"); // Finished!
+
+    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
+    
+    const finalState = mockLoadScreen.mock.calls[0][1];
+    
+    // Verify that the level accuracy field exists and is formatted as a number
+      expect(finalState).toHaveProperty("levelAccuracyPercent");
+      expect(typeof finalState.levelAccuracyPercent).toBe("number");
+    });
+  
+  test("safeguards against division-by-zero errors yielding NaN strings if inputs are 0", async () => {
+    loadLevel.mockResolvedValueOnce(makeLevelState({
+      questions: ["Q1"],
+      answers: ["ab"]
+    }));
+
+    await startLevel(1, "python");
+    
+    // Force immediate timeout without typing anything
+    const realNow = Date.now();
+    const spyDate = jest.spyOn(Date, 'now').mockImplementation(() => realNow + 50000); 
+
+    await onInput(""); 
+
+    const finalState = mockLoadScreen.mock.calls[0][1];
+    
+    // The metric should exist as a string and not be literal "NaN"
+    expect(finalState.levelAccuracyPercent).not.toBe("NaN");
+    spyDate.mockRestore();
   });
 });

@@ -53,6 +53,46 @@
 }
 /*#endregion */
 
+/*#region MainMenu styles */
+#main-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  padding: 2rem 1rem;
+}
+
+#main-menu h1 {
+  font-size: 3rem;
+  letter-spacing: 0.1em;
+}
+
+.main-menu-list {
+  list-style: none;
+  width: 50%;
+  min-width: 200px;
+  background: #e8f5d8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.main-menu-btn {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.main-menu-btn:hover {
+  background: #d0ecb8;
+}
+/*#endregion */
+
 /*#region RulesBox styles */
 .rules-box {
   background: #F4F9ED;

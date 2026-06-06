@@ -45,9 +45,9 @@ export function calculateComboBonus(combo) {
 /**
  * Calculates the bonus score for one plant based on its growth stage.
  *
- * Plants are stored as numbers from 0 to 3:
+ * Plants are stored as numbers from 0 to 2:
  * - 0 means no growth
- * - 3 means fully grown
+ * - 2 means fully grown
  *
  * The stage is clamped so invalid values do not create negative or excessive
  * bonuses.
@@ -57,7 +57,7 @@ export function calculateComboBonus(combo) {
  */
 export function addPlantBonus(plant) {
     const growthStage = Number(plant) || 0;
-    const clampedStage = Math.max(0, Math.min(growthStage, 3));
+    const clampedStage = Math.max(0, Math.min(growthStage, 2));
 
     return clampedStage * PLANT_BONUS;
 }
@@ -80,17 +80,16 @@ export function calculateTotalScore(state, elapsedMs = 0) {
         baseScores = [],
         incorrectInputs = 0,
         answers = [],
-        currentInput = "",
+        currentInput = "",  
         currentQuestionIndex = 0,
         timeLimit = 0,
         combo = 0,
-        plants = []
+        growthLevel = 0
     } = state;
 
     const answer = answers[currentQuestionIndex] || "";
     const questionBaseScore = baseScores[currentQuestionIndex] || 0;
-    const totalChars = Math.max(answer.length, currentInput.length);
-
+    const totalChars = Math.max(answer.length, currentInput.length);  
     const accuracyMultiplier = calculateAccuracyMultiplier(
         incorrectInputs,
         totalChars
@@ -103,16 +102,13 @@ export function calculateTotalScore(state, elapsedMs = 0) {
 
     const comboMultiplier = calculateComboBonus(combo);
 
-    // Sum the bonus from each plant in the current farm state.
-    const plantBonus = plants.reduce((total, plant) => {
-        return total + addPlantBonus(plant);
-    }, 0);
+    // Sum the bonus from the plant in the current growth state.
+    const plantBonus = addPlantBonus(growthLevel);
 
     const finalScore =
         questionBaseScore *
         accuracyMultiplier *
         timeMultiplier * comboMultiplier + plantBonus;
-    //streakMultiplier;
 
     return Math.round(Math.max(0, finalScore));
 }

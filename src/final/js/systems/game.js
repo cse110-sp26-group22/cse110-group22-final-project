@@ -6,7 +6,7 @@
  *
  * Main responsibilities:
  * - Initialize and own GameState as single source of truth
- * - Handle game lifecycle: startLevel(), endGame(), pauseGame(), resumeGame()
+ * - Handle game lifecycle: startLevel(), pauseGame(), resumeGame()
  * - Process player input (onInput) and update state accordingly
  * - Coordinate modules: level.js, scoring.js, timer.js, storage.js
  * - Fire callbacks back to ui-core.js after each state change
@@ -41,12 +41,11 @@
  * Screens emitted via loadScreen():
  * - "game"           → switch to game screen (level just started or resumed)
  * - "pause"          → switch to pause screen
- * - "results"        → switch to results screen (time up or all questions done)
- * - "endscreen"      → switch to end screen (all levels completed)
+ * - "results"        → switch to results screen (all levels completed)
  * - "mainmenu"       → switch to main menu (player exits session)
  */
 
-import { loadLevel } from "./level.js";
+import { getLevelCount, loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
 import { calculateTotalScore } from "./scoring.js";
 import { saveProfile } from "./storage.js";
@@ -80,6 +79,15 @@ const callbacks = {
   /** @type {((response: string, data: object) => void)|null} */
   updateScreen: null,
 };
+
+const MAX_PLANT_GROWTH_LEVEL = 2;
+
+function copyState() {
+  return {
+    ...state,
+    timeUsed: [...state.timeUsed],
+  };
+}
 
 // ── Callback registration ─────────────────────────────────────────────────────
 
@@ -120,11 +128,29 @@ export function resumeGame() {
   
   state.isPaused = false;
   state.isActive = true;
+  state.isOver = false;
 
-  state.questionEndTime = startTimer( { ...state }, _onExpire);
+  const timeRemaining = state.remainingOnPause > 0 ? state.remainingOnPause : state.timeLimit;
+  startTimer( { ...state }, _onExpire);
+  state.questionEndTime = Date.now() + timeRemaining;
   state.remainingOnPause = 0;
   
-  callbacks.loadScreen("game", { ...state });
+  callbacks.loadScreen("game", copyState());
+}
+
+/**
+ * Restarts the current level with a fresh set of questions.
+ * Resets all state except for player profile and language selection.
+ * Note: may be replaced by an isolated call to startLevel(); this is intended for code readability purposes
+ */
+export function restartLevel() {
+  if(state.isPaused || state.isOver || !state.isActive){ return; }
+  
+  state.isPaused = false;
+  state.isActive = true;
+  state.isOver = false;
+
+  startLevel(state.level, state.language);
 }
 
 // ── Called by [game] UI (exclusive) ──────────────────────────────────────────
@@ -137,12 +163,13 @@ export function pauseGame() {
 
   state.isPaused = true;
   state.isActive = true;
+  state.isOver = false;
 
-  state.remainingOnPause = state.questionEndTime - Date.now();
+  state.remainingOnPause = Math.max(0, state.questionEndTime - Date.now());
 
   stopTimer();
 
-  callbacks.loadScreen("pause", { ...state });
+  callbacks.loadScreen("pause", copyState());
 }
 
 /**
@@ -157,10 +184,20 @@ export function pauseGame() {
  *
  * @param {string} input - Input entered by Player 
  */
-export function onInput(input) {
-  if (!state.isActive || state.isPaused) return;
+export async function onInput(input) {
+  if (!state.isActive || state.isPaused || state.isOver) return;
 
-  state.totalInputs++;
+  
+  const previousInput = state.currentInput;  
+  const isDeletion = input.length < previousInput.length;
+  const addedText = input.length > previousInput.length
+    ? input.slice(previousInput.length)
+    : "";
+  const isWhitespaceOnlyInput = addedText.length > 0 && addedText.trim() === "";
+  const shouldCountInput = !isDeletion && !isWhitespaceOnlyInput;
+  state.currentInput = input;               
+
+  if (shouldCountInput) state.totalInputs++;
 
   const answer = state.answers[state.currentQuestionIndex];
   if (!answer) return;
@@ -177,22 +214,25 @@ export function onInput(input) {
   // Correct input + Completed answer 
   if (input === answer) {
     console.debug("Answer complete for question index", state.currentQuestionIndex);
-    handleQuestionComplete();
+    await handleQuestionComplete();
     return;
   } 
 
   // Incorrect input
   if (prefixLength <= state.maxPrefixLength) {
-    state.incorrectInputs++;
+    if (shouldCountInput) {
+      state.incorrectInputs++;
+      state.totalIncorrectInputs++;
+    }
     state.combo = 0;
-    callbacks.updateScreen("incorrect", { ...state });
+    callbacks.updateScreen("incorrect", copyState());
     return;
   }
 
   // Correct input
   state.maxPrefixLength = prefixLength;
   state.combo++;
-  callbacks.updateScreen("correct", { ...state });
+  callbacks.updateScreen("correct", copyState());
   return;
 }
 
@@ -210,22 +250,17 @@ export async function startLevel(levelNumber, category) {
   
   // Refresh state, load level data to state, start timer, set flags
   state = defaultGameState();
+  player.language = category;
   Object.assign(state, await loadLevel(levelNumber, category));
+  state.totalQuestions = state.questions.length;
   state.questionStartTime = Date.now();
   state.questionEndTime = startTimer( { ...state }, _onExpire);
-  state.language = player.language;
+  state.language = category;
   state.isActive = true;
   state.isPaused = false;
 
   // Transition to the game screen
-  callbacks.loadScreen("game", { ...state });
-}
-
-/**
- * TODO: Remove. Depreciated handler.
- */
-export function goToLevelSelect() {
-  return;
+  callbacks.loadScreen("game", copyState());
 }
 
 // ── Called by [pause, results] UI ────────────────────────────────────────
@@ -242,81 +277,96 @@ export function goToMainMenu() {
 
   player = defaultProfile();
 
-  callbacks.loadScreen("mainmenu", { ...state });
+  callbacks.loadScreen("mainmenu", copyState());
 }
 
 // ── Called internally ────────────────────────────────────────────────────
 
-/**
- * Ends the current game session: stops the timer, accumulates session results
- * into the player profile, clears in-progress state, and
- * signals ui-core to show the results screen.
- */
-function endGame() {
+function goToResults() {
   state.isActive = false;
   state.isPaused = false;
 
-  savePlayerData();
-
-  stopTimer();
-
-  callbacks.loadScreen("results", {...state });
-}
-
-function goToResults() {
-  state.isActive = true;
-  state.isPaused = false;
-
   stopTimer();
 
   savePlayerData();
 
-  callbacks.loadScreen("results", {...state });
+  callbacks.loadScreen("results", copyState());
 }
 
 /**
  * Handles the end of a question
  */
-function handleQuestionComplete() {
+async function handleQuestionComplete() {
+  if(state.isPaused || state.isOver || !state.isActive){ return; }
+
+  stopTimer();
 
   // Calculate post-question score
-  const elapsedTime = Date.now() - state.questionStartTime;
-  if (elapsedTime <= state.timeLimit) { 
-    state.score += calculateTotalScore( { ...state }, elapsedTime);
-    state.numCorrectQuestions++;
+  const timeRemaining = Math.max(0, state.questionEndTime - Date.now());
+  const elapsedTime = Math.max(0, state.timeLimit - timeRemaining);
+  const answer = state.answers[state.currentQuestionIndex] ?? "";
+
+  state.timeUsed.push(elapsedTime);
+  state.totalAnswerCharacters += answer.length; 
+
+  if (elapsedTime > state.timeLimit) {
+    // Calculate how many characters they failed to type
+    const remainingCharacters = answer.length - state.maxPrefixLength;
+
+    if (remainingCharacters > 0) {
+      // Treat every untyped character as both an input and an incorrect input
+      state.totalInputs += remainingCharacters;
+      state.totalIncorrectInputs += remainingCharacters;
+    }
   }
-  else{
-    state.score += 0;
+  else {
+    // Correct answer - calculate score and increment correct question count
+    state.score += calculateTotalScore(copyState(), elapsedTime);
+    state.numCorrectQuestions++;
   }
 
   // Increment current question
   state.currentQuestionIndex++;
 
   // Grow plant every 3rd question answered within time limit
-  if (state.numCorrectQuestions % 3 === 0) {
-    if(state.growthLevel < 3){
+  if (elapsedTime <= state.timeLimit && state.numCorrectQuestions % 3 === 0) {
+    if(state.growthLevel < MAX_PLANT_GROWTH_LEVEL) {
       state.growthLevel++;
-      callbacks.updateScreen("plant-growth", { ...state });
+      callbacks.updateScreen("plant-growth", copyState());
     }
   }
 
   // If more questions exist -> Go to next question
   if (state.currentQuestionIndex < state.questions.length) {
     state.maxPrefixLength = 0;
+    state.currentInput = "";    // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
     state.incorrectInputs = 0;
+    state.combo = 0;
+    state.questionStartTime = Date.now();
     state.questionEndTime = startTimer( { ...state }, _onExpire);
     callbacks.updateScreen("next-question", { ...state });
     return;
   }
 
-  // If no more questions AND more levels exist -> Go to next level
-  if (state.currentQuestionIndex >= state.questions.length && state.level < 3) {
+  // If no more questions AND more levels exist -> Go to results
+  if (state.currentQuestionIndex >= state.questions.length && state.level < getLevelCount()) {
+    player.score += state.score;
+
+    const accuracyPercentage = (1 - (state.totalIncorrectInputs / state.totalInputs));
+    state.levelAccuracyPercent = accuracyPercentage.toFixed(2);
+
     goToResults();
     return;
   }
 
-  // If no more questions AND no more levels exist -> End game
-  endGame();
+  // If no more questions AND no more levels exist -> Go to results + Gameover state updates
+  state.isOver = true;
+  state.finalScore = player.score;
+
+  const accuracyPercentage = (1 - (state.totalIncorrectInputs / state.totalInputs));
+  state.levelAccuracyPercent = accuracyPercentage.toFixed(2);
+
+  goToResults();
   return;
 }
 
@@ -326,7 +376,7 @@ function handleQuestionComplete() {
  * Fired by timer.js when the countdown reaches 0.
  */
 function _onExpire() {
-  handleQuestionComplete(); 
+  handleQuestionComplete();
 }
 
 // ── Profile management handling ────────────────────────────────────────────────

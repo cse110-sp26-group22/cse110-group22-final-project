@@ -87,12 +87,11 @@ describe("addPlantBonus", () => {
     expect(addPlantBonus(0)).toBe(0);
     expect(addPlantBonus(1)).toBe(10);
     expect(addPlantBonus(2)).toBe(20);
-    expect(addPlantBonus(3)).toBe(30);
   });
 
   test("clamps invalid plant stages to the valid range", () => {
     expect(addPlantBonus(-1)).toBe(0);
-    expect(addPlantBonus(10)).toBe(30);
+    expect(addPlantBonus(10)).toBe(20);
   });
 });
 
@@ -173,23 +172,23 @@ describe("calculateTotalScore", () => {
     expect(calculateTotalScore(state, 1000)).toBe(0);
   });
 
-  test("adds plant bonuses from the current plant state", () => {
+  test("adds plant bonuses from growthLevel", () => {
     const state = {
       baseScores: [100],
       incorrectInputs: 0,
       answers: ["hello"],
       currentInput: "",
       currentQuestionIndex: 0,
-      plants: [1, 2, 3],
+      growthLevel: 2,  // Single plant at stage 2
       timeLimit: 3000,
     };
 
     const scoreWithoutPlants = calculateTotalScore(
-      { ...state, plants: [0, 0, 0] },
+      { ...state, growthLevel: 0 },
       3000
     );
     const scoreWithPlants = calculateTotalScore(state, 3000);
 
-    expect(scoreWithPlants - scoreWithoutPlants).toBe(60);
+    expect(scoreWithPlants - scoreWithoutPlants).toBe(20);  // 10 points per stage: 2 * 10 = 20
   });
 });
