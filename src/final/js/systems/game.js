@@ -128,6 +128,7 @@ export function resumeGame() {
   
   state.isPaused = false;
   state.isActive = true;
+  state.isOver = false;
 
   const timeRemaining = state.remainingOnPause > 0 ? state.remainingOnPause : state.timeLimit;
   startTimer( { ...state }, _onExpire);
@@ -135,6 +136,16 @@ export function resumeGame() {
   state.remainingOnPause = 0;
   
   callbacks.loadScreen("game", copyState());
+}
+
+export function restartLevel() {
+  if(state.isPaused || state.isOver || !state.isActive){ return; }
+  
+  state.isPaused = false;
+  state.isActive = true;
+  state.isOver = false;
+
+  startLevel(state.level, state.language);
 }
 
 // ── Called by [game] UI (exclusive) ──────────────────────────────────────────
@@ -147,6 +158,7 @@ export function pauseGame() {
 
   state.isPaused = true;
   state.isActive = true;
+  state.isOver = false;
 
   state.remainingOnPause = Math.max(0, state.questionEndTime - Date.now());
 
@@ -168,7 +180,7 @@ export function pauseGame() {
  * @param {string} input - Input entered by Player 
  */
 export async function onInput(input) {
-  if (!state.isActive || state.isPaused) return;
+  if (!state.isActive || state.isPaused || state.isOver) return;
 
   const previousInput = state.currentInput;  
   const isDeletion = input.length < previousInput.length;
