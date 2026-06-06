@@ -92,7 +92,9 @@ function handleLoadScreen(screenName, data) {
         gameUI.sendQuestion(question, answer);
         gameUI.plantDisplayGroup.setGrowthLevel(data.growthLevel ?? 0); 
         updateGameStats(data);
+
         store.update('questionEndTime', data.questionEndTime);
+        store.update('language', data.language);
     }
     if (screenName === 'pause') {
         gameUI.stopCountdown();

@@ -21,7 +21,7 @@
   padding-top: 0.25rem;
   display: grid;
   grid-template-rows:
-    auto [combo-row] auto 1fr [input-area-row] auto [game-tray]; 
+    [combo-row] auto  1fr [input-area-row] auto [game-tray]; 
   grid-template-columns: 
     [flank-left] 3rem [input-area-start] 1fr [stats-display] auto [flank-right] 3rem;   
 }
@@ -38,7 +38,7 @@
 .game-header-pause {
     display: inline-block;
     aspect-ratio: 2 / 2;
-    width: 2.5rem;
+    width: 3.25rem;
     cursor: pointer;
     text-align: center;
     z-index: 1;
@@ -71,6 +71,41 @@
   justify-content: center;
   z-index: 10;
   color: #3D2B1F;
+  gap: 0.5rem;
+}
+
+.pause-menu-title {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pause-menu-current-language {
+  position: absolute;
+  font-size: 1.25rem;
+  bottom: 1.25rem;
+}
+
+.pause-menu-list {
+  list-style: none;
+  width: 50%;
+  min-width: 200px;
+  background: #e8f5d8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pause-menu button {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-align: center;
+}
+.pause-menu button:hover {
+  background: #d0ecb8;
 }
 /*#endregion */
 
@@ -118,6 +153,8 @@
   transform: translate(-50%, 50%) scale(6);
 
   z-index: 0;
+  user-select: none;
+  pointer-events: none;
 }
 /*#endregion */
 
@@ -133,20 +170,6 @@
 }
 /*#endregion */
 
-/*#region StatsDisplay styles */
-.stats-display {
-  grid-column: stats-display /span 2;
-  
-  font-size: 14px;
-  border: 1px solid #8BBF5A;
-  background-color: #F4F9ED;
-  padding: 8px;
-  border-radius: 6px;
-  width: 9rem;
-  grid-row: 1 / 2;
-}
-/*#endregion */
-
 /*#region PromptDisplay styles */
 .prompt-display {
   background: #F4F9ED;
@@ -154,6 +177,7 @@
   border-radius: 8px;
   border: 1px solid #8BBF5A;
   margin-top: auto;
+  user-select: none;    
 }
 /*#endregion */
 
@@ -197,7 +221,7 @@
   flex: 1;
   padding: 8px;
   background: #F4F9ED;
-  border: 1px solid #8BBF5A;
+  border: 2px solid #8BBF5A;
   color: #3D2B1F;
   border-radius: 6px;
   font-size: 1em;
@@ -205,24 +229,34 @@
   font-family: inherit;
   width: 100%;
 }
+.code-input:focus {
+  outline: none;
+  border: 2px solid green;
+  cursor: none;
+  caret-color: green;
+}
 /*#endregion*/
 
 /*#region Timer styles */
-.timer {
+.timer-container {
   grid-row: 1;
   grid-column: input-area-start /span 2;
-  height: fit-content;
-  width: fit-content;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+.timer {
+  height: min-content;
+  width: min-content;
 
   font-family: 'Courier New', monospace;
   letter-spacing: 0.05em;
   color: #D4714A;
-  font-size: 1.5em;
-  border: 1px solid #8BBF5A;
-  background-color: #F4F9ED;
-  padding: 0.25em 0.75em;
-  border-radius: 6px;
-  margin-left: 0.5rem;
+  font-size: 2.75rem;
+  margin-top: 0.25rem;
+  margin-left: 0.75rem;
+
   text-align: center;
 }
 /*#endregion */
@@ -235,13 +269,16 @@
   font-family: 'Courier New', monospace;
   letter-spacing: 0.05em;
   color: #5A8040;
-  font-size: 1.5em;
+  font-weight: normal;
+  font-size: 3em;
 
-  border: 1px solid #8BBF5A;
-  background-color: #F4F9ED;
-  padding: 0.2em 0.75em;
-  border-radius: 6px;
-  text-align: center;
+  border: none;
+  background-image: linear-gradient(to right, 
+    transparent, 
+    #c1f6f186 25%, #c1f6f1 100%);
+  text-align: end;
+  margin-top: 0.15rem;
+  padding-left: 0.5em;
   padding-right: 1em;
 }
 .combo.flashed > .combo-number {
@@ -311,10 +348,34 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem;
+  padding: 0.25rem 0.5rem;
   gap: 1rem;
   background-color: #8BBF5A;
   height: 4rem;
   border-top: 3px ridge #6BA04286;
+}
+/*#endregion */
+
+/*#region StatsDisplay styles */
+.stats-display {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 2.25rem;
+  color: white;
+  width: 100%;
+}
+
+.stats-display span {
+    width: 10rem;
+}
+.stats-display-score {
+  text-align: start;
+}
+.stats-display-accuracy {
+  text-align: center;
+}
+.stats-display-cpm {
+  text-align: end;
 }
 /*#endregion */

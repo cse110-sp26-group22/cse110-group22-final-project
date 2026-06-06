@@ -65,7 +65,7 @@ function main() {
     gameUI.onResume(glue.resumeGame);
     gameUI.codeInputField.onInputChange(glue.handleInputChange);
 
-    gameUI.onRestart(() => {
+    gameUI.onRetry(() => {
         glue.startLevel(1, lastLanguage);
     });
 

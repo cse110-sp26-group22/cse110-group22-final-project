@@ -4,7 +4,6 @@ import PromptDisplay from "./game/input/PromptDisplay.js";
 import StatsDisplay from "./game/StatsDisplay.js";
 import PauseMenu from "./game/PauseMenu.js";
 import PlantDisplayGroup from "./game/plants/PlantDisplayGroup.js";
-import GameTray from "./game/tray/GameTray.js";
 import Combo from "./game/Combo.js";
 import Timer from "./game/Timer.js";
 import NotificationDisplay from "./NotificationDisplay.js";
@@ -47,7 +46,6 @@ export default class GameUI {
         this.onPause(() => this.pauseMenu.show());
         this.onResume(() => this.pauseMenu.hide());
         
-        this.gameTray = new GameTray(assertHTMLElement(this.element.querySelector('.game-tray')));
         this.onClockTick(() => this.updateLiveData());
         this.onPause(() => console.log('game paused'));
     }
@@ -126,9 +124,19 @@ export default class GameUI {
     onResume(callback) {
         this.pauseMenu.onResume(callback);
     }
-    onRestart(callback) {
-        this.pauseMenu.onRestart(callback);
+    
+    /**
+     * Registers a callback to be called when the user clicks the Retry button in the pause menu.
+     * @param {() => void} callback
+     */
+    onRetry(callback) {
+        this.pauseMenu.onRetry(callback);
     }
+
+    /**
+     * Registers a callback to be called when the user clicks the Main Menu button in the pause menu.
+     * @param {() => void} callback
+     */
     onMainMenu(callback) {
         this.pauseMenu.onMainMenu(callback);
     }

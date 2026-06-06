@@ -27,6 +27,7 @@ export default class PlantDisplayGroup {
         this.plantDisplays.push(plantDisplay);
     }
 
+
     /**
      * Removes the last PlantDisplay from this PlantDisplayGroup.
      */
