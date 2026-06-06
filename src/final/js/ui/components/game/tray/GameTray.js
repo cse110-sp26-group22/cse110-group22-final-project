@@ -1,3 +1,5 @@
+//TODO: this class is probably obsolete
+
 /**
  * The component responsible for displaying the game tray.
  * 
