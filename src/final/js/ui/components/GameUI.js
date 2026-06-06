@@ -63,7 +63,6 @@ export default class GameUI {
      * Updates all subcomponents that rely on the clock.
      */
     updateLiveData(){
-        console.log('clock tick');
         this.timer.rerender();
         //this.statsDisplay.rerender();
     }
@@ -125,5 +124,11 @@ export default class GameUI {
      */
     onResume(callback) {
         this.pauseMenu.onResume(callback);
+    }
+    onRestart(callback) {
+        this.pauseMenu.onRestart(callback);
+    }
+    onMainMenu(callback) {
+        this.pauseMenu.onMainMenu(callback);
     }
 }

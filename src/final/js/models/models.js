@@ -40,7 +40,7 @@ export function defaultProfile() {
  * Safe to clear without affecting the persistent player profile.
  *
  * @property {number[]}  plants               - Plants 
- * @property {number}  growthLevel          - Growth stage for each plant, indexed 0 - 2
+ * @property {number}  growthLevel            - Growth stage for the plant, indexed 0 - 2
  * @property {string[]}  questions            - Prompts for the current level (shuffled)
  * @property {string[]}  answers              - Answers parallel to questions[]
  * @property {number[]}  baseScores           - Score for each question derived from question set
