@@ -87,6 +87,7 @@ function handleLoadScreen(screenName, data) {
         rulesBox.show();
         gameUI.show();
         gameUI.pauseMenu.hide();
+        gameUI.startCountdown();
         const { question, answer } = getCurrentQuestion(data);
         gameUI.sendQuestion(question, answer);
         gameUI.plantDisplayGroup.setGrowthLevel(data.growthLevel ?? 0); 
