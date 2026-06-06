@@ -12,7 +12,6 @@ export default class PauseMenu {
         this.element.classList.add('hidden');
         this.resumeBtn = assertHTMLElement(this.element.querySelector('.pause-menu-resume'));
         this.restartBtn = assertHTMLElement(this.element.querySelector('.pause-menu-restart'));
-        this.levelSelectBtn= assertHTMLElement(this.element.querySelector('.pause-menu-level-select'));
         this.mainMenuBtn = assertHTMLElement(this.element.querySelector('.pause-menu-main-menu'));
     }
 
