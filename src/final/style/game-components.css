@@ -21,7 +21,7 @@
   padding-top: 0.25rem;
   display: grid;
   grid-template-rows:
-    auto [combo-row] auto 1fr [input-area-row] auto [game-tray]; 
+    [combo-row] auto  1fr [input-area-row] auto [game-tray]; 
   grid-template-columns: 
     [flank-left] 3rem [input-area-start] 1fr [stats-display] auto [flank-right] 3rem;   
 }
@@ -38,7 +38,7 @@
 .game-header-pause {
     display: inline-block;
     aspect-ratio: 2 / 2;
-    width: 2.5rem;
+    width: 3rem;
     cursor: pointer;
     text-align: center;
     z-index: 1;
@@ -133,20 +133,6 @@
 }
 /*#endregion */
 
-/*#region StatsDisplay styles */
-.stats-display {
-  grid-column: stats-display /span 2;
-  
-  font-size: 14px;
-  border: 1px solid #8BBF5A;
-  background-color: #F4F9ED;
-  padding: 8px;
-  border-radius: 6px;
-  width: 9rem;
-  grid-row: 1 / 2;
-}
-/*#endregion */
-
 /*#region PromptDisplay styles */
 .prompt-display {
   background: #F4F9ED;
@@ -235,13 +221,16 @@
   font-family: 'Courier New', monospace;
   letter-spacing: 0.05em;
   color: #5A8040;
-  font-size: 1.5em;
+  font-weight: normal;
+  font-size: 3em;
 
-  border: 1px solid #8BBF5A;
-  background-color: #F4F9ED;
-  padding: 0.2em 0.75em;
-  border-radius: 6px;
-  text-align: center;
+  border: none;
+  background-image: linear-gradient(to right, 
+    transparent, 
+    #c1f6f186 25%, #c1f6f1 100%);
+  padding: 0.2em 0.2em;
+  text-align: end;
+  padding-left: 0.5em;
   padding-right: 1em;
 }
 .combo.flashed > .combo-number {
@@ -311,10 +300,34 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem;
+  padding: 0.25rem 0.5rem;
   gap: 1rem;
   background-color: #8BBF5A;
   height: 4rem;
   border-top: 3px ridge #6BA04286;
+}
+/*#endregion */
+
+/*#region StatsDisplay styles */
+.stats-display {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 2.25rem;
+  color: white;
+  width: 100%;
+}
+
+.stats-display span {
+    width: 10rem;
+}
+.stats-display-score {
+  text-align: start;
+}
+.stats-display-accuracy {
+  text-align: center;
+}
+.stats-display-cpm {
+  text-align: end;
 }
 /*#endregion */

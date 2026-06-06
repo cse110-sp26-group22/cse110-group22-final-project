@@ -26,8 +26,8 @@ export default class StatsDisplay {
      * @param {{ score: number, accuracy: string, cpm: number }} stats
      */
     update(stats) {
-        this.scoreElement.textContent = `${stats.score}`;
-        this.accuracyElement.textContent = stats.accuracy;
-        this.cpmElement.textContent = `${stats.cpm}`;
+        this.scoreElement.textContent = `${stats.score.toString().padStart(6, '0')}`;
+        this.accuracyElement.textContent = `${Math.round(stats.accuracy * 100)}%`;
+        this.cpmElement.textContent = `${stats.cpm} cpm`;
     }
 }
