@@ -89,7 +89,8 @@ function handleLoadScreen(screenName, data) {
         gameUI.pauseMenu.hide();
         const { question, answer } = getCurrentQuestion(data);
         gameUI.sendQuestion(question, answer);
-        gameUI.plantDisplayGroup.setGrowthLevels(data.growthLevel ?? 1); 
+        gameUI.plantDisplayGroup.setGrowthLevel(data.growthLevel ?? 0); 
+        updateGameStats(data);
         store.update('questionEndTime', data.questionEndTime);
         console.debug(`Loaded game screen with question: ${question} and answer: ${answer}`);
     }
@@ -137,7 +138,7 @@ function handleUpdateScreen(response, data) {
         store.update('questionEndTime', data.questionEndTime);
     }
     if (response === 'plant-growth') {
-        gameUI.plantDisplayGroup.setGrowthLevels(data.growthLevel);
+        gameUI.plantDisplayGroup.setGrowthLevel(data.growthLevel);
         updateGameStats(data);
     }
 }
