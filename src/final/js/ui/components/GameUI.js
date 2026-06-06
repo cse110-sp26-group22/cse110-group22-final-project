@@ -125,4 +125,10 @@ export default class GameUI {
     onResume(callback) {
         this.pauseMenu.onResume(callback);
     }
+    onRestart(callback) {
+        this.pauseMenu.onRestart(callback);
+    }
+    onMainMenu(callback) {
+        this.pauseMenu.onMainMenu(callback);
+    }
 }
