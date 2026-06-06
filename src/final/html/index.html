@@ -88,10 +88,13 @@
 
     <!-- PauseMenu -->
     <div class="pause-menu">
-        <h3>Paused</h3>
-        <button type="button" class="pause-menu-resume">Resume</button>
-        <button type="button" class="pause-menu-restart">Restart</button>
-        <button type="button" class="pause-menu-main-menu">Main Menu</button>
+        <h3 class="pause-menu-title">Paused</h3>
+        <ul class="pause-menu-list">
+            <li><button type="button" class="pause-menu-resume">Resume</button></li>
+            <li><button type="button" class="pause-menu-retry">Retry</button></li>
+            <li><button type="button" class="pause-menu-main-menu">Main Menu</button></li>
+        </ul>
+        <h4 class="pause-menu-current-language"></h4>
     </div>
 
     
@@ -115,11 +118,11 @@
     <!-- GameTray -->
     <div class="game-tray">
       <!-- StatsDisplay -->
-    <div class="stats-display">
-      <span class="stats-display-score">00000</span>
-      <span class="stats-display-accuracy" style="display: none;">100%</span>
-      <span class="stats-display-cpm">0 cpm</span>
-    </div> 
+      <div class="stats-display">
+        <span class="stats-display-score">00000</span>
+        <span class="stats-display-accuracy" style="display: none;">100%</span>
+        <span class="stats-display-cpm">0 cpm</span>
+      </div> 
     </div>
   </div>
 </body>

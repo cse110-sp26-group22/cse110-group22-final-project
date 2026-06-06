@@ -1,3 +1,5 @@
+
+
 export default class Store {
     eventTarget = new EventTarget();
     data = {};

@@ -124,9 +124,19 @@ export default class GameUI {
     onResume(callback) {
         this.pauseMenu.onResume(callback);
     }
-    onRestart(callback) {
-        this.pauseMenu.onRestart(callback);
+    
+    /**
+     * Registers a callback to be called when the user clicks the Retry button in the pause menu.
+     * @param {() => void} callback
+     */
+    onRetry(callback) {
+        this.pauseMenu.onRetry(callback);
     }
+
+    /**
+     * Registers a callback to be called when the user clicks the Main Menu button in the pause menu.
+     * @param {() => void} callback
+     */
     onMainMenu(callback) {
         this.pauseMenu.onMainMenu(callback);
     }

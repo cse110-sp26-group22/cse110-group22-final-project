@@ -38,7 +38,7 @@
 .game-header-pause {
     display: inline-block;
     aspect-ratio: 2 / 2;
-    width: 3rem;
+    width: 3.25rem;
     cursor: pointer;
     text-align: center;
     z-index: 1;
@@ -71,6 +71,41 @@
   justify-content: center;
   z-index: 10;
   color: #3D2B1F;
+  gap: 0.5rem;
+}
+
+.pause-menu-title {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pause-menu-current-language {
+  position: absolute;
+  font-size: 1.25rem;
+  bottom: 1.25rem;
+}
+
+.pause-menu-list {
+  list-style: none;
+  width: 50%;
+  min-width: 200px;
+  background: #e8f5d8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pause-menu button {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-align: center;
+}
+.pause-menu button:hover {
+  background: #d0ecb8;
 }
 /*#endregion */
 
