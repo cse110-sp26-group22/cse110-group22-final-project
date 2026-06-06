@@ -308,13 +308,21 @@ async function handleQuestionComplete() {
 
   state.timeUsed.push(elapsedTime);
   state.totalAnswerCharacters += answer.length; 
-  
-  if (elapsedTime <= state.timeLimit) {
+
+  if (elapsedTime > state.timeLimit) {
+    // Calculate how many characters they failed to type
+    const remainingCharacters = answer.length - state.maxPrefixLength;
+
+    if (remainingCharacters > 0) {
+      // Treat every untyped character as both an input and an incorrect input
+      state.totalInputs += remainingCharacters;
+      state.totalIncorrectInputs += remainingCharacters;
+    }
+  }
+  else {
+    // Correct answer - calculate score and increment correct question count
     state.score += calculateTotalScore(copyState(), elapsedTime);
     state.numCorrectQuestions++;
-  }
-  else{
-    state.score += 0;
   }
 
   // Increment current question
