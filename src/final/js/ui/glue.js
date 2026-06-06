@@ -93,7 +93,7 @@ function handleLoadScreen(screenName, data) {
         console.debug(`Loaded game screen with question: ${question} and answer: ${answer}`);
     }
     if (screenName === 'pause') {
-        gameUI.stopCountdown();D
+        gameUI.stopCountdown();
         gameUI.show();
         gameUI.pauseMenu.show();
         resultsScreen.hide();
