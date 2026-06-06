@@ -50,6 +50,7 @@ function main() {
         mainMenu.hide();
         rulesBox.show()
         gameUI.show();
+        gameUI.startCountdown();
         glue.startLevel(1, language);
     });
 
