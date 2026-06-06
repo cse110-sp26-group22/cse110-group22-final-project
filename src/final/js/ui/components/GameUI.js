@@ -49,6 +49,7 @@ export default class GameUI {
         
         this.gameTray = new GameTray(assertHTMLElement(this.element.querySelector('.game-tray')));
         this.onClockTick(() => this.updateLiveData());
+        this.onPause(() => console.log('game paused'));
     }
 
     /**

@@ -27,13 +27,31 @@
 }
 
 .game-input-area {
-  grid-row: input-area-row; 
-  grid-column: input-area-start /span 2;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  z-index: 1;
+    grid-row: input-area-row; 
+    grid-column: input-area-start /span 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    z-index: 1;
 }
+
+.game-header-pause {
+    display: inline-block;
+    fill: black;
+    aspect-ratio: 2 / 2;
+    width: 2.75rem;
+    cursor: pointer;
+    text-align: center;
+    z-index: 1;
+}
+
+.game-header-pause svg, 
+.game-header-pause use {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
 /*#endregion */
 
 /*#region PauseMenu styles */
