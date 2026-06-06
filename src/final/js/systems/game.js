@@ -138,6 +138,11 @@ export function resumeGame() {
   callbacks.loadScreen("game", copyState());
 }
 
+/**
+ * Restarts the current level with a fresh set of questions.
+ * Resets all state except for player profile and language selection.
+ * Note: may be replaced by an isolated call to startLevel(); this is intended for code readability purposes
+ */
 export function restartLevel() {
   if(state.isPaused || state.isOver || !state.isActive){ return; }
   
@@ -182,6 +187,7 @@ export function pauseGame() {
 export async function onInput(input) {
   if (!state.isActive || state.isPaused || state.isOver) return;
 
+  
   const previousInput = state.currentInput;  
   const isDeletion = input.length < previousInput.length;
   const addedText = input.length > previousInput.length
@@ -291,6 +297,9 @@ function goToResults() {
  * Handles the end of a question
  */
 async function handleQuestionComplete() {
+  if(state.isPaused || state.isOver || !state.isActive){ return; }
+
+  stopTimer();
 
   // Calculate post-question score
   const timeRemaining = Math.max(0, state.questionEndTime - Date.now());
