@@ -18,4 +18,11 @@ It contains displays for:
 - the game tray
 It also sends a question where it sets the code input field, and displays the prompt with the question. There is text in a lower opacity that shows you what the answer needs to be.
 The pause menu is a callback that waits for a click, and then pauses the game. There's a callback in the pause menu that waits for the player to click resume in order to resume the game.
+## components.css
+Components checks the ResultsScreen styles and the RulesBox styles
+## game-components.css
+Game components checks for GameUI, PauseMenu, NotificationDisplay, PlantDisplayGroup, PlantDisplay, StatsDisplay, PromptDisplay, CodeInputField, Timer, Combo, and GameTray styles.
+## qe-styles.css
+This styles covers basic padding such as our body and site title.
+
 
