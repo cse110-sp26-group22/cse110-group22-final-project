@@ -1,6 +1,6 @@
 import {
     registerCallbacks, startLevel as backendStartLevel, pauseGame, resumeGame,
-    goToMainMenu, goToLevelSelect, onInput, setLanguage
+    goToMainMenu, onInput, setLanguage
 } from "../systems/game.js"
 
 import { store } from "./store.js";
@@ -19,32 +19,28 @@ function getCurrentQuestion(data) {
 }
 
 /**
- * @param {*} data
+ * @param {*} data: the full gamestate
  */
 function getResultsStats(data) {
     const totalQuestions = data.totalQuestions ?? data.questions?.length ?? 0;
-    const questionsAnswered = Math.min(data.timeUsed?.length ?? data.currentQuestionIndex ?? 0, totalQuestions);
+    const questionsAnswered = data.numCorrectQuestions ?? 0;
     const totalTimeUsedMs = data.timeUsed?.reduce((total, time) => total + time, 0) ?? 0;
     const elapsedMinutes = totalTimeUsedMs / 60000;
     const totalAnswerCharacters = data.totalAnswerCharacters ?? 0;
-    const totalInputs = data.totalInputs ?? 0;
-    const totalIncorrectInputs = data.totalIncorrectInputs ?? 0;
-    const accuracy = totalInputs > 0
-        ? Math.max(0, Math.min(1, 1 - totalIncorrectInputs / totalInputs))
-        : 0;
+    const accuracy = data.levelAccuracyPercent
 
     return {
         score: data.score ?? 0,
         questionsAnswered,
         totalQuestions,
-        accuracy: `${Math.round(accuracy * 100)}%`,
+        accuracy,
         cpm: elapsedMinutes > 0 ? Math.round(totalAnswerCharacters / elapsedMinutes) : 0,
         language: data.language ?? 'python'
     };
 }
 
 /**
- * @param {*} data
+ * @param {*} data: the full gamestate
  */
 function getLiveStats(data) {
     const completedAnswerCharacters = data.totalAnswerCharacters ?? 0;
@@ -60,19 +56,19 @@ function getLiveStats(data) {
     const elapsedMinutes = (totalTimeUsedMs + currentQuestionElapsedMs) / 60000;
     const totalInputs = data.totalInputs ?? 0;
     const totalIncorrectInputs = data.totalIncorrectInputs ?? 0;
-    const accuracy = totalInputs > 0
+    const currentAccuracy = totalInputs > 0
         ? Math.max(0, Math.min(1, 1 - totalIncorrectInputs / totalInputs))
         : 1;
 
     return {
         score: data.score ?? 0,
-        accuracy: `${Math.round(accuracy * 100)}%`,
+        accuracy: currentAccuracy.toFixed(2), 
         cpm: elapsedMinutes > 0 ? Math.round(correctCharacters / elapsedMinutes) : 0,
     };
 }
 
 /**
- * @param {*} data
+ * @param {*} data: the full gamestate
  */
 function updateGameStats(data) {
     latestGameData = data;
@@ -80,8 +76,8 @@ function updateGameStats(data) {
 }
 
 /**
- * @param {string} screenName 
- * @param {*} data 
+ * @param {string} screenName: the tag of the screen to load, sent from the backend to indicate which screen the frontend should display
+ * @param {*} data: the full game state sent from the backend, used to update the frontend's display and stats when loading a new screen
  */
 function handleLoadScreen(screenName, data) {
     console.debug(`Loading screen: ${screenName} with data:`, data);
@@ -93,8 +89,7 @@ function handleLoadScreen(screenName, data) {
         gameUI.pauseMenu.hide();
         const { question, answer } = getCurrentQuestion(data);
         gameUI.sendQuestion(question, answer);
-        gameUI.plantDisplayGroup.setGrowthLevels(data.growthLevel ?? [0]);
-        updateGameStats(data);
+        gameUI.plantDisplayGroup.setGrowthLevels(data.growthLevel ?? 1); 
         store.update('questionEndTime', data.questionEndTime);
         console.debug(`Loaded game screen with question: ${question} and answer: ${answer}`);
     }
@@ -123,8 +118,8 @@ function handleLoadScreen(screenName, data) {
 }
 
 /**
- * @param {string} response 
- * @param {*} data 
+ * @param {string} response: the tag of the payload sent from the backend to indicate what type of update this is
+ * @param {*} data: the full game state sent from the backend, used to update the frontend's display and stats
  */
 function handleUpdateScreen(response, data) {
     if (response === 'correct') {
@@ -156,7 +151,7 @@ export function initializeBackend() {
  * @param {string} input
  */
 export function handleInputChange(input){
-    onInput(input); //backend naming is different from our convention
+    onInput(input);
 }
 
 export function gameUIReady() {
@@ -176,4 +171,4 @@ function startLevel(levelNumber, category) {
     return backendStartLevel(levelNumber, category);
 }
 
-export { startLevel, pauseGame, resumeGame, goToLevelSelect, goToMainMenu };
+export { startLevel, pauseGame, resumeGame, goToMainMenu };

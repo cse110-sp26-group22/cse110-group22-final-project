@@ -80,17 +80,16 @@ export function calculateTotalScore(state, elapsedMs = 0) {
         baseScores = [],
         incorrectInputs = 0,
         answers = [],
-        currentInput = "",
+        currentInput = "",  
         currentQuestionIndex = 0,
         timeLimit = 0,
         combo = 0,
-        growthLevel = []
+        growthLevel = 0
     } = state;
 
     const answer = answers[currentQuestionIndex] || "";
     const questionBaseScore = baseScores[currentQuestionIndex] || 0;
-    const totalChars = Math.max(answer.length, currentInput.length);
-
+    const totalChars = Math.max(answer.length, currentInput.length);  
     const accuracyMultiplier = calculateAccuracyMultiplier(
         incorrectInputs,
         totalChars
@@ -103,16 +102,13 @@ export function calculateTotalScore(state, elapsedMs = 0) {
 
     const comboMultiplier = calculateComboBonus(combo);
 
-    // Sum the bonus from each plant in the current growth state.
-    const plantBonus = growthLevel.reduce((total, plant) => {
-        return total + addPlantBonus(plant);
-    }, 0);
+    // Sum the bonus from the plant in the current growth state.
+    const plantBonus = addPlantBonus(growthLevel);
 
     const finalScore =
         questionBaseScore *
         accuracyMultiplier *
         timeMultiplier * comboMultiplier + plantBonus;
-    //streakMultiplier;
 
     return Math.round(Math.max(0, finalScore));
 }

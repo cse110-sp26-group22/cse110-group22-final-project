@@ -179,16 +179,16 @@ describe("calculateTotalScore", () => {
       answers: ["hello"],
       currentInput: "",
       currentQuestionIndex: 0,
-      growthLevel: [1, 2],
+      growthLevel: 2,  // Single plant at stage 2
       timeLimit: 3000,
     };
 
     const scoreWithoutPlants = calculateTotalScore(
-      { ...state, growthLevel: [0, 0] },
+      { ...state, growthLevel: 0 },
       3000
     );
     const scoreWithPlants = calculateTotalScore(state, 3000);
 
-    expect(scoreWithPlants - scoreWithoutPlants).toBe(30);
+    expect(scoreWithPlants - scoreWithoutPlants).toBe(20);  // 10 points per stage: 2 * 10 = 20
   });
 });
