@@ -297,7 +297,7 @@ function goToResults() {
  * Handles the end of a question
  */
 async function handleQuestionComplete() {
-  if(isPaused || state.isOver || !state.isActive){ return; }
+  if(state.isPaused || state.isOver || !state.isActive){ return; }
 
   stopTimer();
 
