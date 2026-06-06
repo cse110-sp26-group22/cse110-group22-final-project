@@ -25,7 +25,11 @@ export default class PauseMenu {
         return !this.element.classList.contains('hidden');
     }
 
-    onResume(callback){
+    /**
+     * Registers a callback to be called when the user clicks the Resume button.
+     * @param {() => void} callback 
+     */
+    onResume(callback) {
         this.resumeBtn.addEventListener('click', () => {
             callback();
             this.hide();
