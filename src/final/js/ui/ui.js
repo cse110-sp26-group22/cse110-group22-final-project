@@ -70,6 +70,12 @@ function main() {
         mainMenu.show();
         glue.goToMainMenu();
     });
+
+    resultsScreen.onNext(() => {
+        resultsScreen.hide();
+        gameUI.show();
+        glue.startLevel(2, lastLanguage);
+    });
 }
 
 /**
