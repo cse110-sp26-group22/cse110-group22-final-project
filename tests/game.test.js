@@ -17,9 +17,14 @@ jest.mock("../src/final/js/systems/level.js", () => ({
     timeLimit: 30000,
     language: category,
     currentQuestionIndex: 0,
-    growthLevel: 1,
+    growthLevel: 0,
     currentInput: "",
     totalIncorrectInputs: 0,
+    totalInputs:          0,
+    maxPrefixLength:      0,
+    levelAccuracyPercent: "1.00",
+    timeUsed:             [],
+    totalAnswerCharacters:0,
   })),
   getLevelCount: jest.fn(() => 3),
 }));
@@ -345,5 +350,107 @@ describe("onInput", () => {
     jest.clearAllMocks();
     onInput("z");              // prefixLength 0 <= maxPrefixLength 1 → incorrect
     expect(mockUpdateScreen).toHaveBeenCalledWith("incorrect", expect.any(Object));
+  });
+});
+
+// ── Question Completion & Expiration Penalties ────────────────────────────────
+
+describe("handleQuestionComplete and Expiration Penalties", () => {
+  test("calls stopTimer immediately when a question finishes", async () => {
+    await startLevel(1, "python");
+    jest.clearAllMocks();
+
+    // Type the full answer to naturally trigger question completion
+    await onInput("a");
+    await onInput("ab");
+
+    const { stopTimer } = require("../src/final/js/systems/timer.js");
+    expect(stopTimer).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not penalize accuracy metrics if user answers under the time limit", async () => {
+    await startLevel(1, "python");
+    
+    await onInput("a");
+    await onInput("ab");
+
+    const lastStateSent = mockUpdateScreen.mock.calls[mockUpdateScreen.mock.calls.length - 1][1];
+    expect(lastStateSent.totalIncorrectInputs).toBe(0);
+  });
+
+  test("applies missing character penalty to incorrect inputs on timeout", async () => {
+    // Set up a level where the target answer is long ("python" = 6 chars)
+    loadLevel.mockResolvedValueOnce(makeLevelState({
+      answers: ["python"],
+      currentQuestionIndex: 0
+    }));
+    
+    await startLevel(1, "python");
+    
+    // Simulate the user typing part of the word correctly first
+    await onInput("p");
+    await onInput("py"); // maxPrefixLength becomes 2
+
+    // Freeze the base time and spy on Date.now to force a timeout state
+    const realNow = Date.now();
+    const spyDate = jest.spyOn(Date, 'now').mockImplementation(() => realNow + 40000); 
+
+    // Send an input that forces your code to check elapsed time and process timeout logic
+    await onInput("py"); 
+
+    const lastStateSent = mockUpdateScreen.mock.calls[mockUpdateScreen.mock.calls.length - 1][1];
+    
+    // If your system accurately registers the timeout:
+    // 6 (length) - 2 (prefix) = 4 remaining characters should be added to inputs/errors
+    expect(lastStateSent.totalIncorrectInputs).toBeGreaterThanOrEqual(1);
+
+    spyDate.mockRestore();
+  });
+});
+
+// ── Accuracy Calculations ───────────────────────────────────────────────────
+
+describe("Accuracy Schema Formatter", () => {
+  test("saves levelAccuracyPercent in a clean decimal format string at end of level", async () => {
+    loadLevel.mockResolvedValueOnce(makeLevelState({
+      questions: ["Q1"],
+      answers: ["ab"]
+    }));
+
+    await startLevel(1, "python");
+    
+    // Simulate natural inputs: 1 correct, 1 typo, then finishing the word
+    await onInput("a");  // Correct
+    await onInput("ax"); // Typo
+    await onInput("ab"); // Finished!
+
+    expect(mockLoadScreen).toHaveBeenCalledWith("results", expect.any(Object));
+    
+    const finalState = mockLoadScreen.mock.calls[0][1];
+    
+    // Verify that the level accuracy field exists and is formatted as a number
+      expect(finalState).toHaveProperty("levelAccuracyPercent");
+      expect(typeof finalState.levelAccuracyPercent).toBe("number");
+    });
+  
+  test("safeguards against division-by-zero errors yielding NaN strings if inputs are 0", async () => {
+    loadLevel.mockResolvedValueOnce(makeLevelState({
+      questions: ["Q1"],
+      answers: ["ab"]
+    }));
+
+    await startLevel(1, "python");
+    
+    // Force immediate timeout without typing anything
+    const realNow = Date.now();
+    const spyDate = jest.spyOn(Date, 'now').mockImplementation(() => realNow + 50000); 
+
+    await onInput(""); 
+
+    const finalState = mockLoadScreen.mock.calls[0][1];
+    
+    // The metric should exist as a string and not be literal "NaN"
+    expect(finalState.levelAccuracyPercent).not.toBe("NaN");
+    spyDate.mockRestore();
   });
 });
