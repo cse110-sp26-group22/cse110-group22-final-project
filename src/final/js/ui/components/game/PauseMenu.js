@@ -39,13 +39,6 @@ export default class PauseMenu {
         });
     }
 
-    onLevelSelect(callback){
-        this.levelSelectBtn.addEventListener('click', () => {
-            callback();
-            this.hide();
-        });
-    }
-
     onMainMenu(callback){
         this.mainMenuBtn.addEventListener('click', () => {
             callback();

@@ -69,18 +69,11 @@ function main() {
         glue.startLevel(1, lastLanguage);
     });
 
-    gameUI.onLevelSelect(() => {
-        gameUI.hide();
-        mainMenu.show();
-        glue.goToLevelSelect();
-    });
-
     gameUI.onMainMenu(() => {
         gameUI.hide();
         mainMenu.show();
         glue.goToMainMenu();
     });
-
 
     resultsScreen.onMainMenu(() => {
         resultsScreen.hide();
