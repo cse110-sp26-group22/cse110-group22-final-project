@@ -132,24 +132,18 @@ function handleLoadScreen(screenName, data) {
  * @param {GameState} data: the full game state sent from the backend, used to update the frontend's display and stats
  */
 function handleUpdateScreen(response, data) {
-    if (response === 'correct') {
-        gameUI.combo.increment();
-        updateGameStats(data);
-    }
-    if (response === 'incorrect') {
-        gameUI.combo.reset();
-        updateGameStats(data);
+    updateGameStats(data);
+    if (response === 'correct' || response === 'incorrect') {
+        store.update('combo', data.combo);
     }
     if (response === 'next-question') {
         const { question, answer } = getCurrentQuestion(data);
         gameUI.sendQuestion(question, answer);
-        updateGameStats(data);
         store.update('questionEndTime', data.questionEndTime);
         console.debug(`Updating screen with response: ${response} and data:`, data);
     }
     if (response === 'plant-growth') {
         gameUI.plantDisplayGroup.setGrowthLevel(data.growthLevel);
-        updateGameStats(data);
     }
 }
 
