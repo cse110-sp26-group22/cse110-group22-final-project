@@ -16,6 +16,8 @@
  * @module level
  */
 
+import { defaultGameState } from "../models/models";
+
 const LEVELS = [
   { levelNumber: 1, timeLimit: 30000, questionCount: 9, difficultyMin: 1, difficultyMax: 3  },
   { levelNumber: 2, timeLimit: 25000, questionCount: 9, difficultyMin: 4, difficultyMax: 6  },
@@ -29,7 +31,7 @@ const LEVELS = [
  * then splits them into parallel questions[] and answers[] arrays so game.js
  * can access either by the same index.
  *
- * The returned object is a plain data object — it can be saved to localStorage
+ * The returned object is a plain data object = it can be saved to localStorage
  * via storage.js without any conversion.
  *
  * @param {number} levelNumber - 1-indexed level number
@@ -55,18 +57,23 @@ export async function loadLevel(levelNumber, category) {
     .sort(() => Math.random() - 0.5)
     .slice(0, config.questionCount);
 
-  // Split into parallel arrays — same index = same question
+  // Split into parallel arrays = same index = same question
   const questions  = shuffled.map(q => q.Question);
   const answers    = shuffled.map(q => q.Answer);
   const baseScores = shuffled.map(q => q.baseScore);
   console.debug(`Selected questions for level ${config.levelNumber}:`, questions);
   return {
+    ...defaultGameState(),
     questions,
     answers,
     baseScores,
-    level:                config.levelNumber,
-    timeLimit:            config.timeLimit,
-    language:             category,
+    isActive:          true,
+    isPaused:          false,
+    level:             config.levelNumber,
+    timeLimit:         config.timeLimit,
+    language:          category,
+    totalQuestions:    questions.length,
+    questionStartTime: Date.now(),
   };
 }
 
