@@ -20,8 +20,8 @@ Our project is a typing game that tests and refines a user's proficiency with sy
 
 ## How to Play?
 
-Access the game at this link[https://cse110-sp26-group22.github.io/cse110-group22-final-project/src/final/html/index.html] if the Pages deploy link does not work and follow the instructions below to watch your plant (and coding skills) grow!
-1. Launch the game[https://cse110-sp26-group22.github.io/cse110-group22-final-project/src/final/html/index.html].
+Access the game at this [link](https://cse110-sp26-group22.github.io/cse110-group22-final-project/src/final/html/index.html) if the Pages deploy link does not work and follow the instructions below to watch your plant (and coding skills) grow!
+1. Launch the [game](https://cse110-sp26-group22.github.io/cse110-group22-final-project/src/final/html/index.html).
 2. Select your language.
 3. Read the prompts at the bottom of the screen.
 4. Type the correct answer as quickly and accurately as possible
