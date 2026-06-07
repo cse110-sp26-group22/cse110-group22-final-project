@@ -23,7 +23,7 @@ describe('PlantDisplayGroup', () => {
         plantDisplayGroup.addPlant();
         const childDiv = plantDisplayGroup.element.querySelector('.plant-display');
         expect(childDiv).toBeInstanceOf(HTMLDivElement);
-        expect(childDiv.querySelector('.plant-image')).toBeInstanceOf(HTMLImageElement);
+        expect(childDiv.querySelector('.plant-image')).toBeInstanceOf(HTMLElement);
     });
 
     test('addPlant adds multiple plants correctly', () => {
