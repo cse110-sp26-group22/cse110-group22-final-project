@@ -71,6 +71,15 @@ export default class Combo {
     }
 
     /**
+     * Hard resets the combo count to 0 without the roll down animation. Used when starting a new level.
+     */ 
+    hardReset() {
+        this.#comboCount = 0;
+        this.element.classList.remove('flashed');
+        this.renderedComboCount = 0;
+    }
+
+    /**
      * Returns the current combo count held by this component.
      */
     get combo() {

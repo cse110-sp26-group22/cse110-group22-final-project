@@ -18,9 +18,11 @@ let resultsScreen;
 /** @type {RulesBox} */
 let rulesBox;
 
-// TODO: update when multiple languages are added
 /** @type {string} Last language the user started a game with, used for Retry. */
 let lastLanguage = 'python';
+
+/** @type {number} The current level the user is playing. */
+let currentLevel = 1;
 
 /**
  * Initializes the UI and shows the main menu.
@@ -51,7 +53,8 @@ function main() {
         rulesBox.show()
         gameUI.show();
         gameUI.startCountdown();
-        glue.startLevel(1, language);
+        currentLevel = 1;
+        glue.startLevel(currentLevel, language);
         //gameUI.notificationDisplay.notifyEvent(`Level 1`, '#574728');
     });
 
@@ -60,7 +63,7 @@ function main() {
         rulesBox.show()
         gameUI.show();
         //gameUI.notificationDisplay.notifyEvent(`Retrying Level 1`, '#574728');
-        glue.startLevel(1, lastLanguage);
+        glue.startLevel(currentLevel, lastLanguage);
     });
 
     gameUI.onPause(glue.pauseGame);
@@ -68,7 +71,7 @@ function main() {
     gameUI.codeInputField.onInputChange(glue.handleInputChange);
 
     gameUI.onRetry(() => {
-        glue.startLevel(1, lastLanguage);
+        glue.startLevel(currentLevel, lastLanguage);
         //gameUI.notificationDisplay.notifyEvent(`Retrying Level 1 . . .`, '#574728');
     });
 
@@ -86,9 +89,18 @@ function main() {
     });
 
     resultsScreen.onNext(() => {
+        currentLevel++;
+        if(currentLevel > 3) {
+            currentLevel = 1;
+            resultsScreen.hide();
+            rulesBox.hide();
+            mainMenu.show();
+            glue.goToMainMenu();
+            return;
+        }
         resultsScreen.hide();
         gameUI.show();
-        glue.startLevel(2, lastLanguage);
+        glue.startLevel(currentLevel, lastLanguage);
     });
 }
 
