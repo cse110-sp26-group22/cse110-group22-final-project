@@ -87,6 +87,8 @@ function updateGameStats(data) {
  * @param {GameState} data: the full game state sent from the backend, used to update the frontend's display and stats when loading a new screen
  */
 function handleLoadScreen(screenName, data) {
+    store.update('level', data.level);
+
     console.debug(`Loading screen: ${screenName} with data:`, data);
     if (screenName === 'game') {
         mainMenu.hide();
@@ -100,6 +102,7 @@ function handleLoadScreen(screenName, data) {
         gameUI.plantDisplayGroup.setGrowthLevel(data.growthLevel ?? 0); 
         updateGameStats(data);
 
+        gameUI.combo.hardReset();
         store.update('questionEndTime', data.questionEndTime);
         store.update('language', data.language);
     }

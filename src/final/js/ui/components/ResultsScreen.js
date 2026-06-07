@@ -1,4 +1,5 @@
 import { assertHTMLElement } from "../utils.js";
+import { store } from "../store.js";
 
 /**
  * The results screen shown at the end of a game round.
@@ -49,6 +50,11 @@ export default class ResultsScreen {
         this.cpmEl.textContent = `${stats.cpm}`;
         this.questionsEl.textContent = `${stats.questionsAnswered} / ${stats.totalQuestions}`;
         this.languageEl.textContent = stats.language;
+        if(store.retrieve('level') >= 3) {
+            this.nextBtn.classList.add('hidden');
+        } else {
+            this.nextBtn.classList.remove('hidden');
+        }
         this.element.classList.remove('hidden');
     }
 

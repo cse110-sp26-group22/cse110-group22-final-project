@@ -14,7 +14,7 @@
     );
   /* show the whole image, align to top, and keep green behind it */
   background-size:contain;
-  background-position: top center;
+  background-position: center;
   background-repeat: no-repeat;
   color: #3D2B1F;
 
@@ -165,7 +165,7 @@
   align-items: center;
   width: 20%;
   height: 90%;
-  max-width: 20%;
+  max-width: 50%;
   max-height: 90%;
   overflow: visible;
 }
