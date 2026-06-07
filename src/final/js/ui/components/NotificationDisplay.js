@@ -12,12 +12,21 @@ import { assertHTMLElement } from "../utils.js";
  */
 
 export default class NotificationDisplay {
+    /**
+     * Binds this NotificationDisplay to the given element.
+     * @param {HTMLElement} element 
+     */
     constructor(element){
         this.element = element; 
         this.textElement = assertHTMLElement(this.element.querySelector('.notification-display-text'));
         this.timeoutId = null; 
     }
 
+    /**
+     * Displays a notification with the given event message and color.
+     * @param {string} event 
+     * @param {string} color 
+     */
     notifyEvent(event, color) {
         this.textElement.textContent = event;
         this.element.style.backgroundColor = color;
