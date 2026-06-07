@@ -142,5 +142,10 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
-# Extras:
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# Dependencies
 node_modules/
