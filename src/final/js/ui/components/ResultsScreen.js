@@ -46,7 +46,8 @@ export default class ResultsScreen {
      */
     show(stats) {
         this.scoreEl.textContent = `${stats.score}`;
-        this.accuracyEl.textContent = `${stats.accuracy}`;
+        const accuracyPercent = Math.floor(parseFloat(stats.accuracy) * 100);
+        this.accuracyEl.textContent = `${accuracyPercent}%`;
         this.cpmEl.textContent = `${stats.cpm}`;
         this.questionsEl.textContent = `${stats.questionsAnswered} / ${stats.totalQuestions}`;
         const languageCapitalized = stats.language.charAt(0).toUpperCase() + stats.language.slice(1);

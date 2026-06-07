@@ -62,7 +62,7 @@ function main() {
         resultsScreen.hide();
         rulesBox.show()
         gameUI.show();
-        gameUI.notificationDisplay.notifyEvent(`Retrying Level ${currentLevel}`, '#574728');
+        gameUI.notificationDisplay.notifyEvent(`Retrying Level ${currentLevel} . . .`, '#574728');
         glue.startLevel(currentLevel, lastLanguage);
     });
 
