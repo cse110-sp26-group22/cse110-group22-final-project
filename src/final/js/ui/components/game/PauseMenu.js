@@ -7,10 +7,10 @@ import { store } from "../../store.js";
  * Expects the following minimal HTML structure:
  * <div class="pause-menu">
  *   <h3 class="pause-menu-title">Paused</h3>
- *   <h4 class="pause-menu-current-language"></h4>
  *   ...<button type="button" class="pause-menu-resume">Resume</button>
  *   ...<button type="button" class="pause-menu-retry">Retry</button>
  *   ...<button type="button" class="pause-menu-main-menu">Main Menu</button>
+ *   <h4 class="pause-menu-current-language"></h4>
  * </div>
  */
 export default class PauseMenu {
