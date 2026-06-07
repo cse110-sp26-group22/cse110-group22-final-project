@@ -14,10 +14,17 @@ import { store } from "../../store.js";
  * </div>
  */
 export default class PauseMenu {
+    /** @type {HTMLButtonElement} */
     resumeBtn;
+    /** @type {HTMLButtonElement} */
     retryBtn;
+    /** @type {HTMLButtonElement} */
     mainMenuBtn;
 
+    /**
+     * Binds this PauseMenu to the given element and sets up event listeners for the buttons and language display.
+     * @param {HTMLElement} element 
+     */
     constructor(element){
         this.element = element; 
         this.element.classList.add('hidden');
@@ -28,17 +35,20 @@ export default class PauseMenu {
         store.subscribe('language', (language) => this.language = language);
     }
 
+    /**
+     * Sets the current language displayed in the pause menu.
+     */
     show(){
         this.element.classList.remove('hidden');
     }
+    
+    /**
+     * Hides the pause menu.
+     */
     hide(){
         this.element.classList.add('hidden');
     }
     
-
-    get isVisible(){
-        return !this.element.classList.contains('hidden');
-    }
 
     /**
      * Registers a callback to be called when the user clicks the Resume button.
@@ -71,6 +81,15 @@ export default class PauseMenu {
             callback();
             this.hide();
         });
+    }
+
+    /**
+     * TODO: this method should probably be refactored
+     * Returns whether the pause menu is currently visible.
+     * @returns {boolean} True if the pause menu is visible, false
+     */
+    get isVisible(){
+        return !this.element.classList.contains('hidden');
     }
 
     /**

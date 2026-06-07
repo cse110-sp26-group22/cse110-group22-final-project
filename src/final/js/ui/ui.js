@@ -52,12 +52,14 @@ function main() {
         gameUI.show();
         gameUI.startCountdown();
         glue.startLevel(1, language);
+        //gameUI.notificationDisplay.notifyEvent(`Level 1`, '#574728');
     });
 
     resultsScreen.onRetry(() => {
         resultsScreen.hide();
         rulesBox.show()
         gameUI.show();
+        //gameUI.notificationDisplay.notifyEvent(`Retrying Level 1`, '#574728');
         glue.startLevel(1, lastLanguage);
     });
 
@@ -67,6 +69,7 @@ function main() {
 
     gameUI.onRetry(() => {
         glue.startLevel(1, lastLanguage);
+        //gameUI.notificationDisplay.notifyEvent(`Retrying Level 1 . . .`, '#574728');
     });
 
     gameUI.onMainMenu(() => {

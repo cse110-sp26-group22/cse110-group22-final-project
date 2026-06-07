@@ -22,6 +22,7 @@ import { assertHTMLElement } from "../utils.js";
  */
 export default class ResultsScreen {
     /**
+     * Binds this ResultsScreen to the given element.
      * @param {HTMLElement} element
      */
     constructor(element) {
@@ -51,21 +52,33 @@ export default class ResultsScreen {
         this.element.classList.remove('hidden');
     }
 
+    /**
+     * Hides the results screen.
+     */
     hide() {
         this.element.classList.add('hidden');
     }
 
-    /** @param {() => void} callback */
+    /**
+     * Registers a callback to be called when the user clicks the Retry button.
+     * @param {() => void} callback
+     */
     onRetry(callback) {
         this.retryBtn.addEventListener('click', callback);
     }
 
-    /** @param {() => void} callback */
+    /**
+     * Registers a callback to be called when the user clicks the Main Menu button.
+     * @param {() => void} callback
+     */
     onMainMenu(callback) {
         this.mainMenuBtn.addEventListener('click', callback);
     }
 
-    /** @param {() => void} callback */
+    /** 
+     * Registers a callback to be called when the user clicks the Next Level button.
+     * @param {() => void} callback
+     */
     onNext(callback) {
         this.nextBtn.addEventListener('click', callback);
     }
