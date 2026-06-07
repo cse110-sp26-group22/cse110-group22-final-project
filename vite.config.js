@@ -3,7 +3,7 @@ import path from 'path';
 
 export default defineConfig({
   root: '.',
-  base: '/cse110-group22-final-project/', // Absolute base path
+  base: './', // Absolute base path
   build: {
     outDir: path.resolve(__dirname, 'dist'),
     emptyOutDir: true,
