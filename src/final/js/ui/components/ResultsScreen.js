@@ -60,7 +60,7 @@ export default class ResultsScreen {
         this.cpmEl.textContent = `${stats.cpm}`;
         this.questionsEl.textContent = `${stats.questionsAnswered} / ${stats.totalQuestions}`;
         const languageCapitalized = stats.language.charAt(0).toUpperCase() + stats.language.slice(1);
-        this.languageEl.textContent = languageCapitalized;
+        this.languageEl.textContent = `\u00A0${languageCapitalized}`;
         if(store.retrieve('level') >= 3) {
             this.nextBtn.classList.add('hidden');
         } else {

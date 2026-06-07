@@ -35,29 +35,29 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What keyword defines a function called plantSeed?",
-    "Answer": "function",
+    "Question": "What operator returns the type of a variable as a string?",
+    "Answer": "typeof",
     "Difficulty": 1,
     "baseScore": 10,
     "QuestionList": "javascript"
   },
   {
-    "Question": "What operator checks if cropType is strictly equal to the string 'wheat'?",
-    "Answer": "===",
+    "Question": "What symbol is used for single-line comments in JavaScript?",
+    "Answer": "//",
     "Difficulty": 1,
     "baseScore": 10,
     "QuestionList": "javascript"
   },
   {
-    "Question": "What method adds a new crop to the end of your crops array?",
-    "Answer": ".push()",
+    "Question": "What method removes the last element from an array?",
+    "Answer": ".pop()",
     "Difficulty": 2,
     "baseScore": 15,
     "QuestionList": "javascript"
   },
   {
-    "Question": "What keyword creates a new Farmer object from a class?",
-    "Answer": "new",
+    "Question": "What keyword refers to the current object inside a method?",
+    "Answer": "this",
     "Difficulty": 2,
     "baseScore": 15,
     "QuestionList": "javascript"
@@ -98,8 +98,8 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What method converts a farm inventory JSON string into a JavaScript object?",
-    "Answer": "JSON.parse()",
+    "Question": "What method checks if a value is not a number in JavaScript?",
+    "Answer": "isNaN()",
     "Difficulty": 3,
     "baseScore": 20,
     "QuestionList": "javascript"
@@ -112,8 +112,8 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What method converts your farm save data object into a JSON string?",
-    "Answer": "JSON.stringify()",
+    "Question": "What method returns the index of the first occurrence of a value in an array?",
+    "Answer": ".indexOf()",
     "Difficulty": 3,
     "baseScore": 20,
     "QuestionList": "javascript"
@@ -133,22 +133,22 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What array method applies a growth function to every crop and returns a new array?",
-    "Answer": ".map()",
+    "Question": "What array method checks if every element passes a test?",
+    "Answer": ".every()",
     "Difficulty": 4,
     "baseScore": 25,
     "QuestionList": "javascript"
   },
   {
-    "Question": "What method returns a new array with elements that pass a test?",
-    "Answer": ".filter()",
+    "Question": "What method executes a function once for each array element?",
+    "Answer": ".forEach()",
     "Difficulty": 4,
     "baseScore": 25,
     "QuestionList": "javascript"
   },
   {
-    "Question": "What array method creates a new array with only the ripe crops that pass a test function?",
-    "Answer": ".filter()",
+    "Question": "What method returns the first element that passes a test?",
+    "Answer": ".find()",
     "Difficulty": 4,
     "baseScore": 25,
     "QuestionList": "javascript"
@@ -161,8 +161,8 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What array method calculates the total harvest by reducing all crop yields into one value?",
-    "Answer": ".reduce()",
+    "Question": "What method checks if at least one element passes a test?",
+    "Answer": ".some()",
     "Difficulty": 4,
     "baseScore": 25,
     "QuestionList": "javascript"
@@ -175,8 +175,8 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What keyword is used to catch errors when loading farm save data fails?",
-    "Answer": "try",
+    "Question": "What keyword follows try to handle the error object?",
+    "Answer": "catch",
     "Difficulty": 5,
     "baseScore": 30,
     "QuestionList": "javascript"
@@ -196,22 +196,22 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What DOM method selects the HTML element with id 'farm-grid'?",
-    "Answer": "document.getElementById()",
+    "Question": "What method selects the first element matching a CSS selector?",
+    "Answer": "document.querySelector()",
     "Difficulty": 5,
     "baseScore": 30,
     "QuestionList": "javascript"
   },
   {
-    "Question": "What keyword pauses an async function until the crop price API promise resolves?",
-    "Answer": "await",
+    "Question": "What method attaches a callback to a resolved promise?",
+    "Answer": ".then()",
     "Difficulty": 6,
     "baseScore": 35,
     "QuestionList": "javascript"
   },
   {
-    "Question": "What keyword marks a function as asynchronous so it can fetch weather data for the farm?",
-    "Answer": "async",
+    "Question": "What built-in method makes an HTTP request and returns a promise?",
+    "Answer": "fetch()",
     "Difficulty": 6,
     "baseScore": 35,
     "QuestionList": "javascript"
@@ -224,8 +224,8 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What method attaches a click event handler to a plant button element?",
-    "Answer": ".addEventListener()",
+    "Question": "What method removes an event listener from a DOM element?",
+    "Answer": ".removeEventListener()",
     "Difficulty": 6,
     "baseScore": 35,
     "QuestionList": "javascript"
@@ -245,8 +245,8 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What method returns a promise that resolves when all field watering promises complete?",
-    "Answer": "Promise.all()",
+    "Question": "What method returns a promise that resolves when the first promise settles?",
+    "Answer": "Promise.race()",
     "Difficulty": 8,
     "baseScore": 45,
     "QuestionList": "javascript"
@@ -266,8 +266,8 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What keyword makes a FarmTool class available for import in other modules?",
-    "Answer": "export",
+    "Question": "What keyword is used to bring a value from another module into scope?",
+    "Answer": "import",
     "Difficulty": 9,
     "baseScore": 50,
     "QuestionList": "javascript"
@@ -280,8 +280,8 @@ export default [
     "QuestionList": "javascript"
   },
   {
-    "Question": "What syntax defines a generator function that yields seasonal crops one at a time?",
-    "Answer": "function*",
+    "Question": "What method retrieves the next value from a generator object?",
+    "Answer": ".next()",
     "Difficulty": 10,
     "baseScore": 55,
     "QuestionList": "javascript"
