@@ -28,6 +28,10 @@ body {
   margin-left: 0.75rem;
 }
 
+button {
+    font-family: inherit;
+}
+
 
 #header {
   display: flex;

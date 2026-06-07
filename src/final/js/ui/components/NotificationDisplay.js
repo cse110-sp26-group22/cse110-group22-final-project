@@ -12,6 +12,9 @@ import { assertHTMLElement } from "../utils.js";
  */
 
 export default class NotificationDisplay {
+    /** @const {number} */
+    static DISPLAY_DURATION = 1750;
+
     /**
      * Binds this NotificationDisplay to the given element.
      * @param {HTMLElement} element 
@@ -37,7 +40,7 @@ export default class NotificationDisplay {
         }
         this.timeoutId = setTimeout(() => {
             this.element.classList.remove('notification-visible');
-        }, 3000);
+        }, NotificationDisplay.DISPLAY_DURATION);
     }
 }
     

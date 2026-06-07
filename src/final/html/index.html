@@ -15,7 +15,7 @@
 <body>
 
   <!-- RulesBox -->
-    <div class="rules-box">
+    <div class="rules-box hidden">
       <h3>How to play!</h3>
       <p>Read the question and submit your answer in the box below.</p>
     </div>
@@ -29,10 +29,9 @@
     </ul>
   </div>
 
-  <!-- ResultsScreen: hidden until game engine calls showResults() -->
-  <div class="results-screen">
+  <!-- ResultsScreen -->
+  <div class="results-screen hidden">
     <h2 class="results-title">Round Complete!</h2>
-    <p class="results-label">Language: <span class="results-language">Python</span></p>
     <div class="results-stats">
       <div class="results-stat">
         <span class="results-label">Score</span>
@@ -65,10 +64,11 @@
         Next
       </button>
     </div>
+    <p class="results-label results-language-label">Language: <span class="results-language">Python</span></p>
   </div>
 
   <!-- GameUI -->
-  <div id="game-ui" class="game-ui">
+  <div id="game-ui" class="game-ui hidden">
     <button type="button" class="game-header-pause">
       <svg viewBox="0 0 256 256"><use href="../assets/icons/pause-icon.svg#pause-icon" fill="#E53935"></use></svg>
     </button>

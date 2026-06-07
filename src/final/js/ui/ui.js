@@ -55,14 +55,14 @@ function main() {
         gameUI.startCountdown();
         currentLevel = 1;
         glue.startLevel(currentLevel, language);
-        //gameUI.notificationDisplay.notifyEvent(`Level 1`, '#574728');
+        gameUI.notificationDisplay.notifyEvent(`Level ${currentLevel}`, '#574728');
     });
 
     resultsScreen.onRetry(() => {
         resultsScreen.hide();
         rulesBox.show()
         gameUI.show();
-        //gameUI.notificationDisplay.notifyEvent(`Retrying Level 1`, '#574728');
+        gameUI.notificationDisplay.notifyEvent(`Retrying Level ${currentLevel}`, '#574728');
         glue.startLevel(currentLevel, lastLanguage);
     });
 
@@ -72,7 +72,7 @@ function main() {
 
     gameUI.onRetry(() => {
         glue.startLevel(currentLevel, lastLanguage);
-        //gameUI.notificationDisplay.notifyEvent(`Retrying Level 1 . . .`, '#574728');
+        gameUI.notificationDisplay.notifyEvent(`Retrying Level ${currentLevel} . . .`, '#574728');
     });
 
     gameUI.onMainMenu(() => {
@@ -101,6 +101,7 @@ function main() {
         resultsScreen.hide();
         gameUI.show();
         glue.startLevel(currentLevel, lastLanguage);
+        gameUI.notificationDisplay.notifyEvent(`Level ${currentLevel}`, '#574728');
     });
 }
 

@@ -7,10 +7,9 @@ import { store } from "../store.js";
  * Expects the following HTML structure:
  * <div class="results-screen">
  *   <h2 class="results-title">...</h2>
- *   <p class="results-language-label">Language: <span class="results-language"></span></p>
  *   <div class="results-stats">
  *     <div class="results-stat">
- *       <span class="results-stat-label">Score</span>
+ *       <span class="results-label">Score</span>
  *       <span class="results-stat-value results-score"></span>
  *     </div>
  *     ... (accuracy, cpm, questions)
@@ -19,6 +18,7 @@ import { store } from "../store.js";
  *     <button class="results-retry">Retry</button>
  *     <button class="results-main-menu">Main Menu</button>
  *   </div>
+ *   <p class="results-label results-language-label">Language: <span class="results-language"></span></p>
  * </div>
  */
 export default class ResultsScreen {
@@ -49,7 +49,8 @@ export default class ResultsScreen {
         this.accuracyEl.textContent = `${stats.accuracy}`;
         this.cpmEl.textContent = `${stats.cpm}`;
         this.questionsEl.textContent = `${stats.questionsAnswered} / ${stats.totalQuestions}`;
-        this.languageEl.textContent = stats.language;
+        const languageCapitalized = stats.language.charAt(0).toUpperCase() + stats.language.slice(1);
+        this.languageEl.textContent = languageCapitalized;
         if(store.retrieve('level') >= 3) {
             this.nextBtn.classList.add('hidden');
         } else {
