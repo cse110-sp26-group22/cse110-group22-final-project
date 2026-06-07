@@ -32,16 +32,5 @@ $\circ$ Probably 2d.
 I'm leaning towards a vector style, since it works well with CSS (SVG) and vector graphics are easy to animate.
 That said, I do see arguments for pixel, though.
 
-$\circ$ TBD
-
-
-## Specification Draft
-> [!NOTE]
-> The following content is subject to change. Edit it!
-
-TODO: fill in stuff from the alignment questions + the basic structure of the game environment
-
-## Future Ideas
-- Have the text interface be part of the game.
-- Have 2.5 rendering for a sense of depth.
+$\circ$ Deferred to Sofia
 
