@@ -5,7 +5,7 @@
  * <div class="plant-display"></div>
  */
 export default class PlantDisplay  {
-    /** @const {(string)[]}*/
+    /** @const {(string)[]} */
     static PLANT_IMAGES = ['plant1-stage1.png', 'plant1-stage2.png', 'plant1-stage3.png'];
     /**
      * Binds this PlantDisplay to the given element.
@@ -18,6 +18,10 @@ export default class PlantDisplay  {
 
         this.build();
     }
+
+    /**
+     * Builds the initial plant image element and appends it to the PlantDisplay element.
+     */
     build(){
         this.plantImageElement.src = `../assets/images/plant/${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`;
         this.plantImageElement.classList.add('plant-image');

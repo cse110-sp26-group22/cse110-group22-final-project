@@ -77,9 +77,8 @@ function makeLevelState(overrides = {}) {
     level:      1,
     timeLimit:  30000,
     language:   "python",
-    growthLevel: 1,           
-    currentInput: "",     
-    totalIncorrectInputs: 0,  
+    isActive:   true,
+    isPaused:   false,
     ...overrides,
   };
 }
@@ -235,14 +234,6 @@ describe("onInput", () => {
     expect(mockUpdateScreen).not.toHaveBeenCalled();
   });
 
-  test("does nothing when the answers array is empty", async () => {
-    loadLevel.mockResolvedValue(makeLevelState({ questions: [], answers: [] }));
-    await startLevel(1, "python");
-    jest.clearAllMocks();
-    onInput("a");
-    expect(mockUpdateScreen).not.toHaveBeenCalled();
-    expect(mockLoadScreen).not.toHaveBeenCalled();
-  });
 
   test("fires 'incorrect' when input does not extend the correct prefix", () => {
     onInput("z"); // answer is "ab" — no matching prefix

@@ -2,23 +2,9 @@ import Combo from '../../../../src/final/js/ui/components/game/Combo.js';
 
 describe('Combo', () => {
     beforeEach(() => {
-        document.body.innerHTML = `
-            <div class="combo" id="combo-1"><span></span></div>
-            <div class="combo" id="combo-2"><span></span></div>
-            <div class="combo" id="combo-3"><span></span></div>
-            <div class="combo" id="combo-4"><span></span></div>
-            <div class="combo" id="combo-5"><span></span></div>
-            <div class="combo" id="combo-6"><span></span></div>
-            <div class="combo" id="combo-7"><span></span></div>
-            <div class="combo" id="combo-8"><span></span></div>
-            <div class="combo" id="combo-9"><span></span></div>
-            <div class="combo" id="combo-10"><span></span></div>
-            <div class="combo" id="combo-11"><span></span></div>
-            <div class="combo" id="combo-12"><span></span></div>
-            <div class="combo" id="combo-13"><span></span></div>
-            <div class="combo" id="combo-14"><span></span></div>
-            <div class="combo" id="combo-15"><span></span></div>
-        `;
+        document.body.innerHTML = Array.from({ length: 15 }, (_, i) =>
+            `<div class="combo" id="combo-${i + 1}"><span></span></div>`
+        ).join('\n');
     });
 
     test('initializes with the correct HTML structure', () => {

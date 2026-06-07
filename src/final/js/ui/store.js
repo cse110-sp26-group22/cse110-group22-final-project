@@ -1,7 +1,11 @@
-
-
+/**
+ * A simple state management class that allows components
+ * to more easily access and update shared state, without needing to prop drill.
+ */
 export default class Store {
+    /** @type {EventTarget} - The EventTarget used for managing subscriptions and dispatching events. */
     eventTarget = new EventTarget();
+    /** @type {*} - The data stored in the Store. */
     data = {};
 
     /**
