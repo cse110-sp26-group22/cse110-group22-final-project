@@ -19,7 +19,7 @@ import { defaultProfile, defaultGameState } from '../models/models.js';
 const PROFILE_KEY = "profile";
 const STATE_KEY = "state";
 
-// -------- safety --------
+// ── Safety ──────────────────────────────────────────────────────────────────────
 function safeParse(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -31,7 +31,7 @@ function safeParse(key, fallback) {
   }
 }
 
-// -------- Profile --------
+// ── Profile ─────────────────────────────────────────────────────────────────────
 
 /**
  * Loads the profile from localStorage.
@@ -64,7 +64,7 @@ export function clearProfile() {
     localStorage.removeItem(PROFILE_KEY);
 }
 
-// -------- Game State --------
+// ── GameState ───────────────────────────────────────────────────────────────────
 
 /**
  * Loads the game state from localStorage.
@@ -97,8 +97,7 @@ export function clearState() {
     localStorage.removeItem(STATE_KEY);
 }
 
-// -------- Nuclear options --------
-
+// ── Bulk clear/save ─────────────────────────────────────────────────────────────
 /**
  * Removes profile and game state from localStorage.
  */
