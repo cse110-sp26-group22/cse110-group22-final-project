@@ -1,4 +1,4 @@
-[
+export default [
   {
     "Question": "What keyword declares a variable that can be reassigned?",
     "Answer": "let",

@@ -1,4 +1,4 @@
-[
+export default [
   {
     "Question": "What keyword defines a function in Python?",
     "Answer": "def",
