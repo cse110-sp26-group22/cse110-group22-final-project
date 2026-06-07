@@ -21,8 +21,8 @@ export default defineConfig({
     }
   },
 
-  // 5. CRITICAL FIX: Tells the local dev server exactly where to route when you start it
+  // 5. CRITICAL FIX: Tells the local dev server exactly where to route when you start it!
   server: {
     open: '/src/final/html/index.html'
   }
-});
+});                   
