@@ -13,7 +13,7 @@ let latestGameData;
 
 /**
  * Simplifies accessing the current question and answer from the full game state data sent from the backend.
- * @param {*} data
+ * @param {GameState} data
  */
 function getCurrentQuestion(data) {
     return {
@@ -24,7 +24,7 @@ function getCurrentQuestion(data) {
 
 /**
  * Organizes the relevant stats from the full game state into a more compact form that's easier to use for populating the results screen at the end of a game round.
- * @param {*} data: the full gamestate
+ * @param {GameState} data: the full gamestate
  */
 function getResultsStats(data) {
     const totalQuestions = data.totalQuestions ?? data.questions?.length ?? 0;
@@ -46,7 +46,7 @@ function getResultsStats(data) {
 
 /**
  * Organizes the relevant stats from the full game state into a more compact form that's easier to use for live updates during the game.
- * @param {*} data: the full gamestate
+ * @param {GameState} data: the full gamestate
  */
 function getLiveStats(data) {
     const completedAnswerCharacters = data.totalAnswerCharacters ?? 0;
@@ -75,7 +75,7 @@ function getLiveStats(data) {
 
 /**
  * Loads the appropriate screen based on the given screen name, and updates the frontend's display and stats based on the given game state data.
- * @param {*} data: the full gamestate
+ * @param {GameState} data: the full gamestate
  */
 function updateGameStats(data) {
     latestGameData = data;
@@ -84,7 +84,7 @@ function updateGameStats(data) {
 
 /**
  * @param {string} screenName: the tag of the screen to load, sent from the backend to indicate which screen the frontend should display
- * @param {*} data: the full game state sent from the backend, used to update the frontend's display and stats when loading a new screen
+ * @param {GameState} data: the full game state sent from the backend, used to update the frontend's display and stats when loading a new screen
  */
 function handleLoadScreen(screenName, data) {
     console.debug(`Loading screen: ${screenName} with data:`, data);
@@ -129,7 +129,7 @@ function handleLoadScreen(screenName, data) {
 
 /**
  * @param {string} response: the tag of the payload sent from the backend to indicate what type of update this is
- * @param {*} data: the full game state sent from the backend, used to update the frontend's display and stats
+ * @param {GameState} data: the full game state sent from the backend, used to update the frontend's display and stats
  */
 function handleUpdateScreen(response, data) {
     if (response === 'correct') {
