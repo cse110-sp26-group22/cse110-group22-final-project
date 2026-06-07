@@ -6,7 +6,7 @@
  */
 export default class PlantDisplay  {
     /** @const {(string)[]} */
-    static PLANT_IMAGES = ['plant1-stage1.png', 'plant1-stage2.png', 'plant1-stage3.png'];
+    static PLANT_IMAGES = ['plant1-stage1', 'plant1-stage2', 'plant1-stage3'];
     /**
      * Binds this PlantDisplay to the given element.
      * @param {HTMLElement} element 
@@ -14,7 +14,7 @@ export default class PlantDisplay  {
     constructor(element){
         this.element = element;
         this.growthLevel = 0;
-        this.plantImageElement = document.createElement('img');
+        this.plantElement = document.createElement('div');
 
         this.build();
     }
@@ -23,9 +23,9 @@ export default class PlantDisplay  {
      * Builds the initial plant image element and appends it to the PlantDisplay element.
      */
     build(){
-        this.plantImageElement.src = `../assets/images/plant/${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`;
-        this.plantImageElement.classList.add('plant-image');
-        this.element.appendChild(this.plantImageElement);
+        this.plantElement.classList.add('plant-image');
+        this.plantElement.classList.add(`plant-image-${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`);
+        this.element.appendChild(this.plantElement);
     }
 
     /**
@@ -33,7 +33,8 @@ export default class PlantDisplay  {
      * @param {number} growthLevel
      */
     setGrowthLevel(growthLevel) {
+        this.plantElement.classList.remove(`plant-image-${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`);
         this.growthLevel = Math.max(0, Math.min(growthLevel, PlantDisplay.PLANT_IMAGES.length - 1));
-        this.plantImageElement.src = `../assets/images/plant/${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`;
+        this.plantElement.classList.add(`plant-image-${PlantDisplay.PLANT_IMAGES[this.growthLevel]}`);
     }
 }

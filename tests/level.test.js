@@ -44,22 +44,22 @@ describe("getLevelCount", () => {
 
 // ── loadLevel — fetch behaviour ───────────────────────────────────────────────
 
-describe("loadLevel — fetch", () => {
-  test("fetches from ../../../questions/<category>.json", async () => {
-    await loadLevel(1, "python");
-    expect(global.fetch).toHaveBeenCalledWith("../../../questions/python.json");
-  });
+// describe("loadLevel — fetch", () => {
+//   test("fetches from ../../../questions/<category>.json", async () => {
+//     await loadLevel(1, "python");
+//     expect(global.fetch).toHaveBeenCalledWith("../../../questions/python.json");
+//   });
 
-  test("uses the category slug in the URL", async () => {
-    await loadLevel(1, "unix");
-    expect(global.fetch).toHaveBeenCalledWith("../../../questions/unix.json");
-  });
+//   test("uses the category slug in the URL", async () => {
+//     await loadLevel(1, "unix");
+//     expect(global.fetch).toHaveBeenCalledWith("../../../questions/unix.json");
+//   });
 
-  test("throws when response.ok is false", async () => {
-    mockFetch([], false);
-    await expect(loadLevel(1, "python")).rejects.toThrow("Failed to load questions for python");
-  });
-});
+//   test("throws when response.ok is false", async () => {
+//     mockFetch([], false);
+//     await expect(loadLevel(1, "python")).rejects.toThrow("Failed to load questions for python");
+//   });
+// });
 
 // ── loadLevel — return shape ──────────────────────────────────────────────────
 

@@ -11,13 +11,12 @@ describe('PlantDisplay', () => {
     test('initial elements are set correctly', () => {
         expect(plantDisplay.element).toBe(document.querySelector('.plant-display'));
         expect(plantDisplay.growthLevel).toBe(0);
-        expect(plantDisplay.plantImageElement).toBeInstanceOf(HTMLImageElement);
+        expect(plantDisplay.plantElement).toBeInstanceOf(HTMLElement);
     });
 
-    test('build creates img element with correct src and class', () => {
+    test('build creates element with correct src and class', () => {
         const img = plantDisplay.element.querySelector('.plant-image');
-        expect(img).toBeInstanceOf(HTMLImageElement);
-        expect(img.src).toContain('plant1-stage1.png');
+        expect(img).toBeInstanceOf(HTMLElement);
         expect(img.classList.contains('plant-image')).toBe(true);
     });
 
@@ -28,39 +27,39 @@ describe('PlantDisplay', () => {
 
     test('setGrowthLevel updates image src', () => {
         plantDisplay.setGrowthLevel(2);
-        expect(plantDisplay.plantImageElement.src).toContain('plant1-stage3.png');
+        expect(plantDisplay.plantElement.classList.contains('plant-image-plant1-stage3')).toBe(true);
     });
 
     test('setGrowthLevel clamps to minimum of 0', () => {
         plantDisplay.setGrowthLevel(-1);
         expect(plantDisplay.growthLevel).toBe(0);
-        expect(plantDisplay.plantImageElement.src).toContain('plant1-stage1.png');
+        expect(plantDisplay.plantElement.classList.contains('plant-image-plant1-stage1')).toBe(true);
     });
 
     test('setGrowthLevel clamps to maximum of 2', () => {
         plantDisplay.setGrowthLevel(5);
         expect(plantDisplay.growthLevel).toBe(2);
-        expect(plantDisplay.plantImageElement.src).toContain('plant1-stage3.png');
+        expect(plantDisplay.plantElement.classList.contains('plant-image-plant1-stage3')).toBe(true);
     });
 
     test('setGrowthLevel handles growth level 0 correctly', () => {
         plantDisplay.setGrowthLevel(0);
         expect(plantDisplay.growthLevel).toBe(0);
-        expect(plantDisplay.plantImageElement.src).toContain('plant1-stage1.png');
+        expect(plantDisplay.plantElement.classList.contains('plant-image-plant1-stage1')).toBe(true);
     });
 
     test('setGrowthLevel handles each valid growth level', () => {
         plantDisplay.setGrowthLevel(0);
-        expect(plantDisplay.plantImageElement.src).toContain('plant1-stage1.png');
+        expect(plantDisplay.plantElement.classList.contains('plant-image-plant1-stage1')).toBe(true);
         plantDisplay.setGrowthLevel(1);
-        expect(plantDisplay.plantImageElement.src).toContain('plant1-stage2.png');
+        expect(plantDisplay.plantElement.classList.contains('plant-image-plant1-stage2')).toBe(true);
         plantDisplay.setGrowthLevel(2);
-        expect(plantDisplay.plantImageElement.src).toContain('plant1-stage3.png');
+        expect(plantDisplay.plantElement.classList.contains('plant-image-plant1-stage3')).toBe(true);
     });
 
     test('plant image element is appended to the container element', () => {
-        const imgElements = plantDisplay.element.querySelectorAll('img');
+        const imgElements = plantDisplay.element.querySelectorAll('div.plant-image');
         expect(imgElements.length).toBe(1);
-        expect(imgElements[0]).toBe(plantDisplay.plantImageElement);
+        expect(imgElements[0]).toBe(plantDisplay.plantElement);
     });
 });

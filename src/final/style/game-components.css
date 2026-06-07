@@ -159,14 +159,35 @@
 /*#endregion */
 
 /*#region PlantDisplay styles */
-.plant-display {
+.plant-display { 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20%;
+  height: 90%;
   max-width: 20%;
   max-height: 90%;
+  overflow: visible;
 }
 
 .plant-image {
-  max-width: 100%;
-  max-height: 100%;
+  display: block;
+  width: 75%;
+  height: 75%;
+  background-size: cover;
+  background-position: center;
+}
+
+.plant-image-plant1-stage1 {
+   background-image: url('../assets/images/plant/plant1-stage1.png');
+}
+
+.plant-image-plant1-stage2 {
+  background-image: url('../assets/images/plant/plant1-stage2.png');
+}
+
+.plant-image-plant1-stage3 {
+  background-image: url('../assets/images/plant/plant1-stage3.png');
 }
 /*#endregion */
 

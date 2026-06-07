@@ -18,6 +18,9 @@
 
 import { defaultGameState } from "../models/models.js";
 
+import javascriptQuestions from "../../../../questions/javascript.js";
+import pythonQuestions from "../../../../questions/python.js";
+
 const LEVELS = [
   { levelNumber: 1, timeLimit: 30000, questionCount: 9, difficultyMin: 1, difficultyMax: 3  },
   { levelNumber: 2, timeLimit: 25000, questionCount: 9, difficultyMin: 4, difficultyMax: 6  },
@@ -40,17 +43,23 @@ const LEVELS = [
  */
 export async function loadLevel(levelNumber, category) {
   const config = LEVELS[levelNumber - 1];
+  let allQuestions;
 
-  const response = await fetch(`../../../questions/${category}.json`);
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to load questions for ${category}`
-    );
+  if(category === "javascript") {
+    allQuestions = javascriptQuestions;
+  } else if (category === "python") {
+    allQuestions = pythonQuestions;
+  } else {
+    const response = await fetch(`../../../questions/${category}.json`);
+    if (!response.ok) {
+        throw new Error(
+        `Failed to load questions for ${category}`
+        );
+    }
+    console.debug(`Loaded questions for ${category} category`);
+    allQuestions = await response.json();
   }
-  console.debug(`Loaded questions for ${category} category`);
-  const allQuestions = await response.json();
-
+    
   // Filter by difficulty, shuffle, cap at questionCount
   const shuffled = allQuestions
     .filter(q => q.Difficulty >= config.difficultyMin && q.Difficulty <= config.difficultyMax)
