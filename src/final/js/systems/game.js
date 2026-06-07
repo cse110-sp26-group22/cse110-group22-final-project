@@ -311,7 +311,6 @@ async function handleQuestionComplete() {
     state.maxPrefixLength = 0;
     state.currentInput = "";   
     state.incorrectInputs = 0;
-    state.combo = 0;
     state.questionStartTime = Date.now();
     state.questionEndTime = startTimer( { ...state }, _onExpire);
     callbacks.updateScreen("next-question", { ...state });
