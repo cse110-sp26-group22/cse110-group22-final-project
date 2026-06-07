@@ -95,7 +95,6 @@ const MAX_PLANT_GROWTH_LEVEL = 2;
 export function registerCallbacks(loadScreen, updateScreen) {
   callbacks.loadScreen = loadScreen;
   callbacks.updateScreen = updateScreen;
-  console.debug("Registered game.js callbacks");
 }
 
 // ── Lifecycle  ─────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -191,7 +190,6 @@ export async function onInput(input) {
 
   // If input is correct and typed answer is complete, run completed answer behavior
   if (input === answer) {
-    console.debug("Answer complete for question index", state.currentQuestionIndex);
     await handleQuestionComplete();
     return;
   } 

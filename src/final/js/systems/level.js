@@ -16,7 +16,7 @@
  * @module level
  */
 
-import { defaultGameState } from "../models/models";
+import { defaultGameState } from "../models/models.js";
 
 const LEVELS = [
   { levelNumber: 1, timeLimit: 30000, questionCount: 9, difficultyMin: 1, difficultyMax: 3  },
