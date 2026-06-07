@@ -17,10 +17,16 @@ export default class RulesBox {
         this.element = element;
     }
 
+    /**
+     * Shows the rules box.
+     */
     show() {
         this.element.classList.remove('hidden');
     }
 
+    /**
+     * Hides the rules box.
+     */
     hide() {
         this.element.classList.add('hidden');
     }

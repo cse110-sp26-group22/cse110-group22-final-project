@@ -3,12 +3,16 @@ import {
     goToMainMenu, onInput, setLanguage
 } from "../systems/game.js"
 
+
+/** @typedef {import('../models/models.js').GameState} GameState */
 import { store } from "./store.js";
 import { mainMenu, gameUI, resultsScreen, rulesBox } from "./ui.js";
 
+/** @type {GameState} - The latest game data received from the backend */
 let latestGameData;
 
 /**
+ * Simplifies accessing the current question and answer from the full game state data sent from the backend.
  * @param {*} data
  */
 function getCurrentQuestion(data) {
@@ -19,6 +23,7 @@ function getCurrentQuestion(data) {
 }
 
 /**
+ * Organizes the relevant stats from the full game state into a more compact form that's easier to use for populating the results screen at the end of a game round.
  * @param {*} data: the full gamestate
  */
 function getResultsStats(data) {
@@ -40,6 +45,7 @@ function getResultsStats(data) {
 }
 
 /**
+ * Organizes the relevant stats from the full game state into a more compact form that's easier to use for live updates during the game.
  * @param {*} data: the full gamestate
  */
 function getLiveStats(data) {
@@ -68,6 +74,7 @@ function getLiveStats(data) {
 }
 
 /**
+ * Loads the appropriate screen based on the given screen name, and updates the frontend's display and stats based on the given game state data.
  * @param {*} data: the full gamestate
  */
 function updateGameStats(data) {
@@ -146,6 +153,9 @@ function handleUpdateScreen(response, data) {
     }
 }
 
+/**
+ * Registers the callbacks that the backend will use to communicate with the frontend, allowing the backend to control which screen the frontend shows and update the frontend's display and stats based on changes in the game state.
+ */
 export function initializeBackend() {
     registerCallbacks(handleLoadScreen, handleUpdateScreen);
 }
@@ -158,6 +168,9 @@ export function handleInputChange(input){
     onInput(input);
 }
 
+/**
+ * Called by the backend to indicate that the frontend is ready to start the game and receive updates.
+ */
 export function gameUIReady() {
     gameUI.startCountdown();
     gameUI.onClockTick(() => {
