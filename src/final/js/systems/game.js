@@ -190,7 +190,7 @@ export async function onInput(input) {
 
   // If input is correct and typed answer is complete, run completed answer behavior
   if (input === answer) {
-    await handleQuestionComplete();
+    await handleQuestionComplete(true);
     return;
   } 
 
@@ -259,6 +259,7 @@ function goToResults() {
 }
 
 /**
+ * @param {boolean} complete - whether the question was completed before timer expiration (true) or not (false)
  * Handles all state updates after the current question ends.
  *
  * This function:
@@ -269,7 +270,7 @@ function goToResults() {
  * - Updates plant growth when the player reaches a progress milestone.
  * - Either starts the next question, shows level results, or ends the game.
  */
-async function handleQuestionComplete() {
+async function handleQuestionComplete(complete) {
   if(state.isPaused || state.isOver || !state.isActive){ return; }
 
   // Stop timer to prevent unintentional UI advancement
@@ -283,7 +284,7 @@ async function handleQuestionComplete() {
   state.totalAnswerCharacters += answer.length; 
 
   // If question timed out, do not update score and add penalties to state
-  if (elapsedTime > state.timeLimit) {
+  if (!complete) {
     const remainingCharacters = answer.length - state.maxPrefixLength;
     state.totalInputs += remainingCharacters;
     state.totalIncorrectInputs += remainingCharacters;
@@ -298,7 +299,7 @@ async function handleQuestionComplete() {
   state.currentQuestionIndex++;
 
   // Calculate plant growth level and update UI with new plant growth value
-  if (elapsedTime <= state.timeLimit && state.numCorrectQuestions % 3 === 0) {
+  if (complete && state.numCorrectQuestions % 3 === 0) {
     if(state.growthLevel < MAX_PLANT_GROWTH_LEVEL) {
       state.growthLevel++;
       callbacks.updateScreen("plant-growth", { ...state });
@@ -343,7 +344,7 @@ async function handleQuestionComplete() {
  * Fired by timer.js when the countdown reaches 0.
  */
 function _onExpire() {
-  handleQuestionComplete();
+  handleQuestionComplete(false);
 }
 
 // ── Profile management handling ─────────────────────────────────────────────────────────────────────────────────────
