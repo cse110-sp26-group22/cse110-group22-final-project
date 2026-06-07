@@ -214,7 +214,7 @@ export async function onInput(input) {
   // Correct input + Completed answer 
   if (input === answer) {
     console.debug("Answer complete for question index", state.currentQuestionIndex);
-    await handleQuestionComplete();
+    await handleQuestionComplete(true);
     return;
   } 
 
@@ -296,7 +296,7 @@ function goToResults() {
 /**
  * Handles the end of a question
  */
-async function handleQuestionComplete() {
+async function handleQuestionComplete(completed) {
   if(state.isPaused || state.isOver || !state.isActive){ return; }
 
   stopTimer();
@@ -309,7 +309,7 @@ async function handleQuestionComplete() {
   state.timeUsed.push(elapsedTime);
   state.totalAnswerCharacters += answer.length; 
 
-  if (elapsedTime > state.timeLimit) {
+  if (!completed) {
     // Calculate how many characters they failed to type
     const remainingCharacters = answer.length - state.maxPrefixLength;
 
@@ -329,7 +329,7 @@ async function handleQuestionComplete() {
   state.currentQuestionIndex++;
 
   // Grow plant every 3rd question answered within time limit
-  if (elapsedTime <= state.timeLimit && state.numCorrectQuestions % 3 === 0) {
+  if (completed && state.numCorrectQuestions % 3 === 0) {
     if(state.growthLevel < MAX_PLANT_GROWTH_LEVEL) {
       state.growthLevel++;
       callbacks.updateScreen("plant-growth", copyState());
@@ -341,7 +341,6 @@ async function handleQuestionComplete() {
     state.maxPrefixLength = 0;
     state.currentInput = "";    // TODO: Replace. Depreciated value. Does not work with front-end. Likely maxPrefixLength should be used in scoring.
     state.incorrectInputs = 0;
-    state.combo = 0;
     state.questionStartTime = Date.now();
     state.questionEndTime = startTimer( { ...state }, _onExpire);
     callbacks.updateScreen("next-question", { ...state });
@@ -376,7 +375,7 @@ async function handleQuestionComplete() {
  * Fired by timer.js when the countdown reaches 0.
  */
 function _onExpire() {
-  handleQuestionComplete();
+  handleQuestionComplete(false);
 }
 
 // ── Profile management handling ────────────────────────────────────────────────
