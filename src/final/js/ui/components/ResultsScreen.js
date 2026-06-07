@@ -38,6 +38,15 @@ export default class ResultsScreen {
         this.retryBtn = assertHTMLElement(element.querySelector('.results-retry'));
         this.mainMenuBtn = assertHTMLElement(element.querySelector('.results-main-menu'));
         this.nextBtn = assertHTMLElement(element.querySelector('.results-next'));
+
+        //add event listener for enter navigation, if **nothing** is focused, focus retry button, otherwise, trigger click
+        this.onEnter(() => {
+            const activeElement = document.activeElement;
+            console.error(activeElement);
+            if (activeElement === document.body && !this.nextBtn.classList.contains('hidden')) {
+                this.nextBtn.click();
+            }
+        });
     }
 
     /**
@@ -89,5 +98,18 @@ export default class ResultsScreen {
      */
     onNext(callback) {
         this.nextBtn.addEventListener('click', callback);
+    }
+
+    /**
+     * Registers a callback to be called when the user presses the Enter key.
+     * @param {() => void} callback
+     */
+    onEnter(callback) {
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                console.error('Enter key pressed on results screen');
+                callback();
+            }
+        });
     }
 }

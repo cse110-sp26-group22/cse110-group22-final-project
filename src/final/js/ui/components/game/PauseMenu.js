@@ -32,21 +32,49 @@ export default class PauseMenu {
         this.retryBtn = assertHTMLElement(this.element.querySelector('.pause-menu-retry'));
         this.mainMenuBtn = assertHTMLElement(this.element.querySelector('.pause-menu-main-menu'));
         this.currentLangEl = assertHTMLElement(this.element.querySelector('.pause-menu-current-language'));
+        this.focusableElements = [this.resumeBtn, this.retryBtn, this.mainMenuBtn];
+        this._previouslyFocused = null;
         store.subscribe('language', (language) => this.language = language);
+        this.setupFocusTrap(); 
     }
 
     /**
-     * Sets the current language displayed in the pause menu.
+     * Sets up a keydown listener on the pause menu to trap Tab focus within the menu's buttons.
+     */
+    setupFocusTrap() {
+        this.element.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+
+            const first = this.focusableElements[0];
+            const last = this.focusableElements[this.focusableElements.length - 1];
+            
+            if(e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            }
+            if(!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        });
+    }
+
+    /**
+     * Shows the pause menu, saves the previously focused element, and focuses the Resume button.
      */
     show(){
         this.element.classList.remove('hidden');
+        this.previouslyFocused = document.activeElement;
     }
     
     /**
-     * Hides the pause menu.
+     * Hides the pause menu and restores focus to the previously focused element.
      */
     hide(){
         this.element.classList.add('hidden');
+        if(!this.previouslyFocused) return;
+        this.previouslyFocused.focus();
+        this.previouslyFocused = null;
     }
     
 

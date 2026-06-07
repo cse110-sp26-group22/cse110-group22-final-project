@@ -32,6 +32,11 @@ button {
     font-family: inherit;
 }
 
+button:focus {
+    outline-offset: -3px;
+    outline: 2px solid green;
+}
+
 
 #header {
   display: flex;

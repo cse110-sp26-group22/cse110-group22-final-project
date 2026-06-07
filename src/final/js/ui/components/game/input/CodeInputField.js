@@ -121,4 +121,11 @@ export default class CodeInputField {
             setTimeout(() => callback(event.key), 0);
         });
     }
+
+    /**
+     * Focuses the input field, allowing the user to start typing immediately.
+     */
+    focus() {
+        this.codeInput.focus();
+    }
 }
