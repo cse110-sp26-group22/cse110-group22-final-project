@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <title>Typing Game</title>
   <link rel="preload" href="../assets/fonts/Livvic-Regular.woff2" type="font/woff2" as="font" crossorigin />
-  <link rel="preload" href="../assets/images/plant/plant1-stage1.png" as="image" />
-  <link rel="preload" href="../assets/images/plant/plant1-stage2.png" as="image" />
-  <link rel="preload" href="../assets/images/plant/plant1-stage3.png" as="image" />
   <link rel="stylesheet" href="../style/fonts.css" />
   
   <link rel="stylesheet" href="../style/game-components.css" />
@@ -16,7 +13,6 @@
 </head>
 
 <body>
-
   <!-- RulesBox -->
     <div class="rules-box hidden">
       <h3>How to play!</h3>
@@ -90,7 +86,7 @@
     <div class="combo"><span class="combo-number">0</span></div>
 
     <!-- PauseMenu -->
-    <div class="pause-menu">
+    <div class="pause-menu" tabindex="-1">
         <h3 class="pause-menu-title">Paused</h3>
         <ul class="pause-menu-list">
             <li><button type="button" class="pause-menu-resume" tabindex="1">Resume</button></li>
