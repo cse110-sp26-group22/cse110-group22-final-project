@@ -15,4 +15,19 @@
   - There are two start buttons listed with the labels of the languages listed, either Python or JavaScript. Choosing one of these starts the game.
 - Languages
   - When Python or JavaScript is picked, it will choose the questions of the respected language listed.
-- 
+## Results Screen
+- Description
+  - This shows a title that says "Round Complete!" with the provided language underneath it.
+- Score
+  - This shows the score, with "score" in small text above it.
+- Accuracy
+  - This box displays your accuracy with a decimal rating from 0.0-1.0
+- CPM
+  - This box displays your "characters per minute", or CPM.
+- Questions
+  - Shows how many questions you completed in total.
+- Buttons
+  - There is a main menu button, a retry, and a next button.
+    - The main menu button sends you back to the title screen
+    - The retry button starts the level over at the beginning.
+    - The next button sends you to the next level.
