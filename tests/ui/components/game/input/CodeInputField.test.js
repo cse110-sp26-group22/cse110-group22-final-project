@@ -10,6 +10,10 @@ describe('CodeInputField', () => {
                     <span class="ghost-text-invisible"></span>
                     <span class="ghost-text-visible"></span>
                 </div>
+                <div class="code-input-highlight" aria-hidden="true">
+                    <span class="highlight-correct"></span>
+                    <span class="highlight-error"></span>
+                </div>
                 <input class="code-input" />
             </div>
         `;
@@ -20,6 +24,8 @@ describe('CodeInputField', () => {
         expect(codeInputField.element).toBe(document.querySelector('#game-code-input-field'));
         expect(codeInputField.ghostTextInvisible).toBe(document.querySelector('.ghost-text-invisible'));
         expect(codeInputField.ghostTextVisible).toBe(document.querySelector('.ghost-text-visible'));
+        expect(codeInputField.highlightCorrect).toBe(document.querySelector('.highlight-correct'));
+        expect(codeInputField.highlightError).toBe(document.querySelector('.highlight-error'));
         expect(codeInputField.codeInput).toBe(document.querySelector('.code-input'));
     });
 
@@ -150,10 +156,60 @@ describe('CodeInputField', () => {
         expect(codeInputField.ghostTextInvisible.textContent).toBe(' print("H');
         expect(codeInputField.ghostTextVisible.textContent).toBe('llo, World!")');
     });
+
+    describe('errorHighlight', () => {
+        test('clears highlighting when input is empty', () => {
+            codeInputField.setGhostText('console.debug("test")');
+            codeInputField.codeInput.value = '';
+            codeInputField.handleInput();
+            expect(codeInputField.highlightCorrect.textContent).toBe('');
+            expect(codeInputField.highlightError.textContent).toBe('');
+        });
+
+        test('shows no error when input matches ghost text prefix', () => {
+            codeInputField.setGhostText('console.debug("test")');
+            codeInputField.codeInput.value = 'console.';
+            codeInputField.handleInput();
+            expect(codeInputField.highlightCorrect.textContent).toBe('console.');
+            expect(codeInputField.highlightError.textContent).toBe('');
+        });
+
+        test('highlights correct answer characters where input diverges', () => {
+            codeInputField.setGhostText('console.debug("test")');
+            codeInputField.codeInput.value = 'console.log';
+            codeInputField.handleInput();
+            // 'console.' matches, then at index 8 user typed 'log' but correct has 'deb'
+            expect(codeInputField.highlightCorrect.textContent).toBe('console.');
+            expect(codeInputField.highlightError.textContent).toBe('deb');
+        });
+
+        test('shows no error when input fully matches ghost text', () => {
+            codeInputField.setGhostText('print("Hello, World!")');
+            codeInputField.codeInput.value = 'print("Hello, World!")';
+            codeInputField.handleInput();
+            expect(codeInputField.highlightCorrect.textContent).toBe('print("Hello, World!")');
+            expect(codeInputField.highlightError.textContent).toBe('');
+        });
+
+        test('handles mismatch at the very first character', () => {
+            codeInputField.setGhostText('print("Hello, World!")');
+            codeInputField.codeInput.value = 'x';
+            codeInputField.handleInput();
+            expect(codeInputField.highlightCorrect.textContent).toBe('');
+            expect(codeInputField.highlightError.textContent).toBe('p');
+        });
+
+        test('shows correct answer chars when input is longer than ghost text', () => {
+            codeInputField.setGhostText('hi');
+            codeInputField.codeInput.value = 'hixyz';
+            codeInputField.handleInput();
+            expect(codeInputField.highlightCorrect.textContent).toBe('hi');
+            expect(codeInputField.highlightError.textContent).toBe('');
+        });
+
+        test('does not throw when ghostTextString is null', () => {
+            codeInputField.ghostTextString = null;
+            expect(() => codeInputField.errorHighlight()).not.toThrow();
+        });
+    });
 });
-
-
-
-
-
-        

@@ -8,6 +8,10 @@ import { assertHTMLElement, assertHTMLInputElement } from '../../../utils.js';
  *          <span class="ghost-text-invisible"></span>
  *          <span class="ghost-text-visible"></span>
  *      </div>
+ *      <div class="code-input-highlight" aria-hidden="true">
+ *          <span class="highlight-correct"></span>
+ *          <span class="highlight-error"></span>
+ *      </div>
  *      <input class="code-input" />
  *  </div>
  */
@@ -21,6 +25,8 @@ export default class CodeInputField {
         this.ghostTextString = 'print("Hello, World!")';
         this.ghostTextInvisible = assertHTMLElement(this.element.querySelector('.ghost-text-invisible'));
         this.ghostTextVisible = assertHTMLElement(this.element.querySelector('.ghost-text-visible'));
+        this.highlightCorrect = assertHTMLElement(this.element.querySelector('.highlight-correct'));
+        this.highlightError = assertHTMLElement(this.element.querySelector('.highlight-error'));
         this.codeInput = assertHTMLInputElement(this.element.querySelector('.code-input'));
 
         // Add event listeners
@@ -55,8 +61,31 @@ export default class CodeInputField {
         const value = this.codeInput.value;
         this.ghostTextInvisible.textContent = this.codeInput.value;
         this.ghostTextVisible.textContent = this.ghostTextString.substring(value.length);
+    
+        this.errorHighlight();
     }
 
+    /**
+     * Error highlighting for the input field. If the user's input matches the corresponding portion of the ghost text, the error highlight is removed. Otherwise, an error highlight is added to indicate a mistake.
+     */
+    errorHighlight() {
+        if (!this.ghostTextString) return;
+        const value = this.codeInput.value;
+        if (!value) {
+            this.highlightCorrect.textContent = '';
+            this.highlightError.textContent = '';
+            return;
+        }
+
+        let matchIndex = 0;
+        const compareLen = Math.min(value.length, this.ghostTextString.length);
+        while (matchIndex < compareLen && value[matchIndex] === this.ghostTextString[matchIndex]) {
+            matchIndex++;
+        }
+
+        this.highlightCorrect.textContent = value.substring(0, matchIndex);
+        this.highlightError.textContent = this.ghostTextString.substring(matchIndex, value.length);
+    }
     /**
      * Event handler for when the input value changes. 
      * Rerenders the ghost text to reflect the new input value.
@@ -91,5 +120,12 @@ export default class CodeInputField {
         this.codeInput.addEventListener('keypress', (event) => {
             setTimeout(() => callback(event.key), 0);
         });
+    }
+
+    /**
+     * Focuses the input field, allowing the user to start typing immediately.
+     */
+    focus() {
+        this.codeInput.focus();
     }
 }

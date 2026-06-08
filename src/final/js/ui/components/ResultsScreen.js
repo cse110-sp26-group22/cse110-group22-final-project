@@ -7,10 +7,9 @@ import { store } from "../store.js";
  * Expects the following HTML structure:
  * <div class="results-screen">
  *   <h2 class="results-title">...</h2>
- *   <p class="results-language-label">Language: <span class="results-language"></span></p>
  *   <div class="results-stats">
  *     <div class="results-stat">
- *       <span class="results-stat-label">Score</span>
+ *       <span class="results-label">Score</span>
  *       <span class="results-stat-value results-score"></span>
  *     </div>
  *     ... (accuracy, cpm, questions)
@@ -19,6 +18,7 @@ import { store } from "../store.js";
  *     <button class="results-retry">Retry</button>
  *     <button class="results-main-menu">Main Menu</button>
  *   </div>
+ *   <p class="results-label results-language-label">Language: <span class="results-language"></span></p>
  * </div>
  */
 export default class ResultsScreen {
@@ -38,6 +38,15 @@ export default class ResultsScreen {
         this.retryBtn = assertHTMLElement(element.querySelector('.results-retry'));
         this.mainMenuBtn = assertHTMLElement(element.querySelector('.results-main-menu'));
         this.nextBtn = assertHTMLElement(element.querySelector('.results-next'));
+
+        //add event listener for enter navigation, if **nothing** is focused, focus retry button, otherwise, trigger click
+        this.onEnter(() => {
+            const activeElement = document.activeElement;
+            console.error(activeElement);
+            if (activeElement === document.body && !this.nextBtn.classList.contains('hidden')) {
+                this.nextBtn.click();
+            }
+        });
     }
 
     /**
@@ -46,10 +55,12 @@ export default class ResultsScreen {
      */
     show(stats) {
         this.scoreEl.textContent = `${stats.score}`;
-        this.accuracyEl.textContent = `${stats.accuracy}`;
+        const accuracyPercent = Math.floor(parseFloat(stats.accuracy) * 100);
+        this.accuracyEl.textContent = `${accuracyPercent}%`;
         this.cpmEl.textContent = `${stats.cpm}`;
         this.questionsEl.textContent = `${stats.questionsAnswered} / ${stats.totalQuestions}`;
-        this.languageEl.textContent = stats.language;
+        const languageCapitalized = stats.language.charAt(0).toUpperCase() + stats.language.slice(1);
+        this.languageEl.textContent = `\u00A0${languageCapitalized}`;
         if(store.retrieve('level') >= 3) {
             this.nextBtn.classList.add('hidden');
         } else {
@@ -87,5 +98,18 @@ export default class ResultsScreen {
      */
     onNext(callback) {
         this.nextBtn.addEventListener('click', callback);
+    }
+
+    /**
+     * Registers a callback to be called when the user presses the Enter key.
+     * @param {() => void} callback
+     */
+    onEnter(callback) {
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                console.error('Enter key pressed on results screen');
+                callback();
+            }
+        });
     }
 }

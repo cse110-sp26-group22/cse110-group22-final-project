@@ -28,6 +28,15 @@ body {
   margin-left: 0.75rem;
 }
 
+button {
+    font-family: inherit;
+}
+
+button:focus {
+    outline-offset: -3px;
+    outline: 2px solid green;
+}
+
 
 #header {
   display: flex;

@@ -18,7 +18,7 @@
 <body>
 
   <!-- RulesBox -->
-    <div class="rules-box">
+    <div class="rules-box hidden">
       <h3>How to play!</h3>
       <p>Read the question and submit your answer in the box below.</p>
     </div>
@@ -32,10 +32,9 @@
     </ul>
   </div>
 
-  <!-- ResultsScreen: hidden until game engine calls showResults() -->
-  <div class="results-screen">
-    <h2 class="results-title">Round Complete!</h2>
-    <p class="results-label">Language: <span class="results-language">Python</span></p>
+  <!-- ResultsScreen -->
+  <div class="results-screen hidden">
+    <h2 class="results-title">Level Complete!</h2>
     <div class="results-stats">
       <div class="results-stat">
         <span class="results-label">Score</span>
@@ -68,10 +67,11 @@
         Next
       </button>
     </div>
+    <p class="results-label results-language-label">Language: <span class="results-language">Python</span></p>
   </div>
 
   <!-- GameUI -->
-  <div id="game-ui" class="game-ui">
+  <div id="game-ui" class="game-ui hidden">
     <button type="button" class="game-header-pause">
       <svg viewBox="0 0 256 256"><use href="../assets/icons/pause-icon.svg#pause-icon" fill="#E53935"></use></svg>
     </button>
@@ -93,9 +93,9 @@
     <div class="pause-menu">
         <h3 class="pause-menu-title">Paused</h3>
         <ul class="pause-menu-list">
-            <li><button type="button" class="pause-menu-resume">Resume</button></li>
-            <li><button type="button" class="pause-menu-retry">Retry</button></li>
-            <li><button type="button" class="pause-menu-main-menu">Main Menu</button></li>
+            <li><button type="button" class="pause-menu-resume" tabindex="1">Resume</button></li>
+            <li><button type="button" class="pause-menu-retry" tabindex="2">Retry</button></li>
+            <li><button type="button" class="pause-menu-main-menu" tabindex="3">Main Menu</button></li>
         </ul>
         <h4 class="pause-menu-current-language"></h4>
     </div>
@@ -113,6 +113,10 @@
         <div class="ghost-text">
           <span class="ghost-text-invisible"></span>
           <span class="ghost-text-visible"></span>
+        </div>
+        <div class="code-input-highlight" aria-hidden="true" spellcheck="false">
+          <span class="highlight-correct"></span>
+          <span class="highlight-error"></span>
         </div>
         <input class="code-input" />
       </div>

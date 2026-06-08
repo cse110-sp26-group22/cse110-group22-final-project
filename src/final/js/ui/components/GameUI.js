@@ -99,6 +99,7 @@ export default class GameUI {
      */
     show() {
         this.element.classList.remove('hidden');
+        this.codeInputField.focus();
     }
 
     /**

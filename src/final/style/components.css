@@ -6,20 +6,27 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 1.5rem;
 }
 
 .results-title {
-  font-size: 1.5rem;
+  font-size: 2.75rem;
   font-weight: bold;
 }
 
 .results-label {
-  font-size: 12px;
+  font-size: 1.5rem;
+}
+
+.results-language-label {
+  position: absolute;
+  bottom: 1.25rem;
+  font-size: 1.25rem;
+  font-weight: bold;
 }
 
 .results-stat-value {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: bold;
 }
 
@@ -29,6 +36,7 @@
   gap: 12px;
   width: 100%;
   max-width: 280px;
+  margin-bottom: 0.75rem;
 }
 
 .results-stat {
@@ -37,7 +45,9 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  border: 1px solid currentColor;
+  border: none;
+  background: #e0faf3;
+  border-radius: 0.25rem;
 }
 
 .results-actions {
@@ -49,11 +59,20 @@
 .results-main-menu,
 .results-next {
   padding: 8px 20px;
-  font-size: 14px;
+  font-size: 1.5rem;
+  border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  background: #e8f5d8;
   gap: 6px;
+  border-radius: 0.5rem;
+}
+
+.results-retry:hover,
+.results-main-menu:hover,
+.results-next:hover {
+  background: #d0ecb8;
 }
 /*#endregion */
 
@@ -78,7 +97,6 @@
   min-width: 200px;
   background: #e8f5d8;
   border-radius: 8px;
-  overflow: hidden;
 }
 
 .main-menu-btn {
@@ -90,6 +108,7 @@
   font-size: 1.1rem;
   cursor: pointer;
   text-align: center;
+  border-radius: 0.5rem;
 }
 
 .main-menu-btn:hover {
