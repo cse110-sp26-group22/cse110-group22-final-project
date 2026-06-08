@@ -5,9 +5,6 @@
  * Fetches questions from the category JSON, filters by difficulty, shuffles,
  * and returns a plain state object that game.js merges into its active state.
  *
- * The returned object is JSON-serializable and can be passed directly to
- * storage.js — no methods, no closures, no hidden state.
- *
  * game.js advances through questions by incrementing state.current_question_index.
  * The current prompt and answer are always:
  *   state.questions[state.current_question_index]
@@ -19,10 +16,15 @@
  * @module level
  */
 
+import { defaultGameState } from "../models/models.js";
+
+import javascriptQuestions from "../../../../questions/javascript.js";
+import pythonQuestions from "../../../../questions/python.js";
+
 const LEVELS = [
-  { levelNumber: 1, timeLimit: 3000, questionCount: 9, difficulty: 1 },
-  { levelNumber: 2, timeLimit: 3000, questionCount: 9, difficulty: 2 },
-  { levelNumber: 3, timeLimit: 3000, questionCount: 9, difficulty: 3 },
+  { levelNumber: 1, timeLimit: 30000, questionCount: 9, difficultyMin: 1, difficultyMax: 3  },
+  { levelNumber: 2, timeLimit: 25000, questionCount: 9, difficultyMin: 4, difficultyMax: 6  },
+  { levelNumber: 3, timeLimit: 20000, questionCount: 9, difficultyMin: 7, difficultyMax: 10 },
 ];
 
 /**
@@ -32,55 +34,55 @@ const LEVELS = [
  * then splits them into parallel questions[] and answers[] arrays so game.js
  * can access either by the same index.
  *
- * The returned object is a plain data object — it can be saved to localStorage
+ * The returned object is a plain data object = it can be saved to localStorage
  * via storage.js without any conversion.
  *
  * @param {number} levelNumber - 1-indexed level number
- * @param {string} category    - Question category slug (e.g. "python", "unix")
+ * @param {string} category    - Question category (e.g. "python", "javascript")
  * @returns {Promise<GameState>}
  */
 export async function loadLevel(levelNumber, category) {
   const config = LEVELS[levelNumber - 1];
+  let allQuestions;
 
-  const response = await fetch(`../questions/${category}.json`);
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to load questions for ${category}`
-    );
+  if(category === "javascript") {
+    allQuestions = javascriptQuestions;
+  } else if (category === "python") {
+    allQuestions = pythonQuestions;
+  } else {
+    const response = await fetch(`../../../questions/${category}.json`);
+    if (!response.ok) {
+        throw new Error(
+        `Failed to load questions for ${category}`
+        );
+    }
+    console.debug(`Loaded questions for ${category} category`);
+    allQuestions = await response.json();
   }
-
-  const allQuestions = await response.json();
-
+    
   // Filter by difficulty, shuffle, cap at questionCount
   const shuffled = allQuestions
-    .filter(q => q.Difficulty === config.difficulty)
+    .filter(q => q.Difficulty >= config.difficultyMin && q.Difficulty <= config.difficultyMax)
     .sort(() => Math.random() - 0.5)
     .slice(0, config.questionCount);
 
-  // Split into parallel arrays — same index = same question
-  const questions = shuffled.map(q => q.Question);
-  const answers   = shuffled.map(q => q.answers);
-  const base_scores = shuffled.map(q => q.baseScore);
-
+  // Split into parallel arrays = same index = same question
+  const questions  = shuffled.map(q => q.Question);
+  const answers    = shuffled.map(q => q.Answer);
+  const baseScores = shuffled.map(q => q.baseScore);
+  console.debug(`Selected questions for level ${config.levelNumber}:`, questions);
   return {
-    // ── Calculated from fetched data ──────────────────────────────────────
-    questions,                          // shuffled prompt strings; index matches answers[]
-    answers,                            // shuffled answer strings; index matches questions[]
-    base_scores,                        // base score for each question, parallel to questions[] and answers[]
-    total_questions: shuffled.length,   // may be < questionCount if the pool is small
-    time_limit:      config.timeLimit,  // total seconds allowed, set by LEVELS config
-    level:           config.levelNumber, // add level to gamestate for advancement purposes
-    
-    // ── Always start at zero / empty ─────────────────────────────────────
-    plants:                 [0, 0, 0],  // 3 plants, each starting at growth stage 0
-    current_question_index: 0,   // pointer into questions[] and answers[]
-    current_input:          "",  // what the player has typed so far
-    incorrect_chars:        0,   // wrong keystrokes this question; reset each question
-    score:                  0,   // points earned this level
-    questionStartTime: null,     // timestamp when the current question was loaded; used to calculate elapsed time
-    endTime: null,               // timestamp when the timer should expire; set when the question starts
-    remainingOnPause: null,      // seconds remaining when the game is paused; used to restore timer on resume
+    ...defaultGameState(),
+    questions,
+    answers,
+    baseScores,
+    isActive:          true,
+    isPaused:          false,
+    level:             config.levelNumber,
+    timeLimit:         config.timeLimit,
+    language:          category,
+    totalQuestions:    questions.length,
+    questionStartTime: Date.now(),
   };
 }
 

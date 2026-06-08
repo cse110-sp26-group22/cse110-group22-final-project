@@ -5,7 +5,7 @@
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 body {
@@ -15,12 +15,11 @@ body {
   justify-content: center;
   align-items: start;
   flex-direction: column;
-  gap: 1rem;
 
   min-height: 100vh;
   color: #3D2B1F;
-  font-family: Arial, sans-serif;
-  overflow-x: hidden;
+  font-family: "Livvic Regular", sans-serif;
+  overflow: hidden;
 }
 
 .site-title {

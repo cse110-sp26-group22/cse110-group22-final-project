@@ -2,6 +2,7 @@ import {
   calculateBaseScore,
   calculateAccuracyMultiplier,
   calculateTimeMultiplier,
+  addPlantBonus,
   calculateTotalScore,
 } from "../src/final/js/systems/scoring.js";
 
@@ -79,29 +80,44 @@ describe("calculateTimeMultiplier", () => {
   });
 });
 
+// ── addPlantBonus ─────────────────────────────────────────────────────────────
+
+describe("addPlantBonus", () => {
+  test("returns 10 points per plant growth stage", () => {
+    expect(addPlantBonus(0)).toBe(0);
+    expect(addPlantBonus(1)).toBe(10);
+    expect(addPlantBonus(2)).toBe(20);
+  });
+
+  test("clamps invalid plant stages to the valid range", () => {
+    expect(addPlantBonus(-1)).toBe(0);
+    expect(addPlantBonus(10)).toBe(20);
+  });
+});
+
 // ── calculateTotalScore ───────────────────────────────────────────────────────
 
 describe("calculateTotalScore", () => {
   test("returns 0 when questionBaseScore is 0", () => {
     const state = {
-      base_scores: [0],
-      incorrect_chars: 0,
+      baseScores: [0],
+      incorrectInputs: 0,
       answers: ["abc"],
-      current_input: "",
-      current_question_index: 0,
-      time_limit: 3000,
+      currentInput: "",
+      currentQuestionIndex: 0,
+      timeLimit: 3000,
     };
     expect(calculateTotalScore(state, 1000)).toBe(0);
   });
 
   test("returns a positive score with perfect play", () => {
     const state = {
-      base_scores: [100],
-      incorrect_chars: 0,
+      baseScores: [100],
+      incorrectInputs: 0,
       answers: ["hello"],
-      current_input: "",
-      current_question_index: 0,
-      time_limit: 3000,
+      currentInput: "",
+      currentQuestionIndex: 0,
+      timeLimit: 3000,
     };
     const score = calculateTotalScore(state, 1000);
     expect(score).toBeGreaterThan(0);
@@ -109,12 +125,12 @@ describe("calculateTotalScore", () => {
 
   test("returns an integer", () => {
     const state = {
-      base_scores: [50],
-      incorrect_chars: 1,
+      baseScores: [50],
+      incorrectInputs: 1,
       answers: ["hello"],
-      current_input: "",
-      current_question_index: 0,
-      time_limit: 3000,
+      currentInput: "",
+      currentQuestionIndex: 0,
+      timeLimit: 3000,
     };
     const score = calculateTotalScore(state, 1500);
     expect(Number.isInteger(score)).toBe(true);
@@ -122,37 +138,57 @@ describe("calculateTotalScore", () => {
 
   test("is never negative", () => {
     const state = {
-      base_scores: [0],
-      incorrect_chars: 999,
+      baseScores: [0],
+      incorrectInputs: 999,
       answers: ["x"],
-      current_input: "",
-      current_question_index: 0,
-      time_limit: 3000,
+      currentInput: "",
+      currentQuestionIndex: 0,
+      timeLimit: 3000,
     };
     expect(calculateTotalScore(state, 5000)).toBeGreaterThanOrEqual(0);
   });
 
-  test("uses the base_score at current_question_index", () => {
+  test("uses the base score at currentQuestionIndex", () => {
     const state = {
-      base_scores: [10, 200],
-      incorrect_chars: 0,
+      baseScores: [10, 200],
+      incorrectInputs: 0,
       answers: ["a", "hello"],
-      current_input: "",
-      current_question_index: 1,
-      time_limit: 3000,
+      currentInput: "",
+      currentQuestionIndex: 1,
+      timeLimit: 3000,
     };
     const score = calculateTotalScore(state, 1000);
     expect(score).toBeGreaterThan(10); // should use 200, not 10
   });
 
-  test("handles missing base_scores gracefully (defaults to 0)", () => {
+  test("handles missing baseScores gracefully (defaults to 0)", () => {
     const state = {
-      incorrect_chars: 0,
+      incorrectInputs: 0,
       answers: ["abc"],
-      current_input: "",
-      current_question_index: 0,
-      time_limit: 3000,
+      currentInput: "",
+      currentQuestionIndex: 0,
+      timeLimit: 3000,
     };
     expect(calculateTotalScore(state, 1000)).toBe(0);
+  });
+
+  test("adds plant bonuses from growthLevel", () => {
+    const state = {
+      baseScores: [100],
+      incorrectInputs: 0,
+      answers: ["hello"],
+      currentInput: "",
+      currentQuestionIndex: 0,
+      growthLevel: 2,  // Single plant at stage 2
+      timeLimit: 3000,
+    };
+
+    const scoreWithoutPlants = calculateTotalScore(
+      { ...state, growthLevel: 0 },
+      3000
+    );
+    const scoreWithPlants = calculateTotalScore(state, 3000);
+
+    expect(scoreWithPlants - scoreWithoutPlants).toBe(20);  // 10 points per stage: 2 * 10 = 20
   });
 });

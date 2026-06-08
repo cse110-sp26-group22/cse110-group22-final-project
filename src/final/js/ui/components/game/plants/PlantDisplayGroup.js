@@ -26,4 +26,39 @@ export default class PlantDisplayGroup {
         this.element.appendChild(plantDisplayMount);
         this.plantDisplays.push(plantDisplay);
     }
+
+
+    /**
+     * Removes the last PlantDisplay from this PlantDisplayGroup.
+     */
+    removePlant(){
+        const plantDisplay = this.plantDisplays.pop();
+        plantDisplay?.element.remove();
+    }
+
+    /**
+     * Updates all plant growth stages.
+     * @param {number[]} growthLevels
+     */
+    setGrowthLevels(growthLevels) {
+        while (this.plantDisplays.length > growthLevels.length) {
+            this.removePlant();
+        }
+
+        while (this.plantDisplays.length < growthLevels.length) {
+            this.addPlant();
+        }
+
+        growthLevels.forEach((growthLevel, index) => {
+            this.plantDisplays[index].setGrowthLevel(growthLevel);
+        });
+    }
+
+    /**
+     * Updates plant growth stages.
+     * @param {number | number[]} growthLevel
+     */
+    setGrowthLevel(growthLevel) {
+        this.setGrowthLevels(Array.isArray(growthLevel) ? growthLevel : [growthLevel]);
+    }
 }

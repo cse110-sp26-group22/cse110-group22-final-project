@@ -23,6 +23,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Clear conflicting tag if it exists
+        run: |
+          git tag -d v1.0.0 || true
+          git push origin --delete v1.0.0 || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+
       - name: Run semantic release
         run: npx semantic-release
         env:

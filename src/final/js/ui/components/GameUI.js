@@ -4,10 +4,8 @@ import PromptDisplay from "./game/input/PromptDisplay.js";
 import StatsDisplay from "./game/StatsDisplay.js";
 import PauseMenu from "./game/PauseMenu.js";
 import PlantDisplayGroup from "./game/plants/PlantDisplayGroup.js";
-import GameTray from "./game/tray/GameTray.js";
 import Combo from "./game/Combo.js";
 import Timer from "./game/Timer.js";
-import { store } from "../store.js";
 import NotificationDisplay from "./NotificationDisplay.js";
 
 
@@ -23,6 +21,11 @@ import NotificationDisplay from "./NotificationDisplay.js";
  * </div>
  */
 export default class GameUI {
+    /** @type {number | null} */
+    clockInterval = null;
+    /** @type {EventTarget} */
+    clockEventTarget = new EventTarget();
+
     /**
      * Binds this GameUI to the given element.
      * @param {HTMLElement} element
@@ -43,9 +46,40 @@ export default class GameUI {
         this.onPause(() => this.pauseMenu.show());
         this.onResume(() => this.pauseMenu.hide());
         
-        this.gameTray = new GameTray(assertHTMLElement(this.element.querySelector('.game-tray')));
-        
-        store.subscribe('timer', (/** @type {number} */ value) => this.timer.remainingTime = value);
+        this.onClockTick(() => this.updateLiveData());
+        this.onPause(() => console.log('game paused'));
+    }
+
+    /**
+     * Registers a callback to be called when the clock ticks.
+     * @param {(event: Event) => void} callback
+     */
+    onClockTick(callback) {
+        this.clockEventTarget.addEventListener('clockTick', callback);
+    }
+
+    /**
+     * Updates all subcomponents that rely on the clock.
+     */
+    updateLiveData(){
+        this.timer.rerender();
+        //this.statsDisplay.rerender();
+    }
+
+    /**
+     * Starts the countdown timer.
+     */
+    startCountdown() {
+        if (this.clockInterval) return; // Countdown is already running
+        this.clockInterval = setInterval(() => this.clockEventTarget.dispatchEvent(new Event('clockTick')), 500);
+    }
+
+    /**
+     * Stops the countdown timer from updating. 
+     */
+    stopCountdown(){
+        clearInterval(this.clockInterval);
+        this.clockInterval = null;
     }
 
     /**
@@ -60,10 +94,16 @@ export default class GameUI {
         this.codeInputField.setGhostText(answer);
     }
 
+    /**
+     * Renders this GameUI
+     */
     show() {
         this.element.classList.remove('hidden');
     }
 
+    /**
+     * Hides this GameUI.
+     */
     hide() {
         this.element.classList.add('hidden');
     }
@@ -83,5 +123,21 @@ export default class GameUI {
      */
     onResume(callback) {
         this.pauseMenu.onResume(callback);
+    }
+    
+    /**
+     * Registers a callback to be called when the user clicks the Retry button in the pause menu.
+     * @param {() => void} callback
+     */
+    onRetry(callback) {
+        this.pauseMenu.onRetry(callback);
+    }
+
+    /**
+     * Registers a callback to be called when the user clicks the Main Menu button in the pause menu.
+     * @param {() => void} callback
+     */
+    onMainMenu(callback) {
+        this.pauseMenu.onMainMenu(callback);
     }
 }

@@ -19,7 +19,7 @@ import { defaultProfile, defaultGameState } from '../models/models.js';
 const PROFILE_KEY = "profile";
 const STATE_KEY = "state";
 
-// -------- safety --------
+// ── Safety ──────────────────────────────────────────────────────────────────────
 function safeParse(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -31,7 +31,7 @@ function safeParse(key, fallback) {
   }
 }
 
-// -------- Profile --------
+// ── Profile ─────────────────────────────────────────────────────────────────────
 
 /**
  * Loads the profile from localStorage.
@@ -64,7 +64,7 @@ export function clearProfile() {
     localStorage.removeItem(PROFILE_KEY);
 }
 
-// -------- Game State --------
+// ── GameState ───────────────────────────────────────────────────────────────────
 
 /**
  * Loads the game state from localStorage.
@@ -77,16 +77,12 @@ export function loadState() {
 
 /**
  * Saves the game state to localStorage.
- * currentInput is reset to "" — no point saving a partially typed word.
- * All other fields (score, questions, currentQuestionIndex, timeRemaining) are persisted as-is.
  * @param {GameState} state - The game state object
  * @returns {boolean} True if saved successfully, false otherwise.
  */
 export function saveState(state) {
     try {
-        const snapshot = structuredClone(state);
-        snapshot.current_input = "";
-        localStorage.setItem(STATE_KEY, JSON.stringify(snapshot));
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
         return true;
     } catch (e) {
         console.warn("Failed to save state.", e);
@@ -101,8 +97,7 @@ export function clearState() {
     localStorage.removeItem(STATE_KEY);
 }
 
-// -------- Nuclear options --------
-
+// ── Bulk clear/save ─────────────────────────────────────────────────────────────
 /**
  * Removes profile and game state from localStorage.
  */

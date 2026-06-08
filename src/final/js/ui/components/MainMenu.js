@@ -1,21 +1,17 @@
-import { assertHTMLElement, assertHTMLSelectElement } from "../utils.js";
-
 /**
  * The main menu component for the game.
  *
  * Expects the following minimal HTML structure:
- * <div class="main-menu">
- *   <select class="main-menu-language-select">
- *     <option value="python">Python</option>
- *   </select>
- *   <button type="button" class="main-menu-start">Start Game</button>
+ * <div id="main-menu">
+ *   <h1>Typing Game</h1>
+ *   <ul class="main-menu-language-list">
+ *     <li><button class="main-menu-btn" data-language="python">Python</button></li>
+ *   </ul>
  * </div>
  */
 export default class MainMenu {
-    /** @type {HTMLSelectElement} */
-    languageSelect;
-    /** @type {HTMLElement} */
-    startButton;
+    /** @type {NodeListOf<HTMLButtonElement>} */
+    languageButtons;
 
     /**
      * Binds this MainMenu to the given element.
@@ -23,16 +19,17 @@ export default class MainMenu {
      */
     constructor(element) {
         this.element = element;
-        this.languageSelect = assertHTMLSelectElement(this.element.querySelector('.main-menu-language-select'));
-        this.startButton = assertHTMLElement(this.element.querySelector('.main-menu-start'));
+        this.languageButtons = this.element.querySelectorAll('.main-menu-btn');
     }
 
     /**
-     * Registers a callback to be called when the user starts the game.
-     * @param {(language: string) => void} callback - Called with the selected language value.
+     * Registers a callback to be called when the user selects a language.
+     * @param {(language: string) => void} callback - Called with the language value from data-language.
      */
     onStart(callback) {
-        this.startButton.addEventListener('click', () => callback(this.languageSelect.value));
+        this.languageButtons.forEach(btn => {
+            btn.addEventListener('click', () => callback(btn.dataset.language));
+        });
     }
 
     show() {

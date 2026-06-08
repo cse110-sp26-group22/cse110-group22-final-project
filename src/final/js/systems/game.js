@@ -6,14 +6,14 @@
  *
  * Main responsibilities:
  * - Initialize and own GameState as single source of truth
- * - Handle game lifecycle: startLevel(), endGame(), pauseGame(), resumeGame()
+ * - Handle game lifecycle: startLevel(), restartLevel(), pauseGame(), resumeGame()
  * - Process player input (onInput) and update state accordingly
  * - Coordinate modules: level.js, scoring.js, timer.js, storage.js
- * - Fire callbacks back to ui-core.js after each state change
+ * - Fire callbacks back to glue.js after each state change
  *
  * Architecture:
- * - ui-core.js registers loadScreen / updateScreen callbacks on init
- * - game.js never touches the DOM directly — all UI updates go through callbacks
+ * - glue.js registers loadScreen / updateScreen callbacks on init
+ * - game.js never touches the DOM directly = all UI updates go through callbacks
  * - state is the single source of truth
  *
  * Current question/answer are accessed by index:
@@ -26,52 +26,49 @@
  * Elapsed time = state.time_limit - state.timer.
  *
  * Dependencies:
- * - level.js      : loadLevel(levelNumber, category)
- * - timer.js      : startTimer(), stopTimer()
- * - scoring.js    : calculateTotalScore()
- * - storage.js    : saveProfile(), saveState(), clearState()
+ * - level.js         : loadLevel(levelNumber, category)
+ * - timer.js         : startTimer(), stopTimer()
+ * - scoring.js       : calculateTotalScore()
+ * - storage.js       : saveProfile(),
  * - models/models.js : defaultGameState()
  *
  * Responses emitted via updateScreen():
- * - "correct-char"   → user typed a correct character 
- * - "incorrect"      → user typed a wrong character 
+ * - "correct"        → user entered a correct input
+ * - "incorrect"      → user entered a wrong input
  * - "next-question"  → answer complete, next question ready
- * - "tick"           → timer fired, update timer display
+ * - "plant-growth"    → plant growth level increased
  *
  * Screens emitted via loadScreen():
  * - "game"           → switch to game screen (level just started or resumed)
  * - "pause"          → switch to pause screen
- * - "endscreen"      → switch to end screen (time up or all questions done)
- * - "levelselect"    → switch to level select screen (player exits session)
+ * - "results"        → switch to results screen (all levels completed)
  * - "mainmenu"       → switch to main menu (player exits session)
  */
 
-import { loadLevel } from "./level.js";
+import { getLevelCount, loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
 import { calculateTotalScore } from "./scoring.js";
-import { saveProfile, clearState } from "./storage.js";
+import { saveProfile } from "./storage.js";
 import { defaultGameState, defaultProfile } from "../models/models.js";
-import { growNextPlant } from "./plants.js";
 
 
 
-// ── Module-level state ────────────────────────────────────────────────────────
+// ── Module-level state ──────────────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * Session state — reset each level via Object.assign(state, levelData).
+ * Session state - reset each level via Object.assign(state, levelData).
  * @type {ReturnType<typeof defaultGameState>}
  */
 let state = defaultGameState();
 
 /**
- * Persistent player profile — survives between levels.
- * Loaded from storage on init; saved to storage on endGame.
+ * Persistent player profile = survives between levels.
  * @type {ReturnType<typeof defaultProfile>}
  */
 let player = defaultProfile();
 
 /**
- * Callbacks registered by ui-core.js.
+ * Callbacks registered by glue.js.
  * game.js fires these after processing each event.
  */
 const callbacks = {
@@ -82,7 +79,9 @@ const callbacks = {
   updateScreen: null,
 };
 
-// ── Callback registration ─────────────────────────────────────────────────────
+const MAX_PLANT_GROWTH_LEVEL = 2;
+
+// ── Callback registration ───────────────────────────────────────────────────────────────────────────────────────────
 
 /**
  * Registers the UI callbacks that game.js fires after state changes.
@@ -98,106 +97,139 @@ export function registerCallbacks(loadScreen, updateScreen) {
   callbacks.updateScreen = updateScreen;
 }
 
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
+// ── Lifecycle  ─────────────────────────────────────────────────────────────────────────────────────────────────────
+
+// ── Called by [mainmenu] UI (exclusive) ──────────────────────────────────────
 
 /**
- * Starts a level. Fetches and shuffles questions via level.js, merges the
- * result into state (replacing only level-specific fields), starts the timer,
- * and signals ui-core to show the game screen.
- *
- * Called by the level-select UI when the user picks a level.
- *
- * @param {number} levelNumber - 1-indexed level number
- * @param {string} category    - Question category slug, e.g. "python"
+ * Sets the language used for this game sequence
+ * @param {string} category    - Question category (e.g. "python, javascript")
  */
-export async function startLevel(levelNumber, category) {
- 
-  state = await loadLevel(levelNumber, category);
-  state.isActive = true;
-  state.isPaused = false;
-  // Start the countdown timer
-  startQuestionTimer();
+export function setLanguage(category) {
+  player.language = category;
+}
 
-  // Signal ui-core to transition to the game screen
+// ── Called by [pause] UI (exclusive) ─────────────────────────────────────────
+
+/**
+ * Resumes the countdown timer using remaining time on pause, updates state, and loads the game screen.
+ */
+export function resumeGame() {
+  if (!state.isPaused) return;
+  state.isPaused = false;
+  state.isActive = true;
+  state.isOver = false;
+  startTimer( { ...state }, _onExpire);
+  state.questionEndTime = Date.now() + state.remainingOnPause;
+  state.remainingOnPause = 0;
   callbacks.loadScreen("game", { ...state });
 }
 
 /**
- * Ends the current game session: stops the timer, accumulates session results
- * into the player profile, persists both, clears in-progress state, and
- * signals ui-core to show the end screen.
- *
- * Called internally (all questions done, or timer expired) or by ui.js (quit).
+ * Restarts the current level with a fresh set of questions.
+ * Resets all state except for player profile and language selection.
+ * Note: may be replaced by an isolated call to startLevel(); this is intended for code readability purposes
  */
-export function endGame() {
-  state.isActive = false;
+export function restartLevel() {
+  if(state.isPaused || state.isOver || !state.isActive){ return; }
   state.isPaused = false;
-  stopTimer();
-
-  // Persist profile, clear in-progress session state
-  saveProfile(player);
-  clearState();
-
-  callbacks.loadScreen("endscreen", {...state });
-}
-
-export function goToNextLevel() {
   state.isActive = true;
-  state.isPaused = false;
-  stopTimer();
-
-  savePlayerData();
-  state = defaultGameState();
-
-  callbacks.loadScreen("level_end", {...state });
-  // ui will call startLevel(state.level + 1, player.language) if the user clicks "Next Level"
+  state.isOver = false;
+  startLevel(state.level, state.language);
 }
+
+// ── Called by [game] UI (exclusive) ──────────────────────────────────────────
 
 /**
- * Pauses the active countdown timer and loads the pause screen.
+ * Pauses the active countdown timer and, saves time remaining for questionm and loads the pause screen.
  */
 export function pauseGame() {
+  if (state.isPaused) return;
   state.isPaused = true;
   state.isActive = true;
-
-  state.remaining_on_pause = state.end_time - Date.now();
-
+  state.isOver = false;
+  state.remainingOnPause = Math.max(0, state.questionEndTime - Date.now());
   stopTimer();
   callbacks.loadScreen("pause", { ...state });
 }
 
 /**
- * Resumes the countdown timer and loads the game screen.
+ * Recieves user text input, updates GameState, returns responses,
+ * Checks the current input against the current prompt answer.
+ *
+ * Responses fired:
+ * - "incorrect"     → prefix length of current input is not larger than max prefix length.
+ * - "correct"       → prefix length of current input is larger than max prefix length.
+ * - "next-question" → answer complete, index advanced to next question
+ * - (endGame)       → answer complete and no more questions remain
+ *
+ * @param {string} input - Input entered by Player 
  */
-export function resumeGame() {
-  if (!state.isPaused) return;
-  
-  state.isPaused = false;
-  state.isActive = true;
+export async function onInput(input) {
+  if (!state.isActive || state.isPaused || state.isOver) return;
 
-  if(state.remaining_on_pause <= 0) {
-    _onExpire();
+  // Determine if input is valid and should be counted
+  const previousInput = state.currentInput;
+  const isDeletion = input.length < previousInput.length;
+  const addedText = input.length > previousInput.length ? input.slice(previousInput.length) : "";
+  const isWhitespaceOnlyInput = addedText.length > 0 && addedText.trim() === "";
+  const shouldCountInput = !isDeletion && !isWhitespaceOnlyInput;
+  state.currentInput = input;
+  if (shouldCountInput) state.totalInputs++;
+
+  // Calculate input prefix length
+  const answer = state.answers[state.currentQuestionIndex];
+  if (!answer) return;
+  let prefixLength = 0;
+  for (let i = 0; i < input.length; i++) {
+    if (input[i] != answer[i]) {
+      break;
+    }
+    prefixLength++;
+  }
+
+  // If input is correct and typed answer is complete, run completed answer behavior
+  if (input === answer) {
+    await handleQuestionComplete(true);
+    return;
+  } 
+
+  // If input is incorrect, apply state penalites and update UI 
+  if (prefixLength <= state.maxPrefixLength) {
+    if (shouldCountInput) {
+      state.incorrectInputs++;
+      state.totalIncorrectInputs++;
+    }
+    state.combo = 0;
+    callbacks.updateScreen("incorrect", { ...state });
     return;
   }
-  
-  state.end_time = Date.now() + state.remaining_on_pause;
 
-  startTimer(state.end_time, _onExpire);
+  // If input is correct and typed answer is incomplete, apply bonuses to state and update UI
+  state.maxPrefixLength = prefixLength;
+  state.combo++;
+  callbacks.updateScreen("correct", { ...state });
+  return;
+}
+
+// ── Called by [mainmenu, pause, results] UI ──────────────────────────────
+
+/**
+ * Starts a level. Fetches and shuffles questions via level.js, merges the
+ * result into state (replacing only level-specific fields), starts the timer,
+ * and signals glue.js to show the game screen.
+ *
+ * @param {number} levelNumber - 1-indexed level number
+ * @param {string} category    - Question category slug, e.g. "python"
+ */
+export async function startLevel(levelNumber, category) {
+  player.language = category;
+  state = await loadLevel(levelNumber, category);
+  state.questionEndTime = startTimer( { ...state }, _onExpire);
   callbacks.loadScreen("game", { ...state });
 }
 
-/**
- * Exits the current session and returns to the level select screen.
- * Stops the timer and discards in-progress state without saving.
- * Called when the player presses the level select button.
- */
-export function goToLevelSelect() { //UI does not presently have a level selection feature, nor is this used anywhere right now
-  state.isActive = false;
-  state.isPaused = false;
-  stopTimer();
-  state = defaultGameState();
-  callbacks.loadScreen("levelselect", { ...state });
-}
+// ── Called by [pause, results] UI ────────────────────────────────────────
 
 /**
  * Exits the current session and returns to the main menu.
@@ -208,143 +240,120 @@ export function goToMainMenu() {
   state.isActive = false;
   state.isPaused = false;
   stopTimer();
-  state = defaultGameState();
+  player = defaultProfile();
   callbacks.loadScreen("mainmenu", { ...state });
 }
 
-// ── Game Input handling ────────────────────────────────────────────────────────────
+// ── Called internally ────────────────────────────────────────────────────
 
 /**
- * Called on every keypress in the code input field.
- * Checks the typed key against the expected next character in the current answer.
- *
- * ui.js wires this up like:
- *   inputEl.addEventListener("keyup", (e) => onInput(e.key));
- *
- * Responses fired:
- * - "incorrect"     → wrong character typed
- * - "correct-char"  → right character, answer not yet complete
- * - "next-question" → answer complete, index advanced to next question
- * - (endGame)       → answer complete and no more questions remain
- *
- * @param {string} key - Single character typed by the player (e.key)
+ * Handles end of level behavior. Stops the timer, saves player data,
+ * and advances UI to "results" screen
  */
-export function onInput(key) {
-  if (!state.isActive || state.isPaused) return;
-
-  const answer = state.answers[state.current_question_index];
-  if (!answer) return;
-
-  const i = state.current_input.length;
-
-  // ignore invalid keys like Shift, etc.
-  if (!key || key.length !== 1) return;
-
-  const expectedChar = answer[i];
-
-  //correctness is evaluated per keystroke
-  if (key === expectedChar) {
-    state.current_input += key;
-
-    callbacks.updateScreen("correct-char", {
-      index: i,
-      char: key,
-      ...state,
-    });
-  } else {
-    state.incorrect_chars++;
-
-    callbacks.updateScreen("incorrect", {
-      index: i,
-      typed: key,
-      expected: expectedChar,
-      ...state,
-    });
-  }
-
-  // completion check
-  if (state.current_input === answer) {
-    handleQuestionComplete();
-  }
+function goToResults() {
+  state.isActive = false;
+  state.isPaused = false;
+  stopTimer();
+  savePlayerData();
+  callbacks.loadScreen("results", { ...state });
 }
 
 /**
- * Handles the end of a question
+ * @param {boolean} complete - whether the question was completed before timer expiration (true) or not (false)
+ * Handles all state updates after the current question ends.
+ *
+ * This function:
+ * - Stops the active question timer.
+ * - Records time used for the question.
+ * - Applies timeout penalties or awards score for a completed answer.
+ * - Advances the question index.
+ * - Updates plant growth when the player reaches a progress milestone.
+ * - Either starts the next question, shows level results, or ends the game.
  */
-function handleQuestionComplete() {
-  //init time
-   const elapsedTime = Date.now() - state.question_start_time;
+async function handleQuestionComplete(complete) {
+  if(state.isPaused || state.isOver || !state.isActive){ return; }
 
-  //calculate score and add to total score
-  if(elapsedTime <= state.time_limit) { //can probably be simplified by changes to scoring.js
-    state.score += calculateTotalScore(state, elapsedTime);
+  // Stop timer to prevent unintentional UI advancement
+  stopTimer();
+
+  // Record timing and answer data for this
+  const timeRemaining = Math.max(0, state.questionEndTime - Date.now());
+  const elapsedTime = Math.max(0, state.timeLimit - timeRemaining);
+  const answer = state.answers[state.currentQuestionIndex] ?? "";
+  state.timeUsed.push(elapsedTime);
+  state.totalAnswerCharacters += answer.length; 
+
+  // If question timed out, do not update score and add penalties to state
+  if (!complete) {
+    const remainingCharacters = answer.length - state.maxPrefixLength;
+    state.totalInputs += remainingCharacters;
+    state.totalIncorrectInputs += remainingCharacters;
   }
-  else{
-    state.score += 0;
+  // If question finished normally, calculate new score and increment counter for correct questions
+  else {
+    state.score += calculateTotalScore({ ...state }, elapsedTime);
+    state.numCorrectQuestions++;
   }
 
-  if(state.current_question_index % 3 === 0) {
-    state.plants = growNextPlant(state);
-    callbacks.updateScreen("plant-growth", { ...state });
-  }
+  // Set state to next question
+  state.currentQuestionIndex++;
 
-  state.current_input = "";
-  state.incorrect_chars = 0;
-
-  state.current_question_index++;
-
-  if (state.current_question_index >= state.questions.length) {
-    if (state.level >= 3) {
-      endGame();
+  // Calculate plant growth level and update UI with new plant growth value
+  if (complete && state.numCorrectQuestions % 3 === 0) {
+    if(state.growthLevel < MAX_PLANT_GROWTH_LEVEL) {
+      state.growthLevel++;
+      callbacks.updateScreen("plant-growth", { ...state });
     }
-    else {     
-      goToNextLevel();
-    }
+  }
+
+  // If there are still question left in this level, reset the per-question state
+  // and advance UI to next question
+  if (state.currentQuestionIndex < state.questions.length) {
+    state.maxPrefixLength = 0;
+    state.currentInput = "";   
+    state.incorrectInputs = 0;
+    state.questionStartTime = Date.now();
+    state.questionEndTime = startTimer( { ...state }, _onExpire);
+    callbacks.updateScreen("next-question", { ...state });
     return;
   }
 
-  startQuestionTimer();
+  // If the level is complete but more levels exist, add score to player total
+  // and advance UI to level results screen
+  if (state.currentQuestionIndex >= state.questions.length && state.level < getLevelCount()) {
+    player.score += state.score;
+    const accuracyPercentage = (1 - (state.totalIncorrectInputs / state.totalInputs));
+    state.levelAccuracyPercent = accuracyPercentage.toFixed(2);
+    goToResults();
+    return;
+  }
 
-  callbacks.updateScreen("next-question", { ...state });
+  // If the level is complete and no more levels exist, set game state to "gameover",
+  // calculate final score, and advance UI to level results screen
+  state.isOver = true;
+  state.finalScore = player.score;
+  const accuracyPercentage = (1 - (state.totalIncorrectInputs / state.totalInputs));
+  state.levelAccuracyPercent = accuracyPercentage.toFixed(2);
+  goToResults();
+  return;
 }
 
-
-// ── Timer callbacks (internal) ────────────────────────────────────────────────
-
-
-/**
- * Starts a timer that expires at a specific timestamp
- * Called internally when a new question starts
- */
-function startQuestionTimer() {
-  stopTimer();
-
-  state.question_start_time = Date.now();
-
-  state.end_time =
-      state.question_start_time +
-      state.time_limit;
-
-  startTimer(
-      state.end_time,
-      _onExpire
-  );
-}
+// ── Timer callbacks (internal) ──────────────────────────────────────────────────────────────────────────────────────
 
 /**
  * Fired by timer.js when the countdown reaches 0.
  */
 function _onExpire() {
-  handleQuestionComplete(); 
+  handleQuestionComplete(false);
 }
+
+// ── Profile management handling ─────────────────────────────────────────────────────────────────────────────────────
 
 /** 
  * Save relevant session data in the player profile
 */
-export function savePlayerData(){
-  player.score = state.score; 
+function savePlayerData(){
+  player.score += state.score; 
   player.level = state.level;
-  player.current_question_index = state.current_question_index;
-  player.plants = state.plants;
   saveProfile(player);
 }

@@ -1,10 +1,5 @@
 name: CI/CD Pipeline
 
-# Note: frontend tests using jsdom should please start their files with
-#  /**
-#   * @jest-environment jsdom
-#  */ 
-
 on:
   push:
     branches:
@@ -28,7 +23,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -57,7 +52,12 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # Upload build artifacts for deployment
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      # Upload build artifacts for deployment 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3

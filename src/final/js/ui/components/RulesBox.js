@@ -16,4 +16,18 @@ export default class RulesBox {
     constructor(element) {
         this.element = element;
     }
+
+    /**
+     * Shows the rules box.
+     */
+    show() {
+        this.element.classList.remove('hidden');
+    }
+
+    /**
+     * Hides the rules box.
+     */
+    hide() {
+        this.element.classList.add('hidden');
+    }
 }
