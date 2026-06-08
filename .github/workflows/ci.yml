@@ -52,6 +52,12 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Generate JSDoc
+        run: npm run docs:generate
+
+      - name: Copy docs into dist
+        run: cp -r ./docs ./dist/docs
+
       - name: Run E2E tests
         run: npm run test:e2e
         env:
