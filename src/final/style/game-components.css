@@ -202,22 +202,26 @@
 
 /*#region PromptDisplay styles */
 .prompt-display {
+  align-self: center;
   background: #F4F9ED;
   padding: 12px;
   border-radius: 8px;
   border: 1px solid #8BBF5A;
   margin-top: auto;
   user-select: none;    
+  width: min(40rem, 100%);
 }
 /*#endregion */
 
 /*#region CodeInputField styles*/
 .code-input-field {
+    align-self: center;
     position: relative;
     font-family: Consolas, "Courier New", monospace;
     height: min-content;
     overflow: hidden;
     margin-bottom: 0.5rem;
+    width: min(40rem, 100%);
 }
 
 .ghost-text {

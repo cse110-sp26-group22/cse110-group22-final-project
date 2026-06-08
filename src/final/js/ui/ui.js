@@ -4,6 +4,7 @@ import ResultsScreen from './components/ResultsScreen.js';
 import RulesBox from './components/RulesBox.js';
 import { assertHTMLElement } from './utils.js';
 import * as glue from './glue.js';
+import preloadImages from './image-preload.js';
 
 /**
  * The main entry point for the UI.
@@ -23,6 +24,8 @@ let lastLanguage = 'python';
 
 /** @type {number} The current level the user is playing. */
 let currentLevel = 1;
+
+preloadImages();
 
 /**
  * Initializes the UI and shows the main menu.

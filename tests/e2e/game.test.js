@@ -103,4 +103,54 @@ describe('Typing Game E2E Tests', () => {
       expect(afterClick).not.toBeNull();
     });
   });
+
+  // ── Rules Box and Results Screen Tests ─────────────────────────────────────────────────────────────
+
+  describe('Rules Box & Results Screen Tests', () => {
+    
+    it('should show the rules box when starting a game', async () => {
+
+      await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
+      
+      await page.waitForSelector('.main-menu-btn[data-language="python"]');
+      await page.click('.main-menu-btn[data-language="python"]');
+      
+      const isRulesHidden = await page.evaluate(() => {
+        const rules = document.querySelector('.rules-box');
+        return rules.classList.contains('hidden');
+      });
+      
+      expect(isRulesHidden).toBe(false);
+    });
+
+    it('should hide the rules box when returning to the main menu', async () => {
+
+      await page.waitForSelector('.game-header-pause');
+      await page.click('.game-header-pause'); 
+      
+      await page.waitForSelector('.pause-menu-main-menu');
+      await page.click('.pause-menu-main-menu'); 
+      
+      const isRulesHidden = await page.evaluate(() => {
+        const rules = document.querySelector('.rules-box');
+        return rules.classList.contains('hidden');
+      });
+      
+      expect(isRulesHidden).toBe(true);
+    });
+
+    it('should ensure the results screen is hidden on initial load', async () => {
+
+      await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
+
+      const isResultsHidden = await page.evaluate(() => {
+        const results = document.querySelector('.results-screen');
+        return results.classList.contains('hidden');
+      });
+      
+      expect(isResultsHidden).toBe(true);
+    });
+
+  });
+
 });
