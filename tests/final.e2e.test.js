@@ -316,6 +316,28 @@ describe("final game static integration", () => {
 
     expect(missingAssets).toEqual([]);
   });
+
+  test("ships a complete Python question bank with matching answers and choices", () => {
+    const questionBankPath = path.join(finalDir, "js", "data", "python.json");
+    const rawQuestionBank = fs.readFileSync(questionBankPath, "utf8").replace(/^\uFEFF/, "");
+    const questions = JSON.parse(rawQuestionBank);
+
+    expect(questions).toHaveLength(50);
+    questions.forEach((question) => {
+      expect(question).toEqual(expect.objectContaining({
+        prompt: expect.any(String),
+        options: expect.any(Array),
+        answer: expect.any(String),
+        answerChoice: expect.any(Number),
+        difficulty: expect.any(String),
+        category: "python",
+      }));
+      expect(question.prompt.trim()).not.toBe("");
+      expect(question.options).toHaveLength(3);
+      expect(question.options).toContain(question.answer);
+      expect(question.answerChoice).toBe(question.options.indexOf(question.answer) + 1);
+    });
+  });
 });
 
 describe("final game end-to-end UI flow", () => {
@@ -406,6 +428,48 @@ describe("final game end-to-end UI flow", () => {
     input.value = "x = 10";
     input.dispatchEvent({ type: "keydown", key: "Enter" });
     expect(plantGroup.children).toHaveLength(1);
+  });
+
+  test("keeps existing plants when advancing to a new question", () => {
+    const { document, gameUI } = loadFinalUI();
+    const input = document.querySelector(".code-input");
+    const plantGroup = document.querySelector(".plant-display-group");
+
+    gameUI.sendQuestion("First prompt", "first_answer()");
+    input.value = "first_answer()";
+    input.dispatchEvent({ type: "keydown", key: "Enter" });
+    expect(plantGroup.children).toHaveLength(1);
+
+    gameUI.sendQuestion("Second prompt", "second_answer()");
+    expect(plantGroup.children).toHaveLength(1);
+
+    input.value = "first_answer()";
+    input.dispatchEvent({ type: "keydown", key: "Enter" });
+    expect(plantGroup.children).toHaveLength(1);
+
+    input.value = "second_answer()";
+    input.dispatchEvent({ type: "keydown", key: "Enter" });
+    expect(plantGroup.children).toHaveLength(2);
+  });
+
+  test("updates ghost text correctly after deleting typed characters", () => {
+    const { document, gameUI } = loadFinalUI();
+    const input = document.querySelector(".code-input");
+    const invisibleGhost = document.querySelector(".ghost-text-invisible");
+    const visibleGhost = document.querySelector(".ghost-text-visible");
+
+    gameUI.sendQuestion("Print hello", "print('hello')");
+    input.value = "print";
+    input.dispatchEvent({ type: "input" });
+
+    expect(invisibleGhost.textContent).toBe("print");
+    expect(visibleGhost.textContent).toBe("('hello')");
+
+    input.value = "pri";
+    input.dispatchEvent({ type: "input" });
+
+    expect(invisibleGhost.textContent).toBe("pri");
+    expect(visibleGhost.textContent).toBe("nt('hello')");
   });
 });
 
@@ -564,6 +628,47 @@ describe("final game Puppeteer end-to-end flow", () => {
 
     await page.waitForSelector(".plant-display img");
     await expect(page.$$eval(".plant-display", (plants) => plants.length)).resolves.toBe(1);
+
+    await page.close();
+  });
+
+  test("keeps ghost text synchronized after browser typing edits", async () => {
+    const page = await browser.newPage();
+
+    await page.goto(`${server.baseUrl}/html/index.html`, { waitUntil: "networkidle0" });
+
+    await page.click(".code-input");
+    await page.type(".code-input", "print");
+    await expect(page.$eval(".ghost-text-invisible", (element) => element.textContent))
+      .resolves.toBe("print");
+    await expect(page.$eval(".ghost-text-visible", (element) => element.textContent))
+      .resolves.toBe("(\"Hello, World!\")");
+
+    await page.keyboard.press("Backspace");
+    await expect(page.$eval(".ghost-text-invisible", (element) => element.textContent))
+      .resolves.toBe("prin");
+    await expect(page.$eval(".ghost-text-visible", (element) => element.textContent))
+      .resolves.toBe("t(\"Hello, World!\")");
+
+    await page.close();
+  });
+
+  test("rejects empty Enter submissions and accepts repeated exact submissions", async () => {
+    const page = await browser.newPage();
+
+    await page.goto(`${server.baseUrl}/html/index.html`, { waitUntil: "networkidle0" });
+
+    await page.click(".code-input");
+    await page.keyboard.press("Enter");
+    await expect(page.$$eval(".plant-display", (plants) => plants.length)).resolves.toBe(0);
+
+    await page.type(".code-input", "print(\"Hello, World!\")");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector(".plant-display img");
+    await expect(page.$$eval(".plant-display", (plants) => plants.length)).resolves.toBe(1);
+
+    await page.keyboard.press("Enter");
+    await expect(page.$$eval(".plant-display", (plants) => plants.length)).resolves.toBe(2);
 
     await page.close();
   });
