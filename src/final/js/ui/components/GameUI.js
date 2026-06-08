@@ -44,7 +44,10 @@ export default class GameUI {
 
         this.pauseMenu = new PauseMenu(assertHTMLElement(this.element.querySelector('.pause-menu')));
         this.onPause(() => this.pauseMenu.show());
-        this.onResume(() => this.pauseMenu.hide());
+        this.onResume(() => {
+            this.pauseMenu.hide();
+            this.codeInputField.focus();
+        });
         
         this.onClockTick(() => this.updateLiveData());
         this.onPause(() => console.log('game paused'));

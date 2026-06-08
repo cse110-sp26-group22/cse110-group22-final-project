@@ -48,7 +48,7 @@
 import { getLevelCount, loadLevel } from "./level.js";
 import { startTimer, stopTimer } from "./timer.js";
 import { calculateTotalScore } from "./scoring.js";
-import { saveProfile } from "./storage.js";
+// import { saveProfile } from "./storage.js";
 import { defaultGameState, defaultProfile } from "../models/models.js";
 
 
@@ -355,5 +355,6 @@ function _onExpire() {
 function savePlayerData(){
   player.score += state.score; 
   player.level = state.level;
-  saveProfile(player);
+  // TODO: we are not using local storage
+  // saveProfile(player);
 }

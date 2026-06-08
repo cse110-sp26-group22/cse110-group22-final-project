@@ -65,6 +65,7 @@ export default class PauseMenu {
     show(){
         this.element.classList.remove('hidden');
         this.previouslyFocused = document.activeElement;
+        this.element.focus();
     }
     
     /**

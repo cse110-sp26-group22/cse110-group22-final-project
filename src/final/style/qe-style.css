@@ -5,7 +5,7 @@
 }
 
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
 body {
@@ -20,6 +20,7 @@ body {
   color: #3D2B1F;
   font-family: "Livvic Regular", sans-serif;
   overflow: hidden;
+  cursor: default;
 }
 
 .site-title {
