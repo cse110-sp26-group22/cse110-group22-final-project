@@ -53,7 +53,7 @@ import { defaultGameState, defaultProfile } from "../models/models.js";
 
 
 
-// ── Module-level state ──────────────────────────────────────────────────────────────────────────────────────────────
+// ── Module-level state ─────────────────────────────────────────────────────────────────────────────────────────────
 
 /**
  * Session state - reset each level via Object.assign(state, levelData).
