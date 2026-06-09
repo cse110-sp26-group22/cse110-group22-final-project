@@ -51,12 +51,6 @@ jobs:
 
       - name: Build project
         run: npm run build
-
-      - name: Generate JSDoc
-        run: npm run docs:generate
-
-      - name: Copy docs into dist
-        run: cp -r ./docs ./dist/docs
       
       - name: Debug dist contents
         run: ls -la ./dist
