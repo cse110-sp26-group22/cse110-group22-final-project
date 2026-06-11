@@ -54,3 +54,6 @@ Access the game at this [link](https://cse110-sp26-group22.github.io/cse110-grou
     - Prompts log
     - Summarize outputs/results used in final deliverable
 
+## Video Link
+
+You can find our final project video [here](https://youtu.be/lxQIFumLzdI)
